@@ -1,9 +1,6 @@
-# MSAL Native Auth Sample App Public Preview
+# MSAL Native Auth Sample App Private Preview
 
-This is a sample application used to demonstrate the CIAM extension of the MSAL framework that is currently in public preview. 
-For more information see https://aka.ms/native-auth.
-
-Questions, issues, or feedback can be directed to idnadevexciamdublin@microsoft.com
+This is a sample application used to demonstrate the CIAM extension of the MSAL framework that is currently in private preview. 
 
 ## Prerequisite
 
