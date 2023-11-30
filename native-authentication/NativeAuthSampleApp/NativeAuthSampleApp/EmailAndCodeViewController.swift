@@ -199,9 +199,9 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 // MARK: SignUpResendCodeDelegate
 
 extension EmailAndCodeViewController: SignUpResendCodeDelegate {
+    
     func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         print("SignUpResendCodeDelegate: onSignUpResendCodeError: \(error)")
-        
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }

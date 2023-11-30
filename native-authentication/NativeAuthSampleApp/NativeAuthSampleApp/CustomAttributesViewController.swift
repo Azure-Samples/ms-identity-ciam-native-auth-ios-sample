@@ -173,9 +173,9 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
 // MARK: SignUpResendCodeDelegate
 
 extension CustomAttributesViewController: SignUpResendCodeDelegate {
+    
     func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         print("SignUpResendCodeDelegate: onSignUpResendCodeError: \(error)")
-        
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
