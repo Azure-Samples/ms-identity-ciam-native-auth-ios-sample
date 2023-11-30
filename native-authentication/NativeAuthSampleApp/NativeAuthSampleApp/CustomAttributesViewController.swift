@@ -92,16 +92,17 @@ class CustomAttributesViewController: UIViewController {
 // MARK: SignUpPasswordStartDelegate
 
 extension CustomAttributesViewController: SignUpPasswordStartDelegate {
-    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
-        switch error.type {
-        case .userAlreadyExists:
+    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
+        if error.isUserAlreadyExists {
             showResultText("Unable to sign up: User already exists")
-        case .invalidPassword:
-            showResultText("Unable to sign up: The password is invalid")
-        case .invalidUsername:
+        } else if error.isInvalidUsername {
             showResultText("Unable to sign up: The username is invalid")
-        default:
-            showResultText("Unexpected error signing up: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else if error.isInvalidPassword {
+            showResultText("Unable to sign up: The password is invalid")
+        } else if error.isBrowserRequired {
+            showResultText("Unable to sign up: Web UX required")
+        } else {
+            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description"))")
         }
     }
 
@@ -136,8 +137,7 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
 
 extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
-        switch error.type {
-        case .invalidCode:
+        if error.isInvalidCode {
             guard let newState = newState else {
                 print("Unexpected state. Received invalidCode but newState is nil")
 
@@ -155,11 +155,11 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .browserRequired:
+        } else if error.isBrowserRequired {
             showResultText("Unable to sign up: Web UX required")
             dismissVerifyCodeModal()
-        default:
-            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
             dismissVerifyCodeModal()
         }
     }
@@ -173,9 +173,9 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
 // MARK: SignUpResendCodeDelegate
 
 extension CustomAttributesViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError) {
-        print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
-
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
+        print("SignUpResendCodeDelegate: onSignUpResendCodeError: \(error)")
+        
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }

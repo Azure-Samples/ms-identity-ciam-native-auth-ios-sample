@@ -154,16 +154,15 @@ extension WebFallbackViewController: SignInPasswordStartDelegate {
         result.getAccessToken(delegate: self)
     }
 
-    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
-        print("SignInPasswordStartDelegate: onSignInPasswordError: \(error)")
-
-        switch error.type {
-        case .userNotFound, .invalidUsername:
+    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+        print("SignInPasswordStartDelegate: onSignInPasswordStartError: \(error)")
+        
+        if error.isUserNotFound || error.isInvalidUsername || error.isInvalidCredentials {
             showResultText("Invalid username or password")
-        case .browserRequired:
+        } else if error.isBrowserRequired {
             signInWithWebUX()
-        default:
-            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Error while signing in: \(error.errorDescription ?? "No error description")")
         }
     }
 }
@@ -178,6 +177,6 @@ extension WebFallbackViewController: CredentialsDelegate {
     }
 
     func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
-        showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
+        showResultText("Error retrieving access token: \(error.errorDescription ?? "No error description")")
     }
 }

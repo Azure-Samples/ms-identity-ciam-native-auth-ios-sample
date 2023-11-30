@@ -122,16 +122,15 @@ class EmailAndPasswordViewController: UIViewController {
 // MARK: SignUpPasswordStartDelegate
 
 extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
-    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
-        switch error.type {
-        case .userAlreadyExists:
+    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
+        if error.isUserAlreadyExists {
             showResultText("Unable to sign up: User already exists")
-        case .invalidPassword:
+        } else if error.isInvalidPassword {
             showResultText("Unable to sign up: The password is invalid")
-        case .invalidUsername:
+        } else if error.isInvalidUsername {
             showResultText("Unable to sign up: The username is invalid")
-        default:
-            showResultText("Unexpected error signing up: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description")")
         }
     }
 
@@ -158,8 +157,7 @@ extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
 
 extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
-        switch error.type {
-        case .invalidCode:
+        if error.isInvalidCode {
             guard let newState = newState else {
                 print("Unexpected state. Received invalidCode but newState is nil")
 
@@ -177,8 +175,8 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        default:
-            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
             dismissVerifyCodeModal()
         }
     }
@@ -194,9 +192,9 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 // MARK: SignUpResendCodeDelegate
 
 extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: ResendCodeError) {
-        print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
+        print("SignUpResendCodeDelegate: onSignUpResendCodeError: \(error)")
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
@@ -241,14 +239,13 @@ extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
         result.getAccessToken(delegate: self)
     }
 
-    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
-        print("SignInPasswordStartDelegate: onSignInPasswordError: \(error)")
-
-        switch error.type {
-        case .userNotFound, .invalidPassword, .invalidUsername:
+    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+        print("SignInPasswordStartDelegate: onSignInPasswordStartError: \(error)")
+        
+        if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername {
             showResultText("Invalid username or password")
-        default:
-            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Error while signing in: \(error.errorDescription ?? "No error description")")
         }
     }
 }
@@ -265,7 +262,7 @@ extension EmailAndPasswordViewController: CredentialsDelegate {
     }
 
     func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
-        showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
+        showResultText("Error retrieving access token: \(error.errorDescription ?? "No error description")")
     }
 }
 

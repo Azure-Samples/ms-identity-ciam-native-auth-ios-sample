@@ -122,16 +122,15 @@ class EmailAndCodeViewController: UIViewController {
 // MARK: SignUpStartDelegate
 
 extension EmailAndCodeViewController: SignUpStartDelegate {
-    func onSignUpError(error: MSAL.SignUpStartError) {
-        switch error.type {
-        case .browserRequired:
-            showResultText("Unable to sign up: Web UX required")
-        case .userAlreadyExists:
+    func onSignUpStartError(error: MSAL.SignUpStartError) {
+        if error.isUserAlreadyExists {
             showResultText("Unable to sign up: User already exists")
-        case .invalidUsername:
+        } else if error.isInvalidUsername {
             showResultText("Unable to sign up: The username is invalid")
-        default:
-            showResultText("Unexpected error signing up: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else if error.isBrowserRequired {
+            showResultText("Unable to sign up: Web UX required")
+        } else {
+            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description"))")
         }
     }
 
@@ -141,8 +140,8 @@ extension EmailAndCodeViewController: SignUpStartDelegate {
         channelTargetType: MSALNativeAuthChannelType,
         codeLength: Int
     ) {
-        print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
 
+        print("SignUpStartDelegate: onSignUpCodeRequired: \(newState)")
         showResultText("Email verification required")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
@@ -162,8 +161,7 @@ extension EmailAndCodeViewController: SignUpStartDelegate {
 
 extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
-        switch error.type {
-        case .invalidCode:
+        if error.isInvalidCode {
             guard let newState = newState else {
                 print("Unexpected state. Received invalidCode but newState is nil")
 
@@ -181,11 +179,11 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .browserRequired:
+        } else if error.isBrowserRequired {
             showResultText("Unable to sign up: Web UX required")
             dismissVerifyCodeModal()
-        default:
-            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
             dismissVerifyCodeModal()
         }
     }
@@ -201,9 +199,9 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 // MARK: SignUpResendCodeDelegate
 
 extension EmailAndCodeViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: ResendCodeError) {
-        print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
-
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
+        print("SignUpResendCodeDelegate: onSignUpResendCodeError: \(error)")
+        
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
@@ -240,14 +238,14 @@ extension EmailAndCodeViewController: SignInAfterSignUpDelegate {
 // MARK: SignInStartDelegate
 
 extension EmailAndCodeViewController: SignInStartDelegate {
-    func onSignInError(error: MSAL.SignInStartError) {
-        print("SignInCodeStartDelegate: onSignInCodeError: \(error)")
-
-        switch error.type {
-        case .userNotFound, .invalidUsername:
+    func onSignInStartError(error: MSAL.SignInStartError) {
+        print("SignInStartDelegate: onSignInStartError: \(error)")
+        if error.isUserNotFound || error.isInvalidUsername {
             showResultText("Invalid username")
-        default:
-            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else if error.isBrowserRequired {
+            showResultText("Unable to sign up: Web UX required")
+        } else {
+            showResultText("Error while signing in: \(error.errorDescription ?? "No error description")")
         }
     }
 
@@ -278,8 +276,7 @@ extension EmailAndCodeViewController: SignInStartDelegate {
 
 extension EmailAndCodeViewController: SignInVerifyCodeDelegate {
     func onSignInVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignInCodeRequiredState?) {
-        switch error.type {
-        case .invalidCode:
+        if error.isInvalidCode {
             guard let newState = newState else {
                 print("Unexpected state. Received invalidCode but newState is nil")
 
@@ -297,11 +294,11 @@ extension EmailAndCodeViewController: SignInVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .browserRequired:
+        } else if error.isBrowserRequired {
             showResultText("Unable to sign in: Web UX required")
             dismissVerifyCodeModal()
-        default:
-            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
             dismissVerifyCodeModal()
         }
     }
@@ -356,7 +353,7 @@ extension EmailAndCodeViewController: CredentialsDelegate {
     }
 
     func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
-        showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
+        showResultText("Error retrieving access token: \(error.errorDescription ?? "No error description")")
         dismissVerifyCodeModal()
     }
 }
