@@ -110,17 +110,12 @@
 }
 
 - (void)onSignInPasswordErrorWithError:(SignInPasswordStartError * _Nonnull)error {
-    switch (error.type) {
-        case SignInPasswordStartErrorTypeInvalidUsername:
-            [self showResultText:@"Invalid username."];
-            break;
-
-        case SignInPasswordStartErrorTypeInvalidPassword:
-            [self showResultText:@"Invalid password."];
-            break;
-
-        default:
-            [self showResultText:[NSString stringWithFormat:@"Unexpected error signing in: %@", @(error.type)]];
+    if (error.isInvalidUsername) {
+        [self showResultText:@"Invalid username."];
+    } else if (error.isInvalidCredentials) {
+        [self showResultText:@"Invalid username or password."];
+    } else {
+        [self showResultText:[NSString stringWithFormat:@"Unexpected error signing in: %@", error.errorDescription]];
     }
 }
 
@@ -132,7 +127,7 @@
 }
 
 - (void)onAccessTokenRetrieveErrorWithError:(RetrieveAccessTokenError *)error {
-    [self showResultText:[NSString stringWithFormat:@"Unexpected error retrieving access token in: %@", @(error.type)]];
+    [self showResultText:[NSString stringWithFormat:@"Unexpected error retrieving access token in: %@", error.errorDescription]];
 }
 
 @end

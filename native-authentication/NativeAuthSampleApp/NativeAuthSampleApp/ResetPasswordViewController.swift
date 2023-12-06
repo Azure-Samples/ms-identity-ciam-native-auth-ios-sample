@@ -89,14 +89,13 @@ extension ResetPasswordViewController: ResetPasswordStartDelegate {
                             })
     }
 
-    func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
-        switch error.type {
-        case .invalidUsername, .userNotFound:
+    func onResetPasswordStartError(error: MSAL.ResetPasswordStartError) {
+        if error.isInvalidUsername || error.isUserNotFound {
             showResultText("Unable to reset password: The email is invalid")
-        case .userDoesNotHavePassword:
+        } else if error.isUserDoesNotHavePassword {
             showResultText("Unable to reset password: No password associated with email address")
-        default:
-            showResultText("Unable to reset password. Error: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Unable to reset password. Error: \(error.errorDescription ?? "No error description")")
         }
     }
 }
@@ -136,8 +135,7 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
         error: MSAL.VerifyCodeError,
         newState: MSAL.ResetPasswordCodeRequiredState?
     ) {
-        switch error.type {
-        case .invalidCode:
+        if error.isInvalidCode {
             guard let newState = newState else {
                 print("Unexpected state. Received invalidCode but newState is nil")
 
@@ -155,11 +153,11 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .browserRequired:
+        } else if error.isBrowserRequired {
             showResultText("Unable to sign up: Web UX required")
             dismissVerifyCodeModal()
-        default:
-            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
             dismissVerifyCodeModal()
         }
     }
@@ -177,8 +175,7 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
 
 extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
     func onResetPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.ResetPasswordRequiredState?) {
-        switch error.type {
-        case .invalidPassword:
+        if error.isInvalidPassword {
             guard let newState = newState else {
                 print("Unexpected state. Received invalidPassword but newState is nil")
 
@@ -190,8 +187,8 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
                                    submittedCallback: { password in
                                        newState.submitPassword(password: password, delegate: self)
                                    })
-        default:
-            showResultText("Error setting password: \(error.errorDescription ?? String(error.type.rawValue))")
+        } else {
+            showResultText("Error setting password: \(error.errorDescription ?? "No error description")")
             dismissNewPasswordModal()
         }
     }
