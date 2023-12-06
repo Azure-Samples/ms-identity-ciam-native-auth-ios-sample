@@ -113,7 +113,7 @@
     if (error.isInvalidUsername) {
         [self showResultText:@"Invalid username."];
     } else if (error.isInvalidCredentials) {
-        [self showResultText:@"Invalid password."];
+        [self showResultText:@"Invalid username or password."];
     } else {
         [self showResultText:[NSString stringWithFormat:@"Unexpected error signing in: %@", error.errorDescription]];
     }
