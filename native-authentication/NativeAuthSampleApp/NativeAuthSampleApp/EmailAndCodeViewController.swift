@@ -243,7 +243,7 @@ extension EmailAndCodeViewController: SignInStartDelegate {
         if error.isUserNotFound || error.isInvalidUsername {
             showResultText("Invalid username")
         } else if error.isBrowserRequired {
-            showResultText("Unable to sign up: Web UX required")
+            showResultText("Unable to sign in: Web UX required")
         } else {
             showResultText("Error while signing in: \(error.errorDescription ?? "No error description")")
         }
