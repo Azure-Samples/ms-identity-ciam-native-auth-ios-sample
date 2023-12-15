@@ -65,7 +65,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing up with email \(email) and password")
 
-        nativeAuth.signUpUsingPassword(username: email, password: password, delegate: self)
+        nativeAuth.signUp(username: email, password: password, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -76,7 +76,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -121,8 +121,8 @@ class EmailAndPasswordViewController: UIViewController {
 
 // MARK: SignUpPasswordStartDelegate
 
-extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
-    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
+extension EmailAndPasswordViewController: SignUpStartDelegate {
+    func onSignUpStartError(error: MSAL.SignUpStartError) {
         if error.isUserAlreadyExists {
             showResultText("Unable to sign up: User already exists")
         } else if error.isInvalidPassword {
@@ -230,7 +230,7 @@ extension EmailAndPasswordViewController: SignInAfterSignUpDelegate {
 
 // MARK: SignInPasswordStartDelegate
 
-extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
+extension EmailAndPasswordViewController: SignInStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         print("Signed in: \(result.account.username ?? "")")
 
@@ -239,7 +239,7 @@ extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
         result.getAccessToken(delegate: self)
     }
 
-    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+    func onSignInStartError(error: MSAL.SignInStartError) {
         print("SignInPasswordStartDelegate: onSignInPasswordStartError: \(error)")
         
         if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername {

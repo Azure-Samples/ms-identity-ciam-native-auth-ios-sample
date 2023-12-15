@@ -66,7 +66,7 @@ class WebFallbackViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -148,13 +148,13 @@ class WebFallbackViewController: UIViewController {
 
 // MARK: - Sign In delegates
 
-extension WebFallbackViewController: SignInPasswordStartDelegate {
+extension WebFallbackViewController: SignInStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         accountResult = result
         result.getAccessToken(delegate: self)
     }
 
-    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+    func onSignInStartError(error: MSAL.SignInStartError) {
         print("SignInPasswordStartDelegate: onSignInPasswordStartError: \(error)")
         
         if error.isUserNotFound || error.isInvalidUsername || error.isInvalidCredentials {
