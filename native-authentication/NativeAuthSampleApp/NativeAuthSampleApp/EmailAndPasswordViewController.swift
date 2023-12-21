@@ -65,7 +65,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing up with email \(email) and password")
 
-        nativeAuth.signUpUsingPassword(username: email, password: password, delegate: self)
+        nativeAuth.signUp(username: email, password: password, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -76,7 +76,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -119,10 +119,10 @@ class EmailAndPasswordViewController: UIViewController {
 
 // MARK: - Sign Up delegates
 
-// MARK: SignUpPasswordStartDelegate
+// MARK: SignUpStartDelegate
 
-extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
-    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
+extension EmailAndPasswordViewController: SignUpStartDelegate {
+    func onSignUpStartError(error: MSAL.SignUpStartError) {
         if error.isUserAlreadyExists {
             showResultText("Unable to sign up: User already exists")
         } else if error.isInvalidPassword {
@@ -138,7 +138,7 @@ extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
                               sentTo _: String,
                               channelTargetType _: MSAL.MSALNativeAuthChannelType,
                               codeLength _: Int) {
-        print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
+        print("SignUpStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
                                 guard let self = self else { return }
@@ -228,9 +228,9 @@ extension EmailAndPasswordViewController: SignInAfterSignUpDelegate {
 
 // MARK: - Sign In delegates
 
-// MARK: SignInPasswordStartDelegate
+// MARK: SignInStartDelegate
 
-extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
+extension EmailAndPasswordViewController: SignInStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         print("Signed in: \(result.account.username ?? "")")
 
@@ -239,8 +239,8 @@ extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
         result.getAccessToken(delegate: self)
     }
 
-    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
-        print("SignInPasswordStartDelegate: onSignInPasswordStartError: \(error)")
+    func onSignInStartError(error: MSAL.SignInStartError) {
+        print("SignInStartDelegate: onSignInStartError: \(error)")
         
         if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername {
             showResultText("Invalid username or password")

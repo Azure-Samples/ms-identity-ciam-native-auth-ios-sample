@@ -28,7 +28,7 @@
 
 
 
-@interface ObjCViewController () <SignInPasswordStartDelegate, CredentialsDelegate>
+@interface ObjCViewController () <SignInStartDelegate, CredentialsDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *emailTextField;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
@@ -66,11 +66,11 @@
     NSString *email = self.emailTextField.text;
     NSString *password = self.passwordTextField.text;
 
-    [self.nativeAuth signInUsingPasswordWithUsername:email
-                                            password:password
-                                              scopes:nil
-                                       correlationId:nil
-                                            delegate:self];
+    [self.nativeAuth signInUsername:email
+                           password:password
+                             scopes:nil
+                      correlationId:nil
+                           delegate:self];
 }
 
 - (IBAction)signOutPressed:(id)sender {
@@ -109,7 +109,7 @@
     [result getAccessTokenWithForceRefresh:false correlationId:nil delegate:self];
 }
 
-- (void)onSignInPasswordErrorWithError:(SignInPasswordStartError * _Nonnull)error {
+- (void)onSignInStartErrorWithError:(SignInStartError * _Nonnull)error {
     if (error.isInvalidUsername) {
         [self showResultText:@"Invalid username."];
     } else if (error.isInvalidCredentials) {

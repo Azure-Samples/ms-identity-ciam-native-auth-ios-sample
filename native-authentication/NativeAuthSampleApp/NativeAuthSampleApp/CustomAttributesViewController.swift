@@ -76,10 +76,10 @@ class CustomAttributesViewController: UIViewController {
 
         print("Signing up with email \(email), password and attributes: \(attributes)")
 
-        nativeAuth.signUpUsingPassword(username: email,
-                                       password: password,
-                                       attributes: attributes,
-                                       delegate: self)
+        nativeAuth.signUp(username: email,
+                          password: password,
+                          attributes: attributes,
+                          delegate: self)
     }
 
     func showResultText(_ text: String) {
@@ -89,10 +89,10 @@ class CustomAttributesViewController: UIViewController {
 
 // MARK: - Sign Up delegates
 
-// MARK: SignUpPasswordStartDelegate
+// MARK: SignUpStartDelegate
 
-extension CustomAttributesViewController: SignUpPasswordStartDelegate {
-    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
+extension CustomAttributesViewController: SignUpStartDelegate {
+    func onSignUpStartError(error: MSAL.SignUpStartError) {
         if error.isUserAlreadyExists {
             showResultText("Unable to sign up: User already exists")
         } else if error.isInvalidUsername {
@@ -112,7 +112,7 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
         channelTargetType _: MSAL.MSALNativeAuthChannelType,
         codeLength _: Int
     ) {
-        print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
+        print("SignUpStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showResultText("Email verification required")
 
