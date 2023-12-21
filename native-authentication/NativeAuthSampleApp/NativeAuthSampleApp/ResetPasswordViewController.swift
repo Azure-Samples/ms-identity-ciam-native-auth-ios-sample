@@ -154,7 +154,7 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
                                       newState.resendCode(delegate: self)
                                   })
         } else if error.isBrowserRequired {
-            showResultText("Unable to sign up: Web UX required")
+            showResultText("Unable to reset password: Web UX required")
             dismissVerifyCodeModal()
         } else {
             showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
