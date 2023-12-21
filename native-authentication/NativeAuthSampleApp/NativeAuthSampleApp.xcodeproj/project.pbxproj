@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8CFE2F832AEAA0950038E736 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 8CFE2F822AEAA0950038E736 /* MSAL */; };
+		28C823582B34582800503890 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 28C823572B34582800503890 /* MSAL */; };
 		9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477329969264003BA4B4 /* AppDelegate.swift */; };
 		9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477529969264003BA4B4 /* SceneDelegate.swift */; };
 		9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */; };
@@ -64,7 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CFE2F832AEAA0950038E736 /* MSAL in Frameworks */,
+				28C823582B34582800503890 /* MSAL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,7 +162,7 @@
 			);
 			name = NativeAuthSampleApp;
 			packageProductDependencies = (
-				8CFE2F822AEAA0950038E736 /* MSAL */,
+				28C823572B34582800503890 /* MSAL */,
 			);
 			productName = NativeAuthSampleApp;
 			productReference = 9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */;
@@ -194,7 +194,7 @@
 			);
 			mainGroup = 9B08476729969264003BA4B4;
 			packageReferences = (
-				8CFE2F812AEAA0950038E736 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
+				28C823562B34582800503890 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
 			);
 			productRefGroup = 9B08477129969264003BA4B4 /* Products */;
 			projectDirPath = "";
@@ -460,7 +460,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		8CFE2F812AEAA0950038E736 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */ = {
+		28C823562B34582800503890 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AzureAD/microsoft-authentication-library-for-objc";
 			requirement = {
@@ -471,9 +471,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8CFE2F822AEAA0950038E736 /* MSAL */ = {
+		28C823572B34582800503890 /* MSAL */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8CFE2F812AEAA0950038E736 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
+			package = 28C823562B34582800503890 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
 			productName = MSAL;
 		};
 /* End XCSwiftPackageProductDependency section */
