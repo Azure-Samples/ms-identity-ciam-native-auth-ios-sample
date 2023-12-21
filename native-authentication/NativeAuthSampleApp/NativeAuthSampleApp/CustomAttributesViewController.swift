@@ -89,7 +89,7 @@ class CustomAttributesViewController: UIViewController {
 
 // MARK: - Sign Up delegates
 
-// MARK: SignUpPasswordStartDelegate
+// MARK: SignUpStartDelegate
 
 extension CustomAttributesViewController: SignUpStartDelegate {
     func onSignUpStartError(error: MSAL.SignUpStartError) {
@@ -112,7 +112,7 @@ extension CustomAttributesViewController: SignUpStartDelegate {
         channelTargetType _: MSAL.MSALNativeAuthChannelType,
         codeLength _: Int
     ) {
-        print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
+        print("SignUpStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showResultText("Email verification required")
 

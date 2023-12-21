@@ -155,7 +155,7 @@ extension WebFallbackViewController: SignInStartDelegate {
     }
 
     func onSignInStartError(error: MSAL.SignInStartError) {
-        print("SignInPasswordStartDelegate: onSignInPasswordStartError: \(error)")
+        print("SignInStartDelegate: onSignInStartError: \(error)")
         
         if error.isUserNotFound || error.isInvalidUsername || error.isInvalidCredentials {
             showResultText("Invalid username or password")
