@@ -193,7 +193,7 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
         }
     }
 
-    func onResetPasswordCompleted() {
+    func onResetPasswordCompleted(newState: MSAL.SignInAfterResetPasswordState) {
         showResultText("Password reset successfully")
         dismissNewPasswordModal()
     }
