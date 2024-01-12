@@ -6,7 +6,7 @@
       "location" : "https://github.com/AzureAD/microsoft-authentication-library-for-objc",
       "state" : {
         "branch" : "spetrescu/ciam-new-apis-changes-for-pp-testspm",
-        "revision" : "552b58000e94e805daad76f1c536cf2c5d49dc42"
+        "revision" : "93e6b14917d5c3c0b749cb0c2091ee8d6482826c"
       }
     }
   ],
