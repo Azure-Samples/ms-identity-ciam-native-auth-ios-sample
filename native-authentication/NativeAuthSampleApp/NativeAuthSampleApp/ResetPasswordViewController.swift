@@ -29,10 +29,15 @@ class ResetPasswordViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
 
+    @IBOutlet weak var resetPasswordButton: UIButton!
+    @IBOutlet weak var signOutButton: UIButton!
+
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
     var newPasswordViewController: NewPasswordViewController?
+
+    var accountResult: MSALNativeAuthUserAccountResult?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,6 +54,12 @@ class ResetPasswordViewController: UIViewController {
         }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        retrieveCachedAccount()
+    }
+
     @IBAction func resetPasswordPressed(_: Any) {
         guard let email = emailTextField.text, !email.isEmpty
         else {
@@ -63,8 +74,40 @@ class ResetPasswordViewController: UIViewController {
         nativeAuth.resetPassword(username: email, delegate: self)
     }
 
+    @IBAction func signOutPressed(_: Any) {
+        guard accountResult != nil else {
+            print("signOutPressed: Not currently signed in")
+            return
+        }
+        accountResult?.signOut()
+
+        accountResult = nil
+
+        showResultText("Signed out")
+
+        updateUI()
+    }
+
     func showResultText(_ text: String) {
         resultTextView.text = text
+    }
+
+    func updateUI() {
+        let signedIn = (accountResult != nil)
+
+        resetPasswordButton.isEnabled = !signedIn
+        signOutButton.isEnabled = signedIn
+    }
+
+    func retrieveCachedAccount() {
+        accountResult = nativeAuth.getNativeAuthUserAccount()
+        if let _ = accountResult {
+            showResultText("User signed in. Sign out to Reset Password.")
+        } else {
+            showResultText("Signed out")
+        }
+
+        updateUI()
     }
 }
 
@@ -196,6 +239,28 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
     func onResetPasswordCompleted(newState: MSAL.SignInAfterResetPasswordState) {
         showResultText("Password reset successfully")
         dismissNewPasswordModal()
+
+        newState.signIn(delegate: self)
+    }
+}
+
+// MARK: SignInAfterResetPasswordDelegate
+
+extension ResetPasswordViewController: SignInAfterResetPasswordDelegate {
+    func onSignInAfterResetPasswordError(error: MSAL.SignInAfterResetPasswordError) {
+        showResultText("Error signing in after password reset: \(error.errorDescription ?? "No error description")")
+    }
+
+    func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
+        dismissVerifyCodeModal()
+
+        print("Signed in: \(result.account.username ?? "")")
+
+        accountResult = result
+
+        updateUI()
+
+        showResultText("Password reset successfully and user signed in.")
     }
 }
 
