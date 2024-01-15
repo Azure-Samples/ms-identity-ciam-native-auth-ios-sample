@@ -29,8 +29,8 @@ class CustomAttributesViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
 
-    @IBOutlet weak var firstNameTextField: UITextField!
-    @IBOutlet weak var lastNameTextField: UITextField!
+    @IBOutlet weak var countryTextField: UITextField!
+    @IBOutlet weak var cityTextField: UITextField!
 
     @IBOutlet weak var resultTextView: UITextView!
 
@@ -66,12 +66,12 @@ class CustomAttributesViewController: UIViewController {
 
         var attributes: [String: Any] = [:]
 
-        if let firstName = firstNameTextField.text, !firstName.isEmpty {
-            attributes["first_name"] = firstName
+        if let country = countryTextField.text, !country.isEmpty {
+            attributes["country"] = country
         }
 
-        if let lastName = lastNameTextField.text, !lastName.isEmpty {
-            attributes["last_name"] = lastName
+        if let city = cityTextField.text, !city.isEmpty {
+            attributes["city"] = city
         }
 
         print("Signing up with email \(email), password and attributes: \(attributes)")
