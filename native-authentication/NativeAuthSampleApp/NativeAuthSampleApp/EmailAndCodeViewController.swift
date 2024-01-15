@@ -53,6 +53,10 @@ class EmailAndCodeViewController: UIViewController {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL")
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 
         retrieveCachedAccount()
     }
@@ -113,6 +117,12 @@ class EmailAndCodeViewController: UIViewController {
             accountResult.getAccessToken(delegate: self)
         } else {
             print("No account found in cache")
+
+            accountResult = nil
+
+            showResultText("Signed out")
+
+            updateUI()
         }
     }
 }
