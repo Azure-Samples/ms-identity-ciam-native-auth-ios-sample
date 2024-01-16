@@ -140,7 +140,7 @@ extension EmailAndCodeViewController: SignUpStartDelegate {
         } else if error.isBrowserRequired {
             showResultText("Unable to sign up: Web UX required")
         } else {
-            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description"))")
+            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description")")
         }
     }
 
