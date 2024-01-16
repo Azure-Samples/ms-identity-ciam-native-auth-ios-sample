@@ -104,7 +104,7 @@ class ResetPasswordViewController: UIViewController {
         if let _ = accountResult {
             showResultText("User signed in. Sign out to Reset Password.")
         } else {
-            showResultText("Signed out")
+            showResultText("")
         }
 
         updateUI()

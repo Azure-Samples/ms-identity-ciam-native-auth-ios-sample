@@ -120,7 +120,7 @@ class EmailAndPasswordViewController: UIViewController {
 
             accountResult = nil
 
-            showResultText("Signed out")
+            showResultText("")
 
             updateUI()
         }
