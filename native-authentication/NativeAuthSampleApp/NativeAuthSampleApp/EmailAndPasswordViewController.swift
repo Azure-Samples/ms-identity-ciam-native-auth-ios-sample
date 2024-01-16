@@ -53,6 +53,10 @@ class EmailAndPasswordViewController: UIViewController {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL")
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 
         retrieveCachedAccount()
     }
@@ -113,6 +117,12 @@ class EmailAndPasswordViewController: UIViewController {
             accountResult.getAccessToken(delegate: self)
         } else {
             print("No account found in cache")
+
+            accountResult = nil
+
+            showResultText("")
+
+            updateUI()
         }
     }
 }
@@ -257,7 +267,7 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
 extension EmailAndPasswordViewController: CredentialsDelegate {
     func onAccessTokenRetrieveCompleted(accessToken: String) {
         print("Access Token: \(accessToken)")
-        showResultText("Signed in successfully. Access Token: \(accessToken)")
+        showResultText("Signed in. Access Token: \(accessToken)")
         updateUI()
     }
 

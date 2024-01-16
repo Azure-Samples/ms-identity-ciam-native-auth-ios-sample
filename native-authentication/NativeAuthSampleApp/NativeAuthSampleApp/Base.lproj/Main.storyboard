@@ -501,6 +501,14 @@
                                                             <action selector="resetPasswordPressed:" destination="qfh-W5-W8G" eventType="touchUpInside" id="E0Y-vh-Lmy"/>
                                                         </connections>
                                                     </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fty-KF-UkH">
+                                                        <rect key="frame" x="0.0" y="42.333333333333343" width="145" height="34.333333333333343"/>
+                                                        <state key="normal" title="Button"/>
+                                                        <buttonConfiguration key="configuration" style="filled" title="Sign Out"/>
+                                                        <connections>
+                                                            <action selector="signOutPressed:" destination="qfh-W5-W8G" eventType="touchUpInside" id="HyY-EZ-ams"/>
+                                                        </connections>
+                                                    </button>
                                                 </subviews>
                                                 <variation key="heightClass=compact" axis="horizontal"/>
                                             </stackView>
@@ -546,7 +554,9 @@
                     <tabBarItem key="tabBarItem" title="Password Reset" image="lock.rotation" catalog="system" id="rZj-Cb-72Y"/>
                     <connections>
                         <outlet property="emailTextField" destination="bNb-JY-hyR" id="9Kf-bY-IVB"/>
+                        <outlet property="resetPasswordButton" destination="P22-qR-cAM" id="aZk-t5-8Jg"/>
                         <outlet property="resultTextView" destination="1hd-wN-wPj" id="3C4-uw-RCb"/>
+                        <outlet property="signOutButton" destination="fty-KF-UkH" id="uw6-DA-s7A"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Zzw-zP-n1k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

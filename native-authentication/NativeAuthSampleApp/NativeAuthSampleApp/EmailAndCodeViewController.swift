@@ -53,6 +53,10 @@ class EmailAndCodeViewController: UIViewController {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL")
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 
         retrieveCachedAccount()
     }
@@ -113,6 +117,12 @@ class EmailAndCodeViewController: UIViewController {
             accountResult.getAccessToken(delegate: self)
         } else {
             print("No account found in cache")
+
+            accountResult = nil
+
+            showResultText("")
+
+            updateUI()
         }
     }
 }
@@ -130,7 +140,7 @@ extension EmailAndCodeViewController: SignUpStartDelegate {
         } else if error.isBrowserRequired {
             showResultText("Unable to sign up: Web UX required")
         } else {
-            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description"))")
+            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description")")
         }
     }
 
