@@ -267,7 +267,7 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
 extension EmailAndPasswordViewController: CredentialsDelegate {
     func onAccessTokenRetrieveCompleted(accessToken: String) {
         print("Access Token: \(accessToken)")
-        showResultText("Signed in successfully. Access Token: \(accessToken)")
+        showResultText("Signed in. Access Token: \(accessToken)")
         updateUI()
     }
 
