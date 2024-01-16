@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AzureAD/microsoft-authentication-library-for-objc",
       "state" : {
-        "branch" : "spetrescu/january-release-testspm",
-        "revision" : "1d0960fc82933b6c5f023d79d7f426ab3df4bd0d"
+        "branch" : "spetrescu/ciam-new-apis-changes-for-pp-testspm",
+        "revision" : "93e6b14917d5c3c0b749cb0c2091ee8d6482826c"
       }
     }
   ],
