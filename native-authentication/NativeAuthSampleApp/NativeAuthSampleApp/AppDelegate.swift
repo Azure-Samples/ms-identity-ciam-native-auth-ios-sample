@@ -23,13 +23,21 @@
 // THE SOFTWARE.
 
 import UIKit
+import MSAL
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        MSALGlobalConfig.loggerConfig.logLevel = .verbose
+        MSALGlobalConfig.loggerConfig.setLogCallback { logLevel, message, containsPII in
+           if !containsPII {
+                 print("MSAL: \(message ?? "")")
+           }
+        }
+
         return true
     }
 
