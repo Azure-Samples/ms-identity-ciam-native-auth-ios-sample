@@ -33,9 +33,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         MSALGlobalConfig.loggerConfig.logLevel = .verbose
         MSALGlobalConfig.loggerConfig.setLogCallback { logLevel, message, containsPII in
-           if !containsPII {
-                 print("MSAL: \(message ?? "")")
-           }
+            if !containsPII {
+                print("MSAL: \(message ?? "")")
+            }
         }
 
         return true
