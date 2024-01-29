@@ -30,4 +30,6 @@ class Configuration: NSObject {
 
     static let clientId = "Enter_the_Application_Id_Here"
     static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
+    static let protectedAPIUrl = "Enter_the_Protected_API_Full_URL_Here"
+    static let protectedAPIScopes = ["Enter_the_Protected_API_Scopes_Here"]
 }
