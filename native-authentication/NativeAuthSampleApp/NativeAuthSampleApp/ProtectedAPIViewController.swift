@@ -154,7 +154,7 @@ class ProtectedAPIViewController: UIViewController {
         request.httpMethod = "GET"
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         
-        let task = URLSession.shared.dataTask(with: request) { _, response, error in
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Error found when accessing API: \(error.localizedDescription)")
                 DispatchQueue.main.async {
@@ -170,8 +170,19 @@ class ProtectedAPIViewController: UIViewController {
                 return
             }
             
+            guard let data = data, let result = try? JSONSerialization.jsonObject(with: data, options: []) else {
+                DispatchQueue.main.async {
+                    self.showResultText("Couldn't deserialize result JSON")
+                }
+                return
+            }
+            
             DispatchQueue.main.async {
-                self.showResultText("Accessed API successfully using access token. HTTP response code:\(httpResponse.statusCode)")
+                self.showResultText("""
+                                Accessed API successfully using access token.
+                                HTTP response code: \(httpResponse.statusCode)
+                                HTTP response body: \(result)
+                                """)
             }
         }
         
