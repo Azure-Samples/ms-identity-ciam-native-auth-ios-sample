@@ -226,7 +226,7 @@ extension ProtectedAPIViewController: SignUpVerifyCodeDelegate {
         showResultText("Signed up successfully!")
         dismissVerifyCodeModal()
 
-        newState.signIn(delegate: self)
+        newState.signIn(scopes: Configuration.protectedAPIScopes, delegate: self)
     }
 }
 
