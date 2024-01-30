@@ -33,7 +33,6 @@ class ProtectedAPIViewController: UIViewController {
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
 
-    @IBOutlet weak var signUpButton: UIButton!
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
     @IBOutlet weak var protectedAPIButton: UIButton!
@@ -67,17 +66,6 @@ class ProtectedAPIViewController: UIViewController {
         retrieveCachedAccount()
     }
 
-    @IBAction func signUpPressed(_: Any) {
-        guard let email = emailTextField.text, let password = passwordTextField.text else {
-            resultTextView.text = "Email or password not set"
-            return
-        }
-
-        print("Signing up with email \(email) and password")
-
-        nativeAuth.signUp(username: email, password: password, delegate: self)
-    }
-
     @IBAction func signInPressed(_: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "Email or password not set"
@@ -107,7 +95,9 @@ class ProtectedAPIViewController: UIViewController {
     
     @IBAction func protectedAPIPressed(_: Any) {
         guard let accessToken = self.accessToken else {
-            print("No access token found")
+            let errorMessage = "No access token found"
+            print(errorMessage)
+            showResultText(errorMessage)
             return
         }
         
@@ -121,7 +111,6 @@ class ProtectedAPIViewController: UIViewController {
     func updateUI() {
         let signedIn = (accountResult != nil)
 
-        signUpButton.isEnabled = !signedIn
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
         protectedAPIButton.isEnabled = accessToken != nil
@@ -146,7 +135,9 @@ class ProtectedAPIViewController: UIViewController {
     
     func accessProtectedAPI(accessToken: String) {
         guard let url = URL(string: protectedAPIUrl) else {
-            print("Invalid API url")
+            let errorMessage = "Invalid API url"
+            print(errorMessage)
+            showResultText(errorMessage)
             return
         }
         
@@ -187,115 +178,6 @@ class ProtectedAPIViewController: UIViewController {
         }
         
         task.resume()
-    }
-}
-
-// MARK: - Sign Up delegates
-
-// MARK: SignUpStartDelegate
-
-extension ProtectedAPIViewController: SignUpStartDelegate {
-    func onSignUpStartError(error: MSAL.SignUpStartError) {
-        if error.isUserAlreadyExists {
-            showResultText("Unable to sign up: User already exists")
-        } else if error.isInvalidPassword {
-            showResultText("Unable to sign up: The password is invalid")
-        } else if error.isInvalidUsername {
-            showResultText("Unable to sign up: The username is invalid")
-        } else {
-            showResultText("Unexpected error signing up: \(error.errorDescription ?? "No error description")")
-        }
-    }
-
-    func onSignUpCodeRequired(newState: MSAL.SignUpCodeRequiredState,
-                              sentTo _: String,
-                              channelTargetType _: MSAL.MSALNativeAuthChannelType,
-                              codeLength _: Int) {
-        print("SignUpStartDelegate: onSignUpCodeRequired: \(newState)")
-
-        showVerifyCodeModal(submitCallback: { [weak self] code in
-                                guard let self = self else { return }
-
-                                newState.submitCode(code: code, delegate: self)
-                            },
-                            resendCallback: { [weak self] in
-                                guard let self = self else { return }
-
-                                newState.resendCode(delegate: self)
-                            })
-    }
-}
-
-// MARK: SignUpVerifyCodeDelegate
-
-extension ProtectedAPIViewController: SignUpVerifyCodeDelegate {
-    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
-        if error.isInvalidCode {
-            guard let newState = newState else {
-                print("Unexpected state. Received invalidCode but newState is nil")
-
-                showResultText("Internal error verifying code")
-                return
-            }
-
-            updateVerifyCodeModal(errorMessage: "Invalid code",
-                                  submitCallback: { [weak self] code in
-                                      guard let self = self else { return }
-
-                                      newState.submitCode(code: code, delegate: self)
-                                  }, resendCallback: { [weak self] in
-                                      guard let self = self else { return }
-
-                                      newState.resendCode(delegate: self)
-                                  })
-        } else {
-            showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
-            dismissVerifyCodeModal()
-        }
-    }
-
-    func onSignUpCompleted(newState: MSAL.SignInAfterSignUpState) {
-        showResultText("Signed up successfully!")
-        dismissVerifyCodeModal()
-
-        newState.signIn(scopes: protectedAPIScopes, delegate: self)
-    }
-}
-
-// MARK: SignUpResendCodeDelegate
-
-extension ProtectedAPIViewController: SignUpResendCodeDelegate {
-
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
-        print("SignUpResendCodeDelegate: onSignUpResendCodeError: \(error)")
-        showResultText("Unexpected error while requesting new code")
-        dismissVerifyCodeModal()
-    }
-
-    func onSignUpResendCodeCodeRequired(
-        newState: MSAL.SignUpCodeRequiredState,
-        sentTo _: String,
-        channelTargetType _: MSAL.MSALNativeAuthChannelType,
-        codeLength _: Int
-    ) {
-        updateVerifyCodeModal(errorMessage: nil,
-                              submitCallback: { [weak self] code in
-                                  guard let self = self else { return }
-
-                                  newState.submitCode(code: code, delegate: self)
-                              }, resendCallback: { [weak self] in
-                                  guard let self = self else { return }
-
-                                  newState.resendCode(delegate: self)
-                              })
-    }
-}
-
-// MARK: SignInAfterSignUpDelegate
-
-extension ProtectedAPIViewController: SignInAfterSignUpDelegate {
-    func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {
-        showResultText("Error signing in after signing up.")
     }
 }
 
