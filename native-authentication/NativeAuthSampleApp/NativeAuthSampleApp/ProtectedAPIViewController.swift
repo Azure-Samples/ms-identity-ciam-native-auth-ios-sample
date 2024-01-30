@@ -117,7 +117,7 @@ class ProtectedAPIViewController: UIViewController {
         request.httpMethod = "GET"
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         
-        retrieveAPIData(request: request)
+        accessProtectedAPI(request: request)
     }
     
     func showResultText(_ text: String) {
@@ -150,13 +150,14 @@ class ProtectedAPIViewController: UIViewController {
         }
     }
     
-    func retrieveAPIData(request: URLRequest) {
+    func accessProtectedAPI(request: URLRequest) {
         let task = URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
                 print("Error found when accessing API: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.showResultText(error.localizedDescription)
                 }
+                return
             }
             
             guard let httpResponse = response as? HTTPURLResponse,
@@ -167,7 +168,7 @@ class ProtectedAPIViewController: UIViewController {
             }
             
             DispatchQueue.main.async {
-                self.showResultText("Http response code is: \(httpResponse.statusCode)")
+                self.showResultText("Accessed API successfully using access token. HTTP response code:\(httpResponse.statusCode)")
             }
         }
         
