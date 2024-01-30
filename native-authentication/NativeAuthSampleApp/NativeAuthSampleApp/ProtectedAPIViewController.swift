@@ -26,6 +26,9 @@ import MSAL
 import UIKit
 
 class ProtectedAPIViewController: UIViewController {
+    let protectedAPIUrl = "Enter_the_Protected_API_Full_URL_Here"
+    let protectedAPIScopes = ["Enter_the_Protected_API_Scopes_Here"]
+    
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
@@ -83,7 +86,7 @@ class ProtectedAPIViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signIn(username: email, password: password, scopes: Configuration.protectedAPIScopes, delegate: self)
+        nativeAuth.signIn(username: email, password: password, scopes: protectedAPIScopes, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -103,21 +106,12 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedAPIPressed(_: Any) {
-        guard let url = URL(string: Configuration.protectedAPIUrl) else {
-            print("Invalid API url")
-            return
-        }
-        
         guard let accessToken = self.accessToken else {
             print("No access token found")
             return
         }
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        accessProtectedAPI(request: request)
+        accessProtectedAPI(accessToken: accessToken)
     }
     
     func showResultText(_ text: String) {
@@ -150,7 +144,16 @@ class ProtectedAPIViewController: UIViewController {
         }
     }
     
-    func accessProtectedAPI(request: URLRequest) {
+    func accessProtectedAPI(accessToken: String) {
+        guard let url = URL(string: protectedAPIUrl) else {
+            print("Invalid API url")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        
         let task = URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
                 print("Error found when accessing API: \(error.localizedDescription)")
@@ -244,7 +247,7 @@ extension ProtectedAPIViewController: SignUpVerifyCodeDelegate {
         showResultText("Signed up successfully!")
         dismissVerifyCodeModal()
 
-        newState.signIn(scopes: Configuration.protectedAPIScopes, delegate: self)
+        newState.signIn(scopes: protectedAPIScopes, delegate: self)
     }
 }
 
