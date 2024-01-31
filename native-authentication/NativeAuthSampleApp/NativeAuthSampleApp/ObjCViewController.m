@@ -66,6 +66,8 @@
     NSString *email = self.emailTextField.text;
     NSString *password = self.passwordTextField.text;
 
+    [self showResultText:@"Signing in..."];
+
     [self.nativeAuth signInUsername:email
                            password:password
                              scopes:nil

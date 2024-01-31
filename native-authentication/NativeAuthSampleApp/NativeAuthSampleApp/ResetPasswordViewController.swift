@@ -69,7 +69,7 @@ class ResetPasswordViewController: UIViewController {
 
         print("Resetting password for email \(email)")
 
-        showResultText("")
+        showResultText("Resetting password...")
 
         nativeAuth.resetPassword(username: email, delegate: self)
     }

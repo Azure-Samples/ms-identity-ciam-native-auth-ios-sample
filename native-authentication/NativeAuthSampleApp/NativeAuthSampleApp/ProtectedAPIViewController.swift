@@ -74,6 +74,8 @@ class ProtectedAPIViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
+        showResultText("Signing in...")
+
         nativeAuth.signIn(username: email, password: password, scopes: protectedAPIScopes, delegate: self)
     }
 
