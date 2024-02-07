@@ -1,6 +1,6 @@
 # MSAL Native Auth Sample App Private Preview
 
-This is a sample application used to demonstrate the CIAM extension of the MSAL framework that is currently in private preview. 
+This is a sample application used to demonstrate the CIAM extension of the MSAL framework that is currently in public preview. 
 
 ## Prerequisite
 
