@@ -69,6 +69,8 @@ class EmailAndCodeViewController: UIViewController {
 
         print("Signing up with email \(email)")
 
+        showResultText("Signing up...")
+
         nativeAuth.signUp(username: email, delegate: self)
     }
 
@@ -79,6 +81,8 @@ class EmailAndCodeViewController: UIViewController {
         }
 
         print("Signing in with email \(email)")
+
+        showResultText("Signing in...")
 
         nativeAuth.signIn(username: email, delegate: self)
     }

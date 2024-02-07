@@ -76,6 +76,8 @@ class CustomAttributesViewController: UIViewController {
 
         print("Signing up with email \(email), password and attributes: \(attributes)")
 
+        showResultText("Signing up...")
+
         nativeAuth.signUp(username: email,
                           password: password,
                           attributes: attributes,
