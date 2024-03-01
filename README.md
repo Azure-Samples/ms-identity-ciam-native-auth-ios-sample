@@ -1,5 +1,14 @@
 # A native authentication iOS (Swift) sample app using MSAL to authenticate users and call a web API using Microsoft Entra External ID
 
+* [Overview](#overview)
+* [Contents](#contents)
+* [Prerequisites](#prerequisites)
+* [Project setup](#project-setup)
+* [Key concepts](#key-concepts)
+* [Contributing](#contributing)
+
+## Overview
+
 This sample iOS sample applications demonstrates how sign-up, sign in, sign out, reset password scenarios and call a web API using Microsoft Entra External ID for customers.
 
 ## Contents
@@ -13,7 +22,7 @@ This sample iOS sample applications demonstrates how sign-up, sign in, sign out,
 | `README.md` | This README file. |
 | `LICENSE`   | The license for the sample. |
 
-## Prerequisite
+## Prerequisites
 
 - <a href="https://developer.apple.com/xcode/resources/" target="_blank">Xcode</a>
 - Microsoft Entra External ID for customers tenant. If you don't already have one, <a href="https://aka.ms/ciam-free-trial?wt.mc_id=ciamcustomertenantfreetrial_linkclick_content_cnl" target="_blank">sign up for a free trial</a>
@@ -72,6 +81,8 @@ do {
     showResultText("Unable to initialize MSAL")
 }
 ```
+
+To learn more, see [Tutorial: Prepare your iOS app for native authentication](https://review.learn.microsoft.com/en-us/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app?branch=pr-en-us-2024)
 
 ## Contributing
 
