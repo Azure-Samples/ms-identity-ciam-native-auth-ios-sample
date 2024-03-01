@@ -31,6 +31,48 @@ To enable your application to authenicate users with Microsoft Entra, Microsoft 
 1. [Configure the sample iOS mobile application](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#configure-the-sample-ios-mobile-application)
 1. [Run and test sample iOS mobile application](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#run-and-test-sample-ios-mobile-application)
 
+## Key concepts
+
+Let's take a quick review of what's happenning in the app. Open `NativeAuthSampleApp/Configuration.swift` file and you find the following lines of code:
+
+```swift
+import MSAL
+
+@objcMembers
+class Configuration: NSObject {
+    // Update the below to your client ID and tenantSubdomain you received in the portal.
+
+    static let clientId = "Enter_the_Application_Id_Here"
+    static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
+}
+```
+
+The code creates two constant properties:
+
+- _clientId_ - the value _Enter_the_Application_Id_Here_ is be replaced with **Application (client) ID** of the app you register during the project setup. The **Application (client) ID** is unique identifier of your registered application.
+- _tenantSubdomain_ - the value _Enter_the_Tenant_Subdomain_Here_ is replaced with the Directory (tenant) subdomain. The tenant subdomain URL is used to construct the authentication endpoint for your app.
+
+You use `NativeAuthSampleApp/Configuration.swift` file to set configuration options when you initialize the client app in the Microsoft Authentication Library (MSAL).
+
+To create SDK instance, use the following code:
+
+```swift
+import MSAL
+
+var nativeAuth: MSALNativeAuthPublicClientApplication!
+
+do {
+    nativeAuth = try MSALNativeAuthPublicClientApplication(
+        clientId: Configuration.clientId,
+        tenantSubdomain: Configuration.tenantSubdomain,
+        challengeTypes: [.OOB, .password]
+    )
+} catch {
+    print("Unable to initialize MSAL \(error)")
+    showResultText("Unable to initialize MSAL")
+}
+```
+
 ## Contributing
 
 If you'd like to contribute to this sample, see [CONTRIBUTING.MD](/CONTRIBUTING.md).
