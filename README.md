@@ -5,6 +5,7 @@
 * [Prerequisites](#prerequisites)
 * [Project setup](#project-setup)
 * [Key concepts](#key-concepts)
+* [Reporting problems](#reporting-problems)
 * [Contributing](#contributing)
 
 ## Overview
@@ -24,8 +25,8 @@ This sample iOS sample applications demonstrates how sign-up, sign in, sign out,
 
 ## Prerequisites
 
-- <a href="https://developer.apple.com/xcode/resources/" target="_blank">Xcode</a>
-- Microsoft Entra External ID for customers tenant. If you don't already have one, <a href="https://aka.ms/ciam-free-trial?wt.mc_id=ciamcustomertenantfreetrial_linkclick_content_cnl" target="_blank">sign up for a free trial</a>
+* <a href="https://developer.apple.com/xcode/resources/" target="_blank">Xcode</a>
+* Microsoft Entra External ID for customers tenant. If you don't already have one, <a href="https://aka.ms/ciam-free-trial?wt.mc_id=ciamcustomertenantfreetrial_linkclick_content_cnl" target="_blank">sign up for a free trial</a>
 
 ## Project setup
 
@@ -58,8 +59,8 @@ class Configuration: NSObject {
 
 The code creates two constant properties:
 
-- _clientId_ - the value _Enter_the_Application_Id_Here_ is be replaced with **Application (client) ID** of the app you register during the project setup. The **Application (client) ID** is unique identifier of your registered application.
-- _tenantSubdomain_ - the value _Enter_the_Tenant_Subdomain_Here_ is replaced with the Directory (tenant) subdomain. The tenant subdomain URL is used to construct the authentication endpoint for your app.
+* _clientId_ - the value _Enter_the_Application_Id_Here_ is be replaced with **Application (client) ID** of the app you register during the project setup. The **Application (client) ID** is unique identifier of your registered application.
+* _tenantSubdomain_ - the value _Enter_the_Tenant_Subdomain_Here_ is replaced with the Directory (tenant) subdomain. The tenant subdomain URL is used to construct the authentication endpoint for your app.
 
 You use `NativeAuthSampleApp/Configuration.swift` file to set configuration options when you initialize the client app in the Microsoft Authentication Library (MSAL).
 
@@ -83,6 +84,11 @@ do {
 ```
 
 To learn more, see [Tutorial: Prepare your iOS app for native authentication](https://review.learn.microsoft.com/en-us/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app?branch=pr-en-us-2024)
+
+## Reporting problems
+
+* Search the [GitHub issues](https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample/issues) in the repository - your problem might already have been reported or have an answer.
+* Nothing similar? [Open an issue](https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample/issues/new) that clearly explains the problem you're having running the sample app.
 
 ## Contributing
 
