@@ -10,7 +10,7 @@
 
 ## Overview
 
-This sample iOS sample applications demonstrates how sign-up, sign in, sign out, reset password scenarios and call a web API using Microsoft Entra External ID for customers.
+This sample iOS sample applications demonstrates how to sign-up, sign in, sign out, reset password scenarios and call a web API using Microsoft Entra External ID for customers.
 
 ## Contents
 
