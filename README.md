@@ -1,4 +1,4 @@
-# MSAL Native Auth Sample App Private Preview
+# A native authentication iOS (Swift) app using MSAL to authenticate users and call a web API against Microsoft Entra External ID
 
 This is a sample application used to demonstrate the CIAM extension of the MSAL framework that is currently in public preview. 
 
