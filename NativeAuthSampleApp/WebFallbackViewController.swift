@@ -172,9 +172,9 @@ extension WebFallbackViewController: SignInStartDelegate {
 // MARK: - Credentials Delegate methods
 
 extension WebFallbackViewController: CredentialsDelegate {
-    func onAccessTokenRetrieveCompleted(accessToken: String) {
-        print("Access Token: \(accessToken)")
-        showResultText("Signed in successfully. Access Token: \(accessToken)")
+    func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
+        print("Access Token: \(result.accessToken)")
+        showResultText("Signed in. Access Token: \(result.accessToken)")
         updateUI()
     }
 

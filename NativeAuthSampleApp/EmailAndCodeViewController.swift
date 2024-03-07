@@ -360,9 +360,9 @@ extension EmailAndCodeViewController: SignInResendCodeDelegate {
 // MARK: - CredentialsDelegate methods
 
 extension EmailAndCodeViewController: CredentialsDelegate {
-    func onAccessTokenRetrieveCompleted(accessToken: String) {
-        print("Access Token: \(accessToken)")
-        showResultText("Signed in. Access Token: \(accessToken)")
+    func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
+        print("Access Token: \(result.accessToken)")
+        showResultText("Signed in. Access Token: \(result.accessToken)")
         updateUI()
     }
 

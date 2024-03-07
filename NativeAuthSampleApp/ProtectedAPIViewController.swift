@@ -212,10 +212,10 @@ extension ProtectedAPIViewController: SignInStartDelegate {
 // MARK: CredentialsDelegate
 
 extension ProtectedAPIViewController: CredentialsDelegate {
-    func onAccessTokenRetrieveCompleted(accessToken: String) {
-        print("Access Token: \(accessToken)")
-        self.accessToken = accessToken
-        showResultText("Signed in. Access Token: \(accessToken)")
+    func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
+        print("Access Token: \(result.accessToken)")
+        self.accessToken = result.accessToken
+        showResultText("Signed in. Access Token: \(result.accessToken)")
         updateUI()
     }
 
