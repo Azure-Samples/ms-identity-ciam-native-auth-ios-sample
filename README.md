@@ -1,4 +1,4 @@
-# A native authentication iOS (Swift) sample app using MSAL to authenticate users and call a web API using Microsoft Entra External ID
+# Sign in users and call a protected web API in iOS (Swift) mobile app by using native authentication
 
 * [Overview](#overview)
 * [Contents](#contents)
@@ -10,13 +10,13 @@
 
 ## Overview
 
-This sample iOS sample applications demonstrates how to sign-up, sign in, sign out, reset password scenarios and call a web API using Microsoft Entra External ID for customers.
+This sample iOS sample applications demonstrates how to handle sign-up, sign-in, sign out, and reset password scenarios using Microsoft Entra External ID for customers. You can configure the sample to call a protected web API.
 
 ## Contents
 
 | File/folder | Description |
 |-------------|-------------|
-| `NativeAuthSampleApp`       | Sample source code. |
+| `NativeAuthSampleApp/Configuration.swift`       | Configuration file. |
 | `.gitignore` | Define what to ignore at commit time. |
 | `CHANGELOG.md` | List of changes to the sample. |
 | `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
@@ -32,18 +32,45 @@ This sample iOS sample applications demonstrates how to sign-up, sign in, sign o
 
 To enable your application to authenicate users with Microsoft Entra, Microsoft Entra ID for customers must be made aware of the application you create. The following steps show you how to:
 
-1. [Register an application](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#register-an-application)
-1. [Enable public client and native authentication flows](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#enable-public-client-and-native-authentication-flows)
-1. [Grant API permissions](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#grant-api-permissions)
-1. [Create a user flow](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#create-a-user-flow)
-1. [Associate the application with the user flow](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#associate-the-application-with-the-user-flow)
-1. [Clone sample iOS mobile application](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#clone-sample-ios-mobile-application)
-1. [Configure the sample iOS mobile application](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#configure-the-sample-ios-mobile-application)
-1. [Run and test sample iOS mobile application](https://review.learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app?branch=pr-en-us-2024#run-and-test-sample-ios-mobile-application)
+### Step 1: Register an application
+
+Register your app in the Microsoft Entra admin center using the steps in [Register an application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#register-an-application).
+
+### Step 2: Enable public client and native authentication flows
+
+Enable public client and native authentication flows for the registered application using the steps in [Enable public client and native authentication flows](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#enable-public-client-and-native-authentication-flows).
+
+### Step 3: Grant API permissions
+
+Grant API permissions to the registered application by following the steps in [Grant API permissions](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#grant-api-permissions).
+
+### Step 4: Create user flow
+
+Create a user flow by following the steps in [Create a user flow](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#create-a-user-flow).
+
+### Step 5: Associate the app with the user flow
+
+Associate the application with the user flow by following the steps in [Associate the application with the user flow](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#associate-the-application-with-the-user-flow).
+
+### Step 6: Clone sample iOS mobile application
+
+Clone the sample iOS mobile application by following the steps outlined in [Clone sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#clone-sample-ios-mobile-application).
+ 
+### Step 7: Configure the sample iOS mobile application
+
+Configure the sample iOS mobile application by following the steps in [Configure the sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#configure-the-sample-ios-mobile-application).
+
+### Step 8: Run and test sample iOS mobile application
+
+Run and test the iOS sample mobile application by following the steps in [Run and test sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#run-and-test-sample-ios-mobile-application).
+
+### Step 9: Call a protected web API
+
+Follow the steps in Sign in users and call an API in a sample iOS mobile app by using native authentication to [sign in users and call a protected API in the iOS sample mobile app](https://learn.microsoft.com//entra/external-id/customers/sample-native-authentication-ios-sample-app-call-web-api).
 
 ## Key concepts
 
-Let's take a quick review of what's happenning in the app. Open `NativeAuthSampleApp/Configuration.swift` file and you find the following lines of code:
+Open `NativeAuthSampleApp/Configuration.swift` file and you find the following lines of code:
 
 ```swift
 import MSAL
@@ -59,7 +86,7 @@ class Configuration: NSObject {
 
 The code creates two constant properties:
 
-* _clientId_ - the value _Enter_the_Application_Id_Here_ is be replaced with **Application (client) ID** of the app you register during the project setup. The **Application (client) ID** is unique identifier of your registered application.
+* _clientId_ - the value _Enter_the_Application_Id_Here_ is replaced with **Application (client) ID** of the app you register during the project setup. The **Application (client) ID** is unique identifier of your registered application.
 * _tenantSubdomain_ - the value _Enter_the_Tenant_Subdomain_Here_ is replaced with the Directory (tenant) subdomain. The tenant subdomain URL is used to construct the authentication endpoint for your app.
 
 You use `NativeAuthSampleApp/Configuration.swift` file to set configuration options when you initialize the client app in the Microsoft Authentication Library (MSAL).
@@ -83,7 +110,7 @@ do {
 }
 ```
 
-To learn more, see [Tutorial: Prepare your iOS app for native authentication](https://review.learn.microsoft.com/en-us/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app?branch=pr-en-us-2024)
+You create MSL instance so that we can perform authentication logic and interact with our tenant through native authentication APIs. For more information about SDK instance, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/en-gb/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance)
 
 ## Reporting problems
 
