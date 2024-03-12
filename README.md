@@ -17,7 +17,6 @@ This sample iOS sample applications demonstrates how to handle sign-up, sign-in,
 | File/folder | Description |
 |-------------|-------------|
 | `NativeAuthSampleApp/Configuration.swift`       | Configuration file. |
-| `.gitignore` | Define what to ignore at commit time. |
 | `CHANGELOG.md` | List of changes to the sample. |
 | `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
 | `README.md` | This README file. |
