@@ -55,7 +55,7 @@ Associate the application with the user flow by following the steps in [Associat
 ### Step 6: Clone sample iOS mobile application
 
 Clone the sample iOS mobile application by following the steps outlined in [Clone sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#clone-sample-ios-mobile-application).
- 
+
 ### Step 7: Configure the sample iOS mobile application
 
 Configure the sample iOS mobile application by following the steps in [Configure the sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#configure-the-sample-ios-mobile-application).
@@ -110,7 +110,7 @@ do {
 }
 ```
 
-You create MSL instance so that we can perform authentication logic and interact with our tenant through native authentication APIs. For more information about SDK instance, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/en-gb/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance)
+You create MSAL instance so that you can perform authentication logic and interact with your tenant through native authentication APIs. The `MSALNativeAuthPublicClientApplication` create an instance called `nativeAuth`. The configuration file `NativeAuthSampleApp/Configuration.swift` file is passed as parameter.For more information about SDK instance, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/en-gb/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance)
 
 ## Reporting problems
 
