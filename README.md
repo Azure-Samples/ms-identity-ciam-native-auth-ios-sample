@@ -1,76 +1,124 @@
-# Contributing to iOS (Swift) native authentication sample app
+# Sign in users and call a protected web API in iOS (Swift) mobile app by using native authentication
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+* [Overview](#overview)
+* [Contents](#contents)
+* [Prerequisites](#prerequisites)
+* [Project setup](#project-setup)
+* [Key concepts](#key-concepts)
+* [Reporting problems](#reporting-problems)
+* [Contributing](#contributing)
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+## Overview
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+This sample iOS sample applications demonstrates how to handle sign-up, sign-in, sign out, and reset password scenarios using Microsoft Entra External ID for customers. You can configure the sample to call a protected web API.
 
- - [Code of Conduct](#coc)
- - [Issues and Bugs](#issue)
- - [Feature Requests](#feature)
- - [Submission Guidelines](#submit)
+## Contents
 
-## <a name="coc"></a> Code of Conduct
-Help us keep this project open and inclusive. Please read and follow our [Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+| File/folder | Description |
+|-------------|-------------|
+| `NativeAuthSampleApp.xcodeproj`      | Container for organizing and managing app’s source code, resources, build settings, and other essential components. |
+| `NativeAuthSampleApp/Configuration.swift`       | Configuration file. |
+| `CHANGELOG.md` | List of changes to the sample. |
+| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
+| `README.md` | This README file. |
+| `LICENSE`   | The license for the sample. |
 
-## <a name="issue"></a> Found an Issue?
-If you find a bug in the source code or a mistake in the documentation, you can help us by
-[submitting an issue](#submit-issue) to the GitHub Repository. Even better, you can
-[submit a Pull Request](#submit-pr) with a fix.
+## Prerequisites
 
-## <a name="feature"></a> Want a Feature?
-You can *request* a new feature by [submitting an issue](#submit-issue) to the GitHub
-Repository. If you would like to *implement* a new feature, please submit an issue with
-a proposal for your work first, to be sure that we can use it.
+* <a href="https://developer.apple.com/xcode/resources/" target="_blank">Xcode</a>
+* Microsoft Entra External ID for customers tenant. If you don't already have one, <a href="https://aka.ms/ciam-free-trial?wt.mc_id=ciamcustomertenantfreetrial_linkclick_content_cnl" target="_blank">sign up for a free trial</a>
 
-* **Small Features** can be crafted and directly [submitted as a Pull Request](#submit-pr).
+## Project setup
 
-## <a name="submit"></a> Submission Guidelines
+To enable your application to authenicate users with Microsoft Entra, Microsoft Entra ID for customers must be made aware of the application you create. The following steps show you how to:
 
-### <a name="submit-issue"></a> Submitting an Issue
-Before you submit an issue, search the archive, maybe your question was already answered.
+### Step 1: Register an application
 
-If your issue appears to be a bug, and hasn't been reported, open a new issue.
-Help us to maximize the effort we can spend fixing issues and adding new
-features, by not reporting duplicate issues.  Providing the following information will increase the
-chances of your issue being dealt with quickly:
+Register your app in the Microsoft Entra admin center using the steps in [Register an application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#register-an-application).
 
-* **Overview of the Issue** - if an error is being thrown a non-minified stack trace helps
-* **Version** - what version is affected (e.g. 0.1.2)
-* **Motivation for or Use Case** - explain what are you trying to do and why the current behavior is a bug for you
-* **Browsers and Operating System** - is this a problem with all browsers?
-* **Reproduce the Error** - provide a live example or a unambiguous set of steps
-* **Related Issues** - has a similar issue been reported before?
-* **Suggest a Fix** - if you can't fix the bug yourself, perhaps you can point to what might be
-  causing the problem (line of code or commit)
+### Step 2: Enable public client and native authentication flows
 
-You can file new issues by providing the above information at the corresponding repository's issues link: https://github.com/[organization-name]/[repository-name]/issues/new].
+Enable public client and native authentication flows for the registered application using the steps in [Enable public client and native authentication flows](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#enable-public-client-and-native-authentication-flows).
 
-### <a name="submit-pr"></a> Submitting a Pull Request (PR)
-Before you submit your Pull Request (PR) consider the following guidelines:
+### Step 3: Grant API permissions
 
-* Search the repository (https://github.com/[organization-name]/[repository-name]/pulls) for an open or closed PR
-  that relates to your submission. You don't want to duplicate effort.
+Grant API permissions to the registered application by following the steps in [Grant API permissions](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#grant-api-permissions).
 
-* Make your changes in a new git fork:
+### Step 4: Create user flow
 
-* Commit your changes using a descriptive commit message
-* Push your fork to GitHub:
-* In GitHub, create a pull request
-* If we suggest changes then:
-  * Make the required updates.
-  * Rebase your fork and force push to your GitHub repository (this will update your Pull Request):
+Create a user flow by following the steps in [Create a user flow](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#create-a-user-flow).
 
-    ```shell
-    git rebase master -i
-    git push -f
-    ```
+### Step 5: Associate the app with the user flow
 
-That's it! Thank you for your contribution!
+Associate the application with the user flow by following the steps in [Associate the application with the user flow](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#associate-the-application-with-the-user-flow).
+
+### Step 6: Clone sample iOS mobile application
+
+Clone the sample iOS mobile application by following the steps outlined in [Clone sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#clone-sample-ios-mobile-application).
+
+### Step 7: Configure the sample iOS mobile application
+
+Configure the sample iOS mobile application by following the steps in [Configure the sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#configure-the-sample-ios-mobile-application).
+
+### Step 8: Run and test sample iOS mobile application
+
+Run and test the iOS sample mobile application by following the steps in [Run and test sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#run-and-test-sample-ios-mobile-application).
+
+### Step 9: Call a protected web API
+
+Follow the steps in Sign in users and call an API in a sample iOS mobile app by using native authentication to [sign in users and call a protected API in the iOS sample mobile app](https://learn.microsoft.com//entra/external-id/customers/sample-native-authentication-ios-sample-app-call-web-api).
+
+## Key concepts
+
+Open `NativeAuthSampleApp/Configuration.swift` file and you find the following lines of code:
+
+```swift
+import MSAL
+
+@objcMembers
+class Configuration: NSObject {
+    // Update the below to your client ID and tenantSubdomain you received in the portal.
+
+    static let clientId = "Enter_the_Application_Id_Here"
+    static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
+}
+```
+
+The code creates two constant properties:
+
+* _clientId_ - the value _Enter_the_Application_Id_Here_ is replaced with **Application (client) ID** of the app you register during the project setup. The **Application (client) ID** is unique identifier of your registered application.
+* _tenantSubdomain_ - the value _Enter_the_Tenant_Subdomain_Here_ is replaced with the Directory (tenant) subdomain. The tenant subdomain URL is used to construct the authentication endpoint for your app.
+
+You use `NativeAuthSampleApp/Configuration.swift` file to set configuration options when you initialize the client app in the Microsoft Authentication Library (MSAL).
+
+To create SDK instance, use the following code:
+
+```swift
+import MSAL
+
+var nativeAuth: MSALNativeAuthPublicClientApplication!
+
+do {
+    nativeAuth = try MSALNativeAuthPublicClientApplication(
+        clientId: Configuration.clientId,
+        tenantSubdomain: Configuration.tenantSubdomain,
+        challengeTypes: [.OOB, .password]
+    )
+} catch {
+    print("Unable to initialize MSAL \(error)")
+    showResultText("Unable to initialize MSAL")
+}
+```
+
+You create MSAL instance so that you can perform authentication logic and interact with your tenant through native authentication APIs. The `MSALNativeAuthPublicClientApplication` create an instance called `nativeAuth`. The `clientId` and `tenantSubdomain`, defined in the configuration file `NativeAuthSampleApp/Configuration.swift` file, are passed as parameters. For more information about SDK instance, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/en-gb/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance)
+
+## Reporting problems
+
+* Search the [GitHub issues](https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample/issues) in the repository - your problem might already have been reported or have an answer.
+* Nothing similar? [Open an issue](https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample/issues/new) that clearly explains the problem you're having running the sample app.
+
+## Contributing
+
+If you'd like to contribute to this sample, see [CONTRIBUTING.MD](/CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
