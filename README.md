@@ -10,7 +10,7 @@
 
 ## Overview
 
-This sample iOS sample applications demonstrates how to handle sign-up, sign-in, sign out, and reset password scenarios using Microsoft Entra External ID for customers. You can configure the sample to call a protected web API.
+This sample iOS application demonstrates how to handle sign-up, sign-in, sign-out, and reset-password scenarios using Microsoft Entra External ID for customers. You can configure the sample to call a protected web API.
 
 ## Contents
 
@@ -30,7 +30,7 @@ This sample iOS sample applications demonstrates how to handle sign-up, sign-in,
 
 ## Project setup
 
-To enable your application to authenicate users with Microsoft Entra, Microsoft Entra ID for customers must be made aware of the application you create. The following steps show you how to:
+To enable your application to authenticate users with Microsoft Entra, Microsoft Entra ID for customers must be made aware of the application you create. The following steps show you how to:
 
 ### Step 1: Register an application
 
@@ -110,7 +110,7 @@ do {
 }
 ```
 
-You create MSAL instance so that you can perform authentication logic and interact with your tenant through native authentication APIs. The `MSALNativeAuthPublicClientApplication` create an instance called `nativeAuth`. The `clientId` and `tenantSubdomain`, defined in the configuration file `NativeAuthSampleApp/Configuration.swift` file, are passed as parameters. For more information about SDK instance, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/en-gb/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance)
+You create MSAL instance so that you can perform authentication logic and interact with your tenant through native authentication APIs. The `MSALNativeAuthPublicClientApplication` creates an instance called `nativeAuth`. The `clientId` and `tenantSubdomain`, defined in the configuration file `NativeAuthSampleApp/Configuration.swift` file, are passed as parameters. For more information about SDK instance, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/en-gb/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance)
 
 ## Reporting problems
 
