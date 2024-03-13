@@ -16,7 +16,7 @@ This sample iOS sample applications demonstrates how to handle sign-up, sign-in,
 
 | File/folder | Description |
 |-------------|-------------|
-| `NativeAuthSampleApp.xcodeproj`      | Container for organizing and managing app’s source code, resources, build settings, and other essential components. |
+| `NativeAuthSampleApp.xcodeproj`      | This sample application project file. |
 | `NativeAuthSampleApp/Configuration.swift`       | Configuration file. |
 | `CHANGELOG.md` | List of changes to the sample. |
 | `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
