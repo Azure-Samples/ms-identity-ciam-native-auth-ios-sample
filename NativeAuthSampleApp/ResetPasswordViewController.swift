@@ -259,8 +259,21 @@ extension ResetPasswordViewController: SignInAfterResetPasswordDelegate {
         accountResult = result
 
         updateUI()
+        result.getAccessToken(delegate: self)
+    }
+}
 
-        showResultText("Password reset successfully and user signed in.")
+// MARK: CredentialsDelegate
+
+extension ResetPasswordViewController: CredentialsDelegate {
+    func onAccessTokenRetrieveCompleted(accessToken: String) {
+        print("Access Token: \(accessToken)")
+        showResultText("Password reset successfully and signed in. Access Token: \(accessToken)")
+        updateUI()
+    }
+
+    func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
+        showResultText("Error retrieving access token: \(error.errorDescription ?? "No error description")")
     }
 }
 

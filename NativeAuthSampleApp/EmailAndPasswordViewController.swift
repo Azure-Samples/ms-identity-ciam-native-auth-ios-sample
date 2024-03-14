@@ -264,8 +264,6 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
     }
 }
 
-// MARK: - Credentials delegates
-
 // MARK: CredentialsDelegate
 
 extension EmailAndPasswordViewController: CredentialsDelegate {
