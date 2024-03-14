@@ -167,6 +167,10 @@ extension EmailAndCodeViewController: SignUpStartDelegate {
                                 guard let self = self else { return }
 
                                 newState.resendCode(delegate: self)
+                            }, cancelCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                showResultText("Action cancelled")
                             })
     }
 }
@@ -192,6 +196,10 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
                                       guard let self = self else { return }
 
                                       newState.resendCode(delegate: self)
+                                  }, cancelCallback: { [weak self] in
+                                      guard let self = self else { return }
+
+                                      showResultText("Action cancelled")
                                   })
         } else if error.isBrowserRequired {
             showResultText("Unable to sign up: Web UX required")
@@ -235,6 +243,10 @@ extension EmailAndCodeViewController: SignUpResendCodeDelegate {
                                   guard let self = self else { return }
 
                                   newState.resendCode(delegate: self)
+                              }, cancelCallback: { [weak self] in
+                                  guard let self = self else { return }
+
+                                  showResultText("Action cancelled")
                               })
     }
 }
@@ -282,6 +294,10 @@ extension EmailAndCodeViewController: SignInStartDelegate {
                                 guard let self = self else { return }
 
                                 newState.resendCode(delegate: self)
+                            }, cancelCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                showResultText("Action cancelled")
                             })
     }
 }
@@ -307,6 +323,10 @@ extension EmailAndCodeViewController: SignInVerifyCodeDelegate {
                                       guard let self = self else { return }
 
                                       newState.resendCode(delegate: self)
+                                  }, cancelCallback: { [weak self] in
+                                      guard let self = self else { return }
+
+                                      showResultText("Action cancelled")
                                   })
         } else if error.isBrowserRequired {
             showResultText("Unable to sign in: Web UX required")
@@ -353,6 +373,10 @@ extension EmailAndCodeViewController: SignInResendCodeDelegate {
                                   guard let self = self else { return }
 
                                   newState.resendCode(delegate: self)
+                              }, cancelCallback: { [weak self] in
+                                  guard let self = self else { return }
+
+                                  showResultText("Action cancelled")
                               })
     }
 }
@@ -377,7 +401,8 @@ extension EmailAndCodeViewController: CredentialsDelegate {
 extension EmailAndCodeViewController {
     func showVerifyCodeModal(
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
@@ -389,7 +414,8 @@ extension EmailAndCodeViewController {
 
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: submitCallback,
-                              resendCallback: resendCallback)
+                              resendCallback: resendCallback,
+                              cancelCallback: cancelCallback)
 
         present(verifyCodeViewController, animated: true)
     }
@@ -397,7 +423,8 @@ extension EmailAndCodeViewController {
     func updateVerifyCodeModal(
         errorMessage: String?,
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         guard let verifyCodeViewController = verifyCodeViewController else {
             return
@@ -418,6 +445,12 @@ extension EmailAndCodeViewController {
                 resendCallback()
             }
         }
+
+        verifyCodeViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
+            }
+        }
     }
 
     func dismissVerifyCodeModal() {
@@ -428,5 +461,6 @@ extension EmailAndCodeViewController {
 
         dismiss(animated: true)
         verifyCodeViewController = nil
+        showResultText("Action cancelled")
     }
 }

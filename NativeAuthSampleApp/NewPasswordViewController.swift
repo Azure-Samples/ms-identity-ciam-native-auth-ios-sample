@@ -26,11 +26,14 @@ import UIKit
 
 class NewPasswordViewController: UIViewController {
     var onSubmit: ((_ password: String) -> Void)?
+    var onCancel: (() -> Void)?
 
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var passwordTextField: UITextField!
 
     @IBAction func cancelPressed(_: Any) {
+        onCancel?()
+        
         dismiss(animated: true)
     }
 

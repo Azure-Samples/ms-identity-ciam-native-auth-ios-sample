@@ -129,6 +129,10 @@ extension ResetPasswordViewController: ResetPasswordStartDelegate {
                                 guard let self = self else { return }
 
                                 newState.resendCode(delegate: self)
+                            }, cancelCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                showResultText("Action cancelled")
                             })
     }
 
@@ -169,6 +173,10 @@ extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
                                   guard let self = self else { return }
 
                                   newState.resendCode(delegate: self)
+                              }, cancelCallback: { [weak self] in
+                                  guard let self = self else { return }
+
+                                  showResultText("Action cancelled")
                               })
     }
 }
@@ -195,6 +203,10 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
                                       guard let self = self else { return }
 
                                       newState.resendCode(delegate: self)
+                                  }, cancelCallback: { [weak self] in
+                                      guard let self = self else { return }
+
+                                      showResultText("Action cancelled")
                                   })
         } else if error.isBrowserRequired {
             showResultText("Unable to reset password: Web UX required")
@@ -227,8 +239,12 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
             }
 
             updateNewPasswordModal(errorMessage: "Invalid password",
-                                   submittedCallback: { password in
+                                   submitCallback: { password in
                                        newState.submitPassword(password: password, delegate: self)
+                                   }, cancelCallback: { [weak self] in
+                                       guard let self = self else { return }
+
+                                       showResultText("Action cancelled")
                                    })
         } else {
             showResultText("Error setting password: \(error.errorDescription ?? "No error description")")
@@ -269,7 +285,8 @@ extension ResetPasswordViewController: SignInAfterResetPasswordDelegate {
 extension ResetPasswordViewController {
     func showVerifyCodeModal(
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
@@ -281,7 +298,8 @@ extension ResetPasswordViewController {
 
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: submitCallback,
-                              resendCallback: resendCallback)
+                              resendCallback: resendCallback,
+                              cancelCallback: cancelCallback)
 
         present(verifyCodeViewController, animated: true)
     }
@@ -289,7 +307,8 @@ extension ResetPasswordViewController {
     func updateVerifyCodeModal(
         errorMessage: String?,
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         guard let verifyCodeViewController = verifyCodeViewController else {
             return
@@ -308,6 +327,12 @@ extension ResetPasswordViewController {
         verifyCodeViewController.onResend = {
             DispatchQueue.main.async {
                 resendCallback()
+            }
+        }
+
+        verifyCodeViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
             }
         }
     }
@@ -342,7 +367,8 @@ extension ResetPasswordViewController {
 
     func updateNewPasswordModal(
         errorMessage: String?,
-        submittedCallback: @escaping ((_ password: String) -> Void)
+        submitCallback: @escaping ((_ password: String) -> Void),
+        cancelCallback: @escaping () -> Void
     ) {
         guard let newPasswordViewController = newPasswordViewController else {
             return
@@ -354,7 +380,13 @@ extension ResetPasswordViewController {
 
         newPasswordViewController.onSubmit = { password in
             DispatchQueue.main.async {
-                submittedCallback(password)
+                submitCallback(password)
+            }
+        }
+
+        newPasswordViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
             }
         }
     }
@@ -368,5 +400,6 @@ extension ResetPasswordViewController {
         dismiss(animated: true)
 
         newPasswordViewController = nil
+        showResultText("Action cancelled")
     }
 }

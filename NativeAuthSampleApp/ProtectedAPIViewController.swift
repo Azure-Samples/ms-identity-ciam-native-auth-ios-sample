@@ -229,7 +229,8 @@ extension ProtectedAPIViewController: CredentialsDelegate {
 extension ProtectedAPIViewController {
     func showVerifyCodeModal(
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
@@ -241,7 +242,8 @@ extension ProtectedAPIViewController {
 
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: submitCallback,
-                              resendCallback: resendCallback)
+                              resendCallback: resendCallback,
+                              cancelCallback: cancelCallback)
 
         present(verifyCodeViewController, animated: true)
     }
@@ -249,7 +251,8 @@ extension ProtectedAPIViewController {
     func updateVerifyCodeModal(
         errorMessage: String?,
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         guard let verifyCodeViewController = verifyCodeViewController else {
             return
