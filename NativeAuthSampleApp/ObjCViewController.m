@@ -123,8 +123,8 @@
 
 #pragma mark -  Credentials Delegate methods
 
-- (void)onAccessTokenRetrieveCompletedWithAccessToken:(NSString *)accessToken {
-    [self showResultText:[NSString stringWithFormat:@"Signed in successfully. Access Token: %@", accessToken]];
+- (void)onAccessTokenRetrieveCompletedWithAccessToken:(MSALNativeAuthTokenResult *)result {
+    [self showResultText:[NSString stringWithFormat:@"Signed in successfully. Access Token: %@", result.accessToken]];
     [self updateUI];
 }
 
