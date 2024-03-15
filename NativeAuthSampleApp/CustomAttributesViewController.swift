@@ -127,6 +127,10 @@ extension CustomAttributesViewController: SignUpStartDelegate {
                                 guard let self = self else { return }
 
                                 newState.resendCode(delegate: self)
+                            }, cancelCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                showResultText("Action cancelled")
                             })
     }
 
@@ -156,6 +160,10 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
                                       guard let self = self else { return }
 
                                       newState.resendCode(delegate: self)
+                                  }, cancelCallback: { [weak self] in
+                                      guard let self = self else { return }
+
+                                      showResultText("Action cancelled")
                                   })
         } else if error.isBrowserRequired {
             showResultText("Unable to sign up: Web UX required")
@@ -197,6 +205,10 @@ extension CustomAttributesViewController: SignUpResendCodeDelegate {
                                   guard let self = self else { return }
 
                                   newState.resendCode(delegate: self)
+                              }, cancelCallback: { [weak self] in
+                                  guard let self = self else { return }
+
+                                  showResultText("Action cancelled")
                               })
     }
 }
@@ -206,7 +218,8 @@ extension CustomAttributesViewController: SignUpResendCodeDelegate {
 extension CustomAttributesViewController {
     func showVerifyCodeModal(
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
@@ -218,7 +231,8 @@ extension CustomAttributesViewController {
 
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: submitCallback,
-                              resendCallback: resendCallback)
+                              resendCallback: resendCallback,
+                              cancelCallback: cancelCallback)
 
         present(verifyCodeViewController, animated: true)
     }
@@ -226,7 +240,8 @@ extension CustomAttributesViewController {
     func updateVerifyCodeModal(
         errorMessage: String?,
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         guard let verifyCodeViewController = verifyCodeViewController else {
             return
@@ -245,6 +260,12 @@ extension CustomAttributesViewController {
         verifyCodeViewController.onResend = {
             DispatchQueue.main.async {
                 resendCallback()
+            }
+        }
+
+        verifyCodeViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
             }
         }
     }

@@ -163,6 +163,10 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
                                 guard let self = self else { return }
 
                                 newState.resendCode(delegate: self)
+                            }, cancelCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                showResultText("Action cancelled")
                             })
     }
 }
@@ -188,6 +192,10 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
                                       guard let self = self else { return }
 
                                       newState.resendCode(delegate: self)
+                                  }, cancelCallback: { [weak self] in
+                                      guard let self = self else { return }
+
+                                      showResultText("Action cancelled")
                                   })
         } else {
             showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
@@ -228,6 +236,10 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
                                   guard let self = self else { return }
 
                                   newState.resendCode(delegate: self)
+                              }, cancelCallback: { [weak self] in
+                                  guard let self = self else { return }
+
+                                  showResultText("Action cancelled")
                               })
     }
 }
@@ -285,7 +297,8 @@ extension EmailAndPasswordViewController: CredentialsDelegate {
 extension EmailAndPasswordViewController {
     func showVerifyCodeModal(
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
@@ -297,7 +310,8 @@ extension EmailAndPasswordViewController {
 
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: submitCallback,
-                              resendCallback: resendCallback)
+                              resendCallback: resendCallback,
+                              cancelCallback: cancelCallback)
 
         present(verifyCodeViewController, animated: true)
     }
@@ -305,7 +319,8 @@ extension EmailAndPasswordViewController {
     func updateVerifyCodeModal(
         errorMessage: String?,
         submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
     ) {
         guard let verifyCodeViewController = verifyCodeViewController else {
             return
@@ -326,6 +341,12 @@ extension EmailAndPasswordViewController {
                 resendCallback()
             }
         }
+
+        verifyCodeViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
+            }
+        }
     }
 
     func dismissVerifyCodeModal() {
@@ -336,5 +357,6 @@ extension EmailAndPasswordViewController {
 
         dismiss(animated: true)
         verifyCodeViewController = nil
+
     }
 }

@@ -27,7 +27,7 @@ import UIKit
 class VerifyCodeViewController: UIViewController {
     var onSubmit: ((_ code: String) -> Void)?
     var onResend: (() -> Void)?
-
+    var onCancel: (() -> Void)?
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var codeTextField: UITextField!
 
@@ -36,6 +36,8 @@ class VerifyCodeViewController: UIViewController {
     }
 
     @IBAction func cancelPressed(_: Any) {
+        onCancel?()
+        
         dismiss(animated: true)
     }
 
