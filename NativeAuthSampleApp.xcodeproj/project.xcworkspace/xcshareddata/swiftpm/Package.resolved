@@ -1,4 +1,5 @@
 {
+  "originHash" : "0210b0d8bdf78f3ea275a5e0688a6bda67366a571df9b9fc7728e8d3a46f78a2",
   "pins" : [
     {
       "identity" : "microsoft-authentication-library-for-objc",
@@ -10,5 +11,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
