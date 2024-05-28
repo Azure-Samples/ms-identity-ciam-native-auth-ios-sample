@@ -26,8 +26,13 @@ import MSAL
 import UIKit
 
 class ProtectedAPIViewController: UIViewController {
-    let protectedAPIUrl = "Enter_the_Protected_API_Full_URL_Here"
-    let protectedAPIScopes = ["Enter_the_Protected_API_Scopes_Here"]
+
+    let urlApi1: String? = "Enter_the_Protected_API_Full_URL_Here"
+    let scopesApi1: [String] = ["Enter_the_Protected_API_Scopes_Here"]
+    
+    // Enter the second protected info Here, if you have one
+    let urlApi2: String? = nil
+    let scopesApi2: [String] = []
     
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
@@ -35,7 +40,6 @@ class ProtectedAPIViewController: UIViewController {
 
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
-    @IBOutlet weak var protectedAPIButton: UIButton!
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
@@ -43,7 +47,8 @@ class ProtectedAPIViewController: UIViewController {
 
     var accountResult: MSALNativeAuthUserAccountResult?
     
-    var accessToken: String?
+    var accessTokenApi1: String?
+    var accessTokenApi2: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,7 +81,7 @@ class ProtectedAPIViewController: UIViewController {
 
         showResultText("Signing in...")
 
-        nativeAuth.signIn(username: email, password: password, scopes: protectedAPIScopes, delegate: self)
+        nativeAuth.signIn(username: email, password: password, scopes: [], delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -87,23 +92,45 @@ class ProtectedAPIViewController: UIViewController {
         accountResult?.signOut()
 
         accountResult = nil
-        
-        accessToken = nil
+        accessTokenApi1 = nil
+        accessTokenApi2 = nil
 
         showResultText("Signed out")
-
         updateUI()
     }
     
-    @IBAction func protectedAPIPressed(_: Any) {
-        guard let accessToken = self.accessToken else {
-            let errorMessage = "No access token found"
-            print(errorMessage)
-            showResultText(errorMessage)
+    @IBAction func protectedApi1Pressed(_: Any) {
+        guard   let url = urlApi1,
+                !scopesApi1.isEmpty else {
+            showResultText("API 1 not configured.")
             return
         }
         
-        accessProtectedAPI(accessToken: accessToken)
+        if let accessToken = accessTokenApi1 {
+            accessProtectedAPI(apiUrl: url, accessToken: accessToken)
+        } else {
+            accountResult?.getAccessToken(scopes: scopesApi1, delegate: self)
+            let message = "Retrieving access token to use with API 1..."
+            showResultText(message)
+            print(message)
+        }
+    }
+    
+    @IBAction func protectedApi2Pressed(_: Any) {
+        guard   let url = urlApi2,
+                !scopesApi2.isEmpty else {
+            showResultText("API 2 not configured.")
+            return
+        }
+        
+        if let accessToken = accessTokenApi2 {
+            accessProtectedAPI(apiUrl: url, accessToken: accessToken)
+        } else {
+            accountResult?.getAccessToken(scopes: scopesApi2, delegate: self)
+            let message = "Retrieving access token to use with API 2..."
+            showResultText(message)
+            print(message)
+        }
     }
     
     func showResultText(_ text: String) {
@@ -115,7 +142,6 @@ class ProtectedAPIViewController: UIViewController {
 
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
-        protectedAPIButton.isEnabled = accessToken != nil
     }
 
     func retrieveCachedAccount() {
@@ -124,6 +150,7 @@ class ProtectedAPIViewController: UIViewController {
             print("Account found in cache: \(homeAccountId)")
 
             accountResult.getAccessToken(delegate: self)
+            
         } else {
             print("No account found in cache")
 
@@ -135,8 +162,8 @@ class ProtectedAPIViewController: UIViewController {
         }
     }
     
-    func accessProtectedAPI(accessToken: String) {
-        guard let url = URL(string: protectedAPIUrl) else {
+    func accessProtectedAPI(apiUrl: String, accessToken: String) {
+        guard let url = URL(string: apiUrl) else {
             let errorMessage = "Invalid API url"
             print(errorMessage)
             showResultText(errorMessage)
@@ -181,6 +208,11 @@ class ProtectedAPIViewController: UIViewController {
         
         task.resume()
     }
+    
+    func arrayContainsSubarray(array: [String], subarray: [String]) -> Bool {
+        let intersection = Array(Set(array).intersection(subarray))
+        return intersection.count == subarray.count
+    }
 }
 
 // MARK: - Sign In delegates
@@ -214,7 +246,21 @@ extension ProtectedAPIViewController: SignInStartDelegate {
 extension ProtectedAPIViewController: CredentialsDelegate {
     func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
         print("Access Token: \(result.accessToken)")
-        self.accessToken = result.accessToken
+
+        if arrayContainsSubarray(array: result.scopes, subarray: scopesApi1),
+           let url = urlApi1
+        {
+            accessTokenApi1 = result.accessToken
+            accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
+        }
+        
+        if arrayContainsSubarray(array: result.scopes, subarray: scopesApi2),
+           let url = urlApi2
+        {
+            accessTokenApi2 = result.accessToken
+            accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
+        }
+        
         showResultText("Signed in. Access Token: \(result.accessToken)")
         updateUI()
     }
