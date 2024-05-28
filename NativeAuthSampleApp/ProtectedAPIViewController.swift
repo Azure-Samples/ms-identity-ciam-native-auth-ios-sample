@@ -30,7 +30,7 @@ class ProtectedAPIViewController: UIViewController {
     let urlApi1: String? = "Enter_the_Protected_API_Full_URL_Here"
     let scopesApi1: [String] = ["Enter_the_Protected_API_Scopes_Here"]
     
-    // Enter the second protected info Here, if you have one
+    // Enter the second protected API info Here, if you have one
     let urlApi2: String? = nil
     let scopesApi2: [String] = []
     
