@@ -261,7 +261,7 @@ extension ProtectedAPIViewController: CredentialsDelegate {
             accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
         }
         
-        showResultText("Signed in. Access Token: \(result.accessToken)")
+        showResultText("Signed in." + "\n\n" + "Scopes:\n\(result.scopes)" + "\n\n" + "Access Token:\n\(result.accessToken)")
         updateUI()
     }
 
