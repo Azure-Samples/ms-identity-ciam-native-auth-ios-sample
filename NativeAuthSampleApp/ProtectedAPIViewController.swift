@@ -27,12 +27,12 @@ import UIKit
 
 class ProtectedAPIViewController: UIViewController {
 
-    let urlApi1: String? = "Enter_the_Protected_API_Full_URL_Here"
-    let scopesApi1: [String] = ["Enter_the_Protected_API_Scopes_Here"]
+    let protectedAPIUrl1: String? = "Enter_the_Protected_API_Full_URL_Here"
+    let protectedAPIScopes1: [String] = ["Enter_the_Protected_API_Scopes_Here"]
     
-    // Enter the second protected API info Here, if you have one
-    let urlApi2: String? = nil
-    let scopesApi2: [String] = []
+    // Enter the second protected API info Here, if you have one.
+    let protectedAPIUrl2: String? = nil
+    let protectedAPIScopes2: [String] = []
     
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
@@ -47,8 +47,8 @@ class ProtectedAPIViewController: UIViewController {
 
     var accountResult: MSALNativeAuthUserAccountResult?
     
-    var accessTokenApi1: String?
-    var accessTokenApi2: String?
+    var accessTokenAPI1: String?
+    var accessTokenAPI2: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,21 +92,21 @@ class ProtectedAPIViewController: UIViewController {
         accountResult?.signOut()
 
         accountResult = nil
-        accessTokenApi1 = nil
-        accessTokenApi2 = nil
+        accessTokenAPI1 = nil
+        accessTokenAPI2 = nil
 
         showResultText("Signed out")
         updateUI()
     }
     
     @IBAction func protectedApi1Pressed(_: Any) {
-        guard   let url = urlApi1,
-                !scopesApi1.isEmpty else {
+        guard   let url = protectedAPIUrl1,
+                !protectedAPIScopes1.isEmpty else {
             showResultText("API 1 not configured.")
             return
         }
         
-        if let accessToken = accessTokenApi1 {
+        if let accessToken = accessTokenAPI1 {
             accessProtectedAPI(apiUrl: url, accessToken: accessToken)
         } else {
             accountResult?.getAccessToken(scopes: scopesApi1, delegate: self)
@@ -117,13 +117,13 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedApi2Pressed(_: Any) {
-        guard   let url = urlApi2,
-                !scopesApi2.isEmpty else {
+        guard   let url = protectedAPIUrl2,
+                !protectedAPIScopes2.isEmpty else {
             showResultText("API 2 not configured.")
             return
         }
         
-        if let accessToken = accessTokenApi2 {
+        if let accessToken = accessTokenAPI2 {
             accessProtectedAPI(apiUrl: url, accessToken: accessToken)
         } else {
             accountResult?.getAccessToken(scopes: scopesApi2, delegate: self)
@@ -150,7 +150,6 @@ class ProtectedAPIViewController: UIViewController {
             print("Account found in cache: \(homeAccountId)")
 
             accountResult.getAccessToken(delegate: self)
-            
         } else {
             print("No account found in cache")
 
@@ -247,17 +246,17 @@ extension ProtectedAPIViewController: CredentialsDelegate {
     func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
         print("Access Token: \(result.accessToken)")
 
-        if arrayContainsSubarray(array: result.scopes, subarray: scopesApi1),
-           let url = urlApi1
+        if arrayContainsSubarray(array: result.scopes, subarray: protectedAPIScopes1),
+           let url = protectedAPIUrl1
         {
-            accessTokenApi1 = result.accessToken
+            accessTokenAPI1 = result.accessToken
             accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
         }
         
-        if arrayContainsSubarray(array: result.scopes, subarray: scopesApi2),
-           let url = urlApi2
+        if arrayContainsSubarray(array: result.scopes, subarray: protectedAPIScopes2),
+           let url = protectedAPIUrl2
         {
-            accessTokenApi2 = result.accessToken
+            accessTokenAPI2 = result.accessToken
             accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
         }
         
