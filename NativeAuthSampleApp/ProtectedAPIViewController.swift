@@ -100,8 +100,8 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedApi1Pressed(_: Any) {
-        guard   let url = protectedAPIUrl1,
-                !protectedAPIScopes1.isEmpty else {
+        guard let url = protectedAPIUrl1,
+              !protectedAPIScopes1.isEmpty else {
             showResultText("API 1 not configured.")
             return
         }
@@ -117,8 +117,8 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedApi2Pressed(_: Any) {
-        guard   let url = protectedAPIUrl2,
-                !protectedAPIScopes2.isEmpty else {
+        guard let url = protectedAPIUrl2,
+              !protectedAPIScopes2.isEmpty else {
             showResultText("API 2 not configured.")
             return
         }
