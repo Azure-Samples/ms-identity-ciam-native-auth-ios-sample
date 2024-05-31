@@ -207,11 +207,6 @@ class ProtectedAPIViewController: UIViewController {
         
         task.resume()
     }
-    
-    func arrayContainsSubarray(array: [String], subarray: [String]) -> Bool {
-        let intersection = Array(Set(array).intersection(subarray))
-        return intersection.count == subarray.count
-    }
 }
 
 // MARK: - Sign In delegates
@@ -246,14 +241,14 @@ extension ProtectedAPIViewController: CredentialsDelegate {
     func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
         print("Access Token: \(result.accessToken)")
 
-        if arrayContainsSubarray(array: result.scopes, subarray: protectedAPIScopes1),
+        if protectedAPIScopes1.allSatisfy(result.scopes.contains),
            let url = protectedAPIUrl1
         {
             accessTokenAPI1 = result.accessToken
             accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
         }
         
-        if arrayContainsSubarray(array: result.scopes, subarray: protectedAPIScopes2),
+        if protectedAPIScopes2.allSatisfy(result.scopes.contains(_:)),
            let url = protectedAPIUrl2
         {
             accessTokenAPI2 = result.accessToken
