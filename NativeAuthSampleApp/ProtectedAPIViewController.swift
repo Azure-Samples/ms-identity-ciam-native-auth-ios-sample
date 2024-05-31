@@ -109,7 +109,7 @@ class ProtectedAPIViewController: UIViewController {
         if let accessToken = accessTokenAPI1 {
             accessProtectedAPI(apiUrl: url, accessToken: accessToken)
         } else {
-            accountResult?.getAccessToken(scopes: scopesApi1, delegate: self)
+            accountResult?.getAccessToken(scopes: protectedAPIScopes1, delegate: self)
             let message = "Retrieving access token to use with API 1..."
             showResultText(message)
             print(message)
@@ -126,7 +126,7 @@ class ProtectedAPIViewController: UIViewController {
         if let accessToken = accessTokenAPI2 {
             accessProtectedAPI(apiUrl: url, accessToken: accessToken)
         } else {
-            accountResult?.getAccessToken(scopes: scopesApi2, delegate: self)
+            accountResult?.getAccessToken(scopes: protectedAPIScopes2, delegate: self)
             let message = "Retrieving access token to use with API 2..."
             showResultText(message)
             print(message)
