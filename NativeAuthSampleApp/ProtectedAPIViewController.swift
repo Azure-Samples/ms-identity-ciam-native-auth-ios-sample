@@ -25,6 +25,10 @@
 import MSAL
 import UIKit
 
+/**
+ * ProtectedAPIViewController class implements samples for accessing custom web APIs using Entra External ID identity tokens.
+ * Learn documentation: https://learn.microsoft.com/en-us/entra/external-id/customers/sample-native-authentication-ios-sample-app-call-web-api
+ */
 class ProtectedAPIViewController: UIViewController {
 
     let protectedAPIUrl1: String? = "Enter_the_Protected_API_Full_URL_Here"
@@ -40,7 +44,9 @@ class ProtectedAPIViewController: UIViewController {
 
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
-
+    @IBOutlet weak var api1Button: UIButton!
+    @IBOutlet weak var api2Button: UIButton!
+    
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
@@ -142,6 +148,8 @@ class ProtectedAPIViewController: UIViewController {
 
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
+        api1Button.isEnabled = signedIn
+        api2Button.isEnabled = signedIn
     }
 
     func retrieveCachedAccount() {

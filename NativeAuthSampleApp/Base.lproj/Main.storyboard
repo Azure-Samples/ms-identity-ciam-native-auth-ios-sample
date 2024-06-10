@@ -1215,6 +1215,8 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="Access Protected API" image="icloud" catalog="system" id="HQk-E2-fhc"/>
                     <connections>
+                        <outlet property="api1Button" destination="XT8-7r-gpf" id="wTM-2L-8xb"/>
+                        <outlet property="api2Button" destination="UBr-AV-0ML" id="xsR-KT-gx3"/>
                         <outlet property="emailTextField" destination="Hye-0l-446" id="bhT-Wj-Hx4"/>
                         <outlet property="passwordTextField" destination="S1e-1T-rhA" id="3XV-fy-TA7"/>
                         <outlet property="resultTextView" destination="cg9-W7-pc9" id="fKI-IT-rLz"/>
@@ -1242,7 +1244,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
