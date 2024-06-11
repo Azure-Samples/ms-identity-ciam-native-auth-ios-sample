@@ -31,11 +31,10 @@ import UIKit
  */
 class ProtectedAPIViewController: UIViewController {
 
-    let protectedAPIUrl1: String? = "Enter_the_Protected_API_Full_URL_Here"
-    let protectedAPIScopes1: [String] = ["Enter_the_Protected_API_Scopes_Here"]
-    
-    // Enter the second protected API info Here, if you have one.
-    let protectedAPIUrl2: String? = nil
+    let protectedAPIUrl1: String? = nil // Developers should set the URL of their first web API resource here
+    let protectedAPIUrl2: String? = nil // Developers should set the URL of their second web API resource here
+    // Developers should set the respective scopes for their web API resources here, for example: ["api://<Resource_App_ID>/ToDoList.Read", "api://<Resource_App_ID>/ToDoList.ReadWrite"]
+    let protectedAPIScopes1: [String] = []
     let protectedAPIScopes2: [String] = []
     
     @IBOutlet weak var emailTextField: UITextField!
@@ -106,8 +105,7 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedApi1Pressed(_: Any) {
-        guard let url = protectedAPIUrl1,
-              !protectedAPIScopes1.isEmpty else {
+        guard let url = protectedAPIUrl1, !protectedAPIScopes1.isEmpty else {
             showResultText("API 1 not configured.")
             return
         }
@@ -123,8 +121,7 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedApi2Pressed(_: Any) {
-        guard let url = protectedAPIUrl2,
-              !protectedAPIScopes2.isEmpty else {
+        guard let url = protectedAPIUrl2, !protectedAPIScopes2.isEmpty else {
             showResultText("API 2 not configured.")
             return
         }
@@ -154,12 +151,12 @@ class ProtectedAPIViewController: UIViewController {
 
     func retrieveCachedAccount() {
         accountResult = nativeAuth.getNativeAuthUserAccount()
-        if let accountResult = accountResult, let homeAccountId = accountResult.account.homeAccountId?.identifier {
-            print("Account found in cache: \(homeAccountId)")
-
-            accountResult.getAccessToken(delegate: self)
+        if let accountResult = accountResult, let username = accountResult.account.username {
+            self.showResultText("Account found in cache: \(username)")
+            self.accountResult = accountResult
+            updateUI()
         } else {
-            print("No account found in cache")
+            self.showResultText("No account found in cache. Please Sign in")
 
             accountResult = nil
 
@@ -173,7 +170,9 @@ class ProtectedAPIViewController: UIViewController {
         guard let url = URL(string: apiUrl) else {
             let errorMessage = "Invalid API url"
             print(errorMessage)
-            showResultText(errorMessage)
+            DispatchQueue.main.async {
+                self.showResultText(errorMessage)
+            }
             return
         }
         
@@ -190,10 +189,11 @@ class ProtectedAPIViewController: UIViewController {
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode)
+            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode)
             else {
-                print("Unsuccessful response found when accessing the API")
+                DispatchQueue.main.async {
+                    self.showResultText("Unsuccessful response found when accessing the API")
+                }
                 return
             }
             
@@ -223,11 +223,9 @@ class ProtectedAPIViewController: UIViewController {
 
 extension ProtectedAPIViewController: SignInStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
-        print("Signed in: \(result.account.username ?? "")")
-
+        showResultText("Signed in: \(result.account.username ?? "")")
         accountResult = result
-
-        result.getAccessToken(delegate: self)
+        updateUI()
     }
 
     func onSignInStartError(error: MSAL.SignInStartError) {
@@ -333,4 +331,3 @@ extension ProtectedAPIViewController {
         verifyCodeViewController = nil
     }
 }
-
