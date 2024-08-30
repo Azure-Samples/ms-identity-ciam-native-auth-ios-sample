@@ -23,6 +23,7 @@
 		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
 		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
 		DE00FD9E2B8CADF100DB3A77 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = DE00FD9D2B8CADF100DB3A77 /* MSAL */; };
+		E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,7 @@
 		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
 		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
+		E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiFactorAuthenticationViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +124,7 @@
 				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
 				9BA1949529F820980023905D /* EmailAndCodeViewController.swift */,
 				9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */,
+				E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */,
 				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
 				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
 				8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */,
@@ -236,6 +239,7 @@
 				9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */,
 				9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */,
 				9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */,
+				E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */,
 				9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */,
 				9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */,
 			);
