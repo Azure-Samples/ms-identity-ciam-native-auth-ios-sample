@@ -32,10 +32,12 @@ class VerifyCodeViewController: UIViewController {
     @IBOutlet weak var codeTextField: UITextField!
 
     @IBAction func resendPressed(_: Any) {
+        codeTextField.resignFirstResponder()
         onResend?()
     }
 
     @IBAction func cancelPressed(_: Any) {
+        codeTextField.resignFirstResponder()
         onCancel?()
         
         dismiss(animated: true)
@@ -46,6 +48,7 @@ class VerifyCodeViewController: UIViewController {
             return
         }
 
+        codeTextField.resignFirstResponder()
         onSubmit?(code)
     }
 }
