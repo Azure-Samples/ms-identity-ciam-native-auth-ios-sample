@@ -57,6 +57,8 @@ class CustomAttributesViewController: UIViewController {
     }
 
     @IBAction func signUpPressed(_: Any) {
+        view.endEditing(true)
+
         guard let email = emailTextField.text, !email.isEmpty,
               let password = passwordTextField.text, !password.isEmpty
         else {

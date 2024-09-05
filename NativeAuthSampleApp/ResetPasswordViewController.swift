@@ -61,6 +61,8 @@ class ResetPasswordViewController: UIViewController {
     }
 
     @IBAction func resetPasswordPressed(_: Any) {
+        emailTextField.resignFirstResponder()
+
         guard let email = emailTextField.text, !email.isEmpty
         else {
             resultTextView.text = "Invalid email address"
@@ -75,6 +77,8 @@ class ResetPasswordViewController: UIViewController {
     }
 
     @IBAction func signOutPressed(_: Any) {
+        emailTextField.resignFirstResponder()
+
         guard accountResult != nil else {
             print("signOutPressed: Not currently signed in")
             return

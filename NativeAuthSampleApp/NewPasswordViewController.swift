@@ -32,6 +32,7 @@ class NewPasswordViewController: UIViewController {
     @IBOutlet weak var passwordTextField: UITextField!
 
     @IBAction func cancelPressed(_: Any) {
+        passwordTextField.resignFirstResponder()
         onCancel?()
         
         dismiss(animated: true)
@@ -42,6 +43,7 @@ class NewPasswordViewController: UIViewController {
             return
         }
 
+        passwordTextField.resignFirstResponder()
         onSubmit?(password)
     }
 }
