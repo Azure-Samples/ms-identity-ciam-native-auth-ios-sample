@@ -35,7 +35,6 @@ class CustomAttributesViewController: UIViewController {
     @IBOutlet weak var resultTextView: UITextView!
 
     @IBOutlet weak var signUpButton: UIButton!
-    @IBOutlet weak var signOutButton: UIButton!
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
