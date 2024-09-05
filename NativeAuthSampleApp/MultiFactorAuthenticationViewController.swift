@@ -67,6 +67,8 @@ class MultiFactorAuthenticationViewController: UIViewController {
     }
 
     @IBAction func signInPressed(_: Any) {
+        view.endEditing(true)
+
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "Email or password not set"
             return
@@ -80,6 +82,8 @@ class MultiFactorAuthenticationViewController: UIViewController {
     }
     
     @IBAction func signOutPressed(_: Any) {
+        view.endEditing(true)
+
         guard accountResult != nil else {
             print("signOutPressed: Not currently signed in")
             return
