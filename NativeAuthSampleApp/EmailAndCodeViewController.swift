@@ -62,6 +62,8 @@ class EmailAndCodeViewController: UIViewController {
     }
 
     @IBAction func signUpPressed(_: Any) {
+        emailTextField.resignFirstResponder()
+
         guard let email = emailTextField.text else {
             resultTextView.text = "Email not set"
             return
@@ -75,6 +77,8 @@ class EmailAndCodeViewController: UIViewController {
     }
 
     @IBAction func signInPressed(_: Any) {
+        emailTextField.resignFirstResponder()
+
         guard let email = emailTextField.text else {
             resultTextView.text = "email not set"
             return
@@ -88,6 +92,8 @@ class EmailAndCodeViewController: UIViewController {
     }
 
     @IBAction func signOutPressed(_: Any) {
+        emailTextField.resignFirstResponder()
+
         guard accountResult != nil else {
             print("signOutPressed: Not currently signed in")
             return

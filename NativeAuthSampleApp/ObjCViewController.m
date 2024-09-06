@@ -63,6 +63,8 @@
 }
 
 - (IBAction)signInPressed:(id)sender {
+    [self.view endEditing:YES];
+
     NSString *email = self.emailTextField.text;
     NSString *password = self.passwordTextField.text;
 
@@ -76,6 +78,8 @@
 }
 
 - (IBAction)signOutPressed:(id)sender {
+    [self.view endEditing:YES];
+
     if (self.accountResult == nil) {
         NSLog(@"signOutPressed: Not currently signed in.");
         return;
@@ -123,7 +127,7 @@
 
 #pragma mark -  Credentials Delegate methods
 
-- (void)onAccessTokenRetrieveCompletedWithAccessToken:(MSALNativeAuthTokenResult *)result {
+- (void)onAccessTokenRetrieveCompletedWithResult:(MSALNativeAuthTokenResult *)result {
     [self showResultText:[NSString stringWithFormat:@"Signed in successfully. Access Token: %@", result.accessToken]];
     [self updateUI];
 }

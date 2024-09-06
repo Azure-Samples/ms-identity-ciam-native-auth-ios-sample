@@ -77,6 +77,8 @@ class ProtectedAPIViewController: UIViewController {
     }
 
     @IBAction func signInPressed(_: Any) {
+        view.endEditing(true)
+
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "Email or password not set"
             return
@@ -90,6 +92,8 @@ class ProtectedAPIViewController: UIViewController {
     }
 
     @IBAction func signOutPressed(_: Any) {
+        view.endEditing(true)
+
         guard accountResult != nil else {
             print("signOutPressed: Not currently signed in")
             return
@@ -105,6 +109,8 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedApi1Pressed(_: Any) {
+        view.endEditing(true)
+
         guard let url = protectedAPIUrl1, !protectedAPIScopes1.isEmpty else {
             showResultText("API 1 not configured.")
             return
@@ -121,6 +127,8 @@ class ProtectedAPIViewController: UIViewController {
     }
     
     @IBAction func protectedApi2Pressed(_: Any) {
+        view.endEditing(true)
+
         guard let url = protectedAPIUrl2, !protectedAPIScopes2.isEmpty else {
             showResultText("API 2 not configured.")
             return
