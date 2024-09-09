@@ -133,7 +133,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
 extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 
     func onSignInStartError(error: MSAL.SignInStartError) {
-        print("SignInStartDelegate: onSignInStartError: \(error)")
+        print("SignInStartDelegate: onSignInStartError: \(error.errorDescription ??? "No error description")")
 
         if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername {
             showResultText("Invalid username or password")
@@ -143,7 +143,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
     }
 
     func onSignInAwaitingMFA(newState: AwaitingMFAState) {
-        print("SignInStartDelegate: onSignInAwaitingMFA: \(newState)")
+        print("SignInStartDelegate: onSignInAwaitingMFA")
 
         let alert = UIAlertController(title: "MFA required", message: "Do you want to proceed with MFA?", preferredStyle: .alert)
 
@@ -164,8 +164,8 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
     
     func onMFARequestChallengeError(error: MFAError, newState: MFARequiredState?) {
-        print("MFARequestChallengeDelegate: onMFARequestChallengeError: \(error)")
-        showResultText("Unexpected error while requesting challenge")
+        print("MFARequestChallengeDelegate: onMFARequestChallengeError: \(error.errorDescription ?? "No error description")")
+        showResultText("Unexpected error while requesting challenge: \(error.errorDescription ?? "No error description")")
         dismissVerifyCodeModal()
     }
 
@@ -204,7 +204,7 @@ extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
 extension MultiFactorAuthenticationViewController: MFASubmitChallengeDelegate {
 
     func onMFASubmitChallengeError(error: MFASubmitChallengeError, newState: MFARequiredState?) {
-        print("MFASubmitChallengeDelegate: onMFASubmitChallengeError: \(error)")
+        print("MFASubmitChallengeDelegate: onMFASubmitChallengeError: \(error.errorDescription ?? "No error description")")
 
         if error.isInvalidChallenge {
             guard let newState = newState else {
