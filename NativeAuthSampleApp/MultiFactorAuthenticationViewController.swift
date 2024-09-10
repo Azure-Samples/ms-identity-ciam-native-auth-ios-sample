@@ -133,7 +133,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
 extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 
     func onSignInStartError(error: MSAL.SignInStartError) {
-        print("SignInStartDelegate: onSignInStartError: \(error.errorDescription ??? "No error description")")
+        print("SignInStartDelegate: onSignInStartError: \(error.errorDescription ?? "No error description")")
 
         if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername {
             showResultText("Invalid username or password")
