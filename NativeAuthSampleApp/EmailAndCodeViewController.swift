@@ -467,6 +467,5 @@ extension EmailAndCodeViewController {
 
         dismiss(animated: true)
         verifyCodeViewController = nil
-        showResultText("Action cancelled")
     }
 }

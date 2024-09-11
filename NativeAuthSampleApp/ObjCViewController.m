@@ -106,7 +106,7 @@
 
 #pragma mark - Sign In Delegate methods
 
-- (void)onSignInCodeRequiredWithNewState:(SignInCodeRequiredState *)newState sentTo:(NSString *)sentTo channelTargetType:(enum MSALNativeAuthChannelType)channelTargetType codeLength:(NSInteger)codeLength {
+- (void)onSignInCodeRequiredWithNewState:(SignInCodeRequiredState *)newState sentTo:(NSString *)sentTo channelTargetType:(MSALNativeAuthChannelType *)channelTargetType codeLength:(NSInteger)codeLength {
     NSLog(@"Unexpected state while signing in: Code Required");
 }
 
