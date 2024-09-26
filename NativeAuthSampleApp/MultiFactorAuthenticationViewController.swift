@@ -162,8 +162,8 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 // MARK: MFARequestChallengeDelegate
 
 extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
-    
-    func onMFARequestChallengeError(error: MFAError, newState: MFARequiredState?) {
+
+    func onMFARequestChallengeError(error: MFARequestChallengeError, newState: MFARequiredState?) {
         print("MFARequestChallengeDelegate: onMFARequestChallengeError: \(error.errorDescription ?? "No error description")")
         showResultText("Unexpected error while requesting challenge: \(error.errorDescription ?? "No error description")")
         dismissVerifyCodeModal()
