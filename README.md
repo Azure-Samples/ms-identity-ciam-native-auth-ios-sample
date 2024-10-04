@@ -18,7 +18,6 @@ This sample iOS application demonstrates how to handle sign-up, sign-in, sign-ou
 |-------------|-------------|
 | `NativeAuthSampleApp.xcodeproj`      | This sample application project file. |
 | `NativeAuthSampleApp/Configuration.swift`       | Configuration file. |
-| `CHANGELOG.md` | List of changes to the sample. |
 | `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
 | `README.md` | This README file. |
 | `LICENSE`   | The license for the sample. |

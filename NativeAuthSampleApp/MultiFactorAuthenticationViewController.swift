@@ -26,34 +26,24 @@ import MSAL
 import UIKit
 
 /**
- * ProtectedAPIViewController class implements samples for accessing custom web APIs using Entra External ID identity tokens.
- * Learn documentation: https://learn.microsoft.com/en-us/entra/external-id/customers/sample-native-authentication-ios-sample-app-call-web-api
+ * MultiFactorAuthenticationViewController class implements samples for using Multi-Factor Authentication (MFA) via Email OTP.
+ * The code shows how to sign in a user with password (1st factor), and how to request and submit an email OTP code (2nd factor).
+ * In order for this flow to work properly, you must enable MFA in the Portal. Follow the link below for more information.
+ * Learn documentation: TBD
  */
-class ProtectedAPIViewController: UIViewController {
-
-    let protectedAPIUrl1: String? = nil // Developers should set the URL of their first web API resource here
-    let protectedAPIUrl2: String? = nil // Developers should set the URL of their second web API resource here
-    // Developers should set the respective scopes for their web API resources here, for example: ["api://<Resource_App_ID>/ToDoList.Read", "api://<Resource_App_ID>/ToDoList.ReadWrite"]
-    let protectedAPIScopes1: [String] = []
-    let protectedAPIScopes2: [String] = []
-    
+class MultiFactorAuthenticationViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
 
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
-    @IBOutlet weak var api1Button: UIButton!
-    @IBOutlet weak var api2Button: UIButton!
-    
+
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
 
     var accountResult: MSALNativeAuthUserAccountResult?
-    
-    var accessTokenAPI1: String?
-    var accessTokenAPI2: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,9 +78,9 @@ class ProtectedAPIViewController: UIViewController {
 
         showResultText("Signing in...")
 
-        nativeAuth.signIn(username: email, password: password, scopes: [], delegate: self)
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
-
+    
     @IBAction func signOutPressed(_: Any) {
         view.endEditing(true)
 
@@ -101,49 +91,12 @@ class ProtectedAPIViewController: UIViewController {
         accountResult?.signOut()
 
         accountResult = nil
-        accessTokenAPI1 = nil
-        accessTokenAPI2 = nil
 
         showResultText("Signed out")
+
         updateUI()
     }
-    
-    @IBAction func protectedApi1Pressed(_: Any) {
-        view.endEditing(true)
 
-        guard let url = protectedAPIUrl1, !protectedAPIScopes1.isEmpty else {
-            showResultText("API 1 not configured.")
-            return
-        }
-        
-        if let accessToken = accessTokenAPI1 {
-            accessProtectedAPI(apiUrl: url, accessToken: accessToken)
-        } else {
-            accountResult?.getAccessToken(scopes: protectedAPIScopes1, delegate: self)
-            let message = "Retrieving access token to use with API 1..."
-            showResultText(message)
-            print(message)
-        }
-    }
-    
-    @IBAction func protectedApi2Pressed(_: Any) {
-        view.endEditing(true)
-
-        guard let url = protectedAPIUrl2, !protectedAPIScopes2.isEmpty else {
-            showResultText("API 2 not configured.")
-            return
-        }
-        
-        if let accessToken = accessTokenAPI2 {
-            accessProtectedAPI(apiUrl: url, accessToken: accessToken)
-        } else {
-            accountResult?.getAccessToken(scopes: protectedAPIScopes2, delegate: self)
-            let message = "Retrieving access token to use with API 2..."
-            showResultText(message)
-            print(message)
-        }
-    }
-    
     func showResultText(_ text: String) {
         resultTextView.text = text
     }
@@ -153,18 +106,16 @@ class ProtectedAPIViewController: UIViewController {
 
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
-        api1Button.isEnabled = signedIn
-        api2Button.isEnabled = signedIn
     }
 
     func retrieveCachedAccount() {
         accountResult = nativeAuth.getNativeAuthUserAccount()
-        if let accountResult = accountResult, let username = accountResult.account.username {
-            self.showResultText("Account found in cache: \(username)")
-            self.accountResult = accountResult
-            updateUI()
+        if let accountResult = accountResult, let homeAccountId = accountResult.account.homeAccountId?.identifier {
+            print("Account found in cache: \(homeAccountId)")
+
+            accountResult.getAccessToken(delegate: self)
         } else {
-            self.showResultText("No account found in cache. Please Sign in")
+            print("No account found in cache")
 
             accountResult = nil
 
@@ -173,77 +124,124 @@ class ProtectedAPIViewController: UIViewController {
             updateUI()
         }
     }
-    
-    func accessProtectedAPI(apiUrl: String, accessToken: String) {
-        guard let url = URL(string: apiUrl) else {
-            let errorMessage = "Invalid API url"
-            print(errorMessage)
-            DispatchQueue.main.async {
-                self.showResultText(errorMessage)
-            }
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error found when accessing API: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.showResultText(error.localizedDescription)
-                }
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode)
-            else {
-                DispatchQueue.main.async {
-                    self.showResultText("Unsuccessful response found when accessing the API")
-                }
-                return
-            }
-            
-            guard let data = data, let result = try? JSONSerialization.jsonObject(with: data, options: []) else {
-                DispatchQueue.main.async {
-                    self.showResultText("Couldn't deserialize result JSON")
-                }
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self.showResultText("""
-                                Accessed API successfully using access token.
-                                HTTP response code: \(httpResponse.statusCode)
-                                HTTP response body: \(result)
-                                """)
-            }
-        }
-        
-        task.resume()
-    }
 }
 
 // MARK: - Sign In delegates
 
 // MARK: SignInStartDelegate
 
-extension ProtectedAPIViewController: SignInStartDelegate {
-    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
-        showResultText("Signed in: \(result.account.username ?? "")")
-        accountResult = result
-        updateUI()
-    }
+extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 
     func onSignInStartError(error: MSAL.SignInStartError) {
-        print("SignInStartDelegate: onSignInStartError: \(error)")
-        
+        print("SignInStartDelegate: onSignInStartError: \(error.errorDescription ?? "No error description")")
+
         if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername {
             showResultText("Invalid username or password")
         } else {
             showResultText("Error while signing in: \(error.errorDescription ?? "No error description")")
         }
+    }
+
+    func onSignInAwaitingMFA(newState: AwaitingMFAState) {
+        print("SignInStartDelegate: onSignInAwaitingMFA")
+
+        let alert = UIAlertController(title: "MFA required", message: "Do you want to proceed with MFA?", preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            newState.requestChallenge(delegate: self)
+        }))
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            self.resultTextView.text = "Second factor authentication required"
+        }))
+
+        present(alert, animated: true)
+    }
+}
+
+// MARK: MFARequestChallengeDelegate
+
+extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
+
+    func onMFARequestChallengeError(error: MFARequestChallengeError, newState: MFARequiredState?) {
+        print("MFARequestChallengeDelegate: onMFARequestChallengeError: \(error.errorDescription ?? "No error description")")
+        showResultText("Unexpected error while requesting challenge: \(error.errorDescription ?? "No error description")")
+        dismissVerifyCodeModal()
+    }
+
+    func onMFARequestChallengeVerificationRequired(
+        newState: MFARequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    ) {
+        print("MFARequestChallengeDelegate: onMFARequestChallengeVerificationRequired: \(newState)")
+
+        guard verifyCodeViewController == nil else {
+            return
+        }
+
+        showVerifyCodeModal(submitCallback: { [weak self] code in
+                                guard let self = self else { return }
+
+                                newState.submitChallenge(challenge: code, delegate: self)
+                            },
+                            resendCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                newState.requestChallenge(delegate: self)
+                            }, cancelCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                self.dismissVerifyCodeModal()
+                                showResultText("Action cancelled")
+                            })
+    }
+}
+
+// MARK: MFASubmitChallengeDelegate
+
+extension MultiFactorAuthenticationViewController: MFASubmitChallengeDelegate {
+
+    func onMFASubmitChallengeError(error: MFASubmitChallengeError, newState: MFARequiredState?) {
+        print("MFASubmitChallengeDelegate: onMFASubmitChallengeError: \(error.errorDescription ?? "No error description")")
+
+        if error.isInvalidChallenge {
+            guard let newState = newState else {
+                print("Unexpected state. Received invalidCode but newState is nil")
+
+                showResultText("Internal error verifying code")
+                dismissVerifyCodeModal()
+                return
+            }
+
+            updateVerifyCodeModal(errorMessage: "Invalid code",
+                                  submitCallback: { [weak self] code in
+                                      guard let self = self else { return }
+
+                                      newState.submitChallenge(challenge: code, delegate: self)
+                                  }, resendCallback: { [weak self] in
+                                      guard let self = self else { return }
+
+                                      newState.requestChallenge(delegate: self)
+                                  }, cancelCallback: { [weak self] in
+                                      guard let self = self else { return }
+
+                                      self.dismissVerifyCodeModal()
+                                      showResultText("Action cancelled")
+                                  })
+        } else {
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
+            dismissVerifyCodeModal()
+        }
+    }
+
+    func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
+        print("Signed in: \(result.account.username ?? "")")
+
+        accountResult = result
+
+        result.getAccessToken(delegate: self)
     }
 }
 
@@ -251,26 +249,13 @@ extension ProtectedAPIViewController: SignInStartDelegate {
 
 // MARK: CredentialsDelegate
 
-extension ProtectedAPIViewController: CredentialsDelegate {
+extension MultiFactorAuthenticationViewController: CredentialsDelegate {
+    
     func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
         print("Access Token: \(result.accessToken)")
-
-        if protectedAPIScopes1.allSatisfy(result.scopes.contains),
-           let url = protectedAPIUrl1
-        {
-            accessTokenAPI1 = result.accessToken
-            accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
-        }
-        
-        if protectedAPIScopes2.allSatisfy(result.scopes.contains(_:)),
-           let url = protectedAPIUrl2
-        {
-            accessTokenAPI2 = result.accessToken
-            accessProtectedAPI(apiUrl: url, accessToken: result.accessToken)
-        }
-        
-        showResultText("Signed in." + "\n\n" + "Scopes:\n\(result.scopes)" + "\n\n" + "Access Token:\n\(result.accessToken)")
+        showResultText("Signed in. Access Token: \(result.accessToken)")
         updateUI()
+        dismissVerifyCodeModal()
     }
 
     func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
@@ -280,7 +265,8 @@ extension ProtectedAPIViewController: CredentialsDelegate {
 
 // MARK: - Verify Code modal methods
 
-extension ProtectedAPIViewController {
+extension MultiFactorAuthenticationViewController {
+
     func showVerifyCodeModal(
         submitCallback: @escaping (_ code: String) -> Void,
         resendCallback: @escaping () -> Void,
@@ -325,6 +311,12 @@ extension ProtectedAPIViewController {
         verifyCodeViewController.onResend = {
             DispatchQueue.main.async {
                 resendCallback()
+            }
+        }
+
+        verifyCodeViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
             }
         }
     }

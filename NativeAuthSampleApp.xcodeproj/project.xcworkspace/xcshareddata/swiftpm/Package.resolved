@@ -7,7 +7,7 @@
       "location" : "https://github.com/AzureAD/microsoft-authentication-library-for-objc",
       "state" : {
         "branch" : "spetrescu/testspm",
-        "revision" : "875e81ab54e1f1f6a287601fa9956206f4bf3599"
+        "revision" : "ad28386eaec680d518ddb81bc288a0907f92037c"
       }
     }
   ],

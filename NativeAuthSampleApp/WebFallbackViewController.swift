@@ -57,6 +57,8 @@ class WebFallbackViewController: UIViewController {
     }
 
     @IBAction func signInPressed(_: Any) {
+        view.endEditing(true)
+
         guard let email = emailTextField.text, !email.isEmpty,
               let password = passwordTextField.text, !password.isEmpty
         else {
@@ -72,6 +74,8 @@ class WebFallbackViewController: UIViewController {
     }
 
     @IBAction func signOutPressed(_: Any) {
+        view.endEditing(true)
+
         if msalAccount != nil {
             signOutWithWebUX()
         } else if accountResult != nil {

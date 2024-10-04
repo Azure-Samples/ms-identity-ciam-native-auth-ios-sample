@@ -35,7 +35,6 @@ class CustomAttributesViewController: UIViewController {
     @IBOutlet weak var resultTextView: UITextView!
 
     @IBOutlet weak var signUpButton: UIButton!
-    @IBOutlet weak var signOutButton: UIButton!
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
@@ -57,6 +56,8 @@ class CustomAttributesViewController: UIViewController {
     }
 
     @IBAction func signUpPressed(_: Any) {
+        view.endEditing(true)
+
         guard let email = emailTextField.text, !email.isEmpty,
               let password = passwordTextField.text, !password.isEmpty
         else {
