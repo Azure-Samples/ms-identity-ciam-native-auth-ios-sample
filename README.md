@@ -67,6 +67,10 @@ Run and test the iOS sample mobile application by following the steps in [Run an
 
 Follow the steps in Sign in users and call an API in a sample iOS mobile app by using native authentication to [sign in users and call a protected API in the iOS sample mobile app](https://learn.microsoft.com//entra/external-id/customers/sample-native-authentication-ios-sample-app-call-web-api).
 
+### Additional step: Add email one-time passcode MFA to your iOS app (Private Preview)
+
+Add email one-time passcode MFA to the sign in flow by following the steps in [Add email one-time passcode MFA to your iOS/macOS app](https://github.com/microsoft/entra-previews/blob/PP5/docs/Native-Auth/Developer-guides/1-iOS-Swift/Add-email-otp-mfa-sign-in.md).
+
 ## Key concepts
 
 Open `NativeAuthSampleApp/Configuration.swift` file and you find the following lines of code:
