@@ -8,6 +8,7 @@
         "x-ms-id": "ciam-ios-native-app",
         "x-ms-name": "ms-identity-ciam-ios-native-app",
         "x-ms-version": "2.0",
+        "allowNativeAuthPermissions": true,
         "replyUrlsWithType": [{
             "url": "msauth.<bundleId>://auth",
             "type": "InstalledClient"
