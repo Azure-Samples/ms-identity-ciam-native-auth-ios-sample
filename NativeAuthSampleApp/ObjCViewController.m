@@ -69,11 +69,9 @@
     NSString *password = self.passwordTextField.text;
 
     [self showResultText:@"Signing in..."];
-
-    [self.nativeAuth signInUsername:email
-                           password:password
-                             scopes:nil
-                      correlationId:nil
+    MSALNativeAuthSignInParameters* parameters = [[MSALNativeAuthSignInParameters alloc] initWithUsername:email];
+    parameters.password = password;
+    [self.nativeAuth signInParameters:parameters
                            delegate:self];
 }
 
@@ -112,7 +110,11 @@
 
 - (void)onSignInCompletedWithResult:(MSALNativeAuthUserAccountResult * _Nonnull)result {
     self.accountResult = result;
-    [result getAccessTokenWithForceRefresh:false correlationId:nil delegate:self];
+
+    MSALNativeAuthGetAccessTokenParameters* parameters = [[MSALNativeAuthGetAccessTokenParameters alloc] init];
+    parameters.forceRefresh = false;
+    parameters.correlationId = nil;
+    [result getAccessTokenWithParameters:parameters delegate:self];
 }
 
 - (void)onSignInStartErrorWithError:(SignInStartError * _Nonnull)error {
