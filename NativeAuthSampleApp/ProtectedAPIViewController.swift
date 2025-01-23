@@ -88,7 +88,10 @@ class ProtectedAPIViewController: UIViewController {
 
         showResultText("Signing in...")
 
-        nativeAuth.signIn(username: email, password: password, scopes: [], delegate: self)
+        let parameters = MSALNativeAuthSignInParameters(username: email)
+        parameters.password = password
+        parameters.scopes = []
+        nativeAuth.signIn(parameters: parameters, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -119,7 +122,9 @@ class ProtectedAPIViewController: UIViewController {
         if let accessToken = accessTokenAPI1 {
             accessProtectedAPI(apiUrl: url, accessToken: accessToken)
         } else {
-            accountResult?.getAccessToken(scopes: protectedAPIScopes1, delegate: self)
+            let parameters = MSALNativeAuthGetAccessTokenParameters()
+            parameters.scopes = protectedAPIScopes1
+            accountResult?.getAccessToken(parameters: parameters, delegate: self)
             let message = "Retrieving access token to use with API 1..."
             showResultText(message)
             print(message)
@@ -137,7 +142,9 @@ class ProtectedAPIViewController: UIViewController {
         if let accessToken = accessTokenAPI2 {
             accessProtectedAPI(apiUrl: url, accessToken: accessToken)
         } else {
-            accountResult?.getAccessToken(scopes: protectedAPIScopes2, delegate: self)
+            let parameters = MSALNativeAuthGetAccessTokenParameters()
+            parameters.scopes = protectedAPIScopes2
+            accountResult?.getAccessToken(parameters: parameters, delegate: self)
             let message = "Retrieving access token to use with API 2..."
             showResultText(message)
             print(message)

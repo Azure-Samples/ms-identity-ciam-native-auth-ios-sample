@@ -73,7 +73,8 @@ class ResetPasswordViewController: UIViewController {
 
         showResultText("Resetting password...")
 
-        nativeAuth.resetPassword(username: email, delegate: self)
+        let parameters = MSALNativeAuthResetPasswordParameters(username: email)
+        nativeAuth.resetPassword(parameters: parameters, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -260,7 +261,8 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
         showResultText("Password reset successfully")
         dismissNewPasswordModal()
 
-        newState.signIn(delegate: self)
+        let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
+        newState.signIn(parameters: parameters, delegate: self)
     }
 }
 
