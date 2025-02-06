@@ -112,8 +112,6 @@
     self.accountResult = result;
 
     MSALNativeAuthGetAccessTokenParameters* parameters = [[MSALNativeAuthGetAccessTokenParameters alloc] init];
-    parameters.forceRefresh = false;
-    parameters.correlationId = nil;
     [result getAccessTokenWithParameters:parameters delegate:self];
 }
 
