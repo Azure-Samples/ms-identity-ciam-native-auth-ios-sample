@@ -79,9 +79,10 @@ class CustomAttributesViewController: UIViewController {
 
         showResultText("Signing up...")
 
-        nativeAuth.signUp(username: email,
-                          password: password,
-                          attributes: attributes,
+        let parameters = MSALNativeAuthSignUpParameters(username: email)
+        parameters.password = password
+        parameters.attributes = attributes
+        nativeAuth.signUp(parameters: parameters,
                           delegate: self)
     }
 

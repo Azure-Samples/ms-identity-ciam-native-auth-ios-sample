@@ -70,7 +70,9 @@ class WebFallbackViewController: UIViewController {
 
         showResultText("Signing in...")
 
-        nativeAuth.signIn(username: email, password: password, delegate: self)
+        let parameters = MSALNativeAuthSignInParameters(username: email)
+        parameters.password = password
+        nativeAuth.signIn(parameters: parameters, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -157,7 +159,8 @@ class WebFallbackViewController: UIViewController {
 extension WebFallbackViewController: SignInStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         accountResult = result
-        result.getAccessToken(delegate: self)
+        let parameters = MSALNativeAuthGetAccessTokenParameters()
+        result.getAccessToken(parameters: parameters, delegate: self)
     }
 
     func onSignInStartError(error: MSAL.SignInStartError) {

@@ -73,7 +73,8 @@ class EmailAndCodeViewController: UIViewController {
 
         showResultText("Signing up...")
 
-        nativeAuth.signUp(username: email, delegate: self)
+        let parameters = MSALNativeAuthSignUpParameters(username: email)
+        nativeAuth.signUp(parameters: parameters, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -88,7 +89,8 @@ class EmailAndCodeViewController: UIViewController {
 
         showResultText("Signing in...")
 
-        nativeAuth.signIn(username: email, delegate: self)
+        let parameters = MSALNativeAuthSignInParameters(username: email)
+        nativeAuth.signIn(parameters: parameters, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -124,7 +126,8 @@ class EmailAndCodeViewController: UIViewController {
         if let accountResult = accountResult, let homeAccountId = accountResult.account.homeAccountId?.identifier {
             print("Account found in cache: \(homeAccountId)")
 
-            accountResult.getAccessToken(delegate: self)
+            let parameters = MSALNativeAuthGetAccessTokenParameters()
+            accountResult.getAccessToken(parameters: parameters, delegate: self)
         } else {
             print("No account found in cache")
 
@@ -220,7 +223,8 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
         showResultText("Signed up successfully!")
         dismissVerifyCodeModal()
 
-        newState.signIn(delegate: self)
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        newState.signIn(parameters: parameters, delegate: self)
     }
 }
 
@@ -350,7 +354,8 @@ extension EmailAndCodeViewController: SignInVerifyCodeDelegate {
 
         accountResult = result
 
-        result.getAccessToken(delegate: self)
+        let parameters = MSALNativeAuthGetAccessTokenParameters()
+        result.getAccessToken(parameters: parameters, delegate: self)
     }
 }
 
