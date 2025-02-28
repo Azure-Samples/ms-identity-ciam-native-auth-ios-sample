@@ -78,7 +78,9 @@ class MultiFactorAuthenticationViewController: UIViewController {
 
         showResultText("Signing in...")
 
-        nativeAuth.signIn(username: email, password: password, delegate: self)
+        let parameters = MSALNativeAuthSignInParameters(username: email)
+        parameters.password = password
+        nativeAuth.signIn(parameters: parameters, delegate: self)
     }
     
     @IBAction func signOutPressed(_: Any) {
@@ -113,7 +115,8 @@ class MultiFactorAuthenticationViewController: UIViewController {
         if let accountResult = accountResult, let homeAccountId = accountResult.account.homeAccountId?.identifier {
             print("Account found in cache: \(homeAccountId)")
 
-            accountResult.getAccessToken(delegate: self)
+            let parameters = MSALNativeAuthGetAccessTokenParameters()
+            accountResult.getAccessToken(parameters: parameters, delegate: self)
         } else {
             print("No account found in cache")
 
@@ -241,7 +244,8 @@ extension MultiFactorAuthenticationViewController: MFASubmitChallengeDelegate {
 
         accountResult = result
 
-        result.getAccessToken(delegate: self)
+        let parameters = MSALNativeAuthGetAccessTokenParameters()
+        result.getAccessToken(parameters: parameters, delegate: self)
     }
 }
 
