@@ -1384,7 +1384,7 @@
                                     <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="If5-jF-jHT">
                                         <rect key="frame" x="0.0" y="61.000000000000014" width="353" height="238.33333333333337"/>
                                     </pickerView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Or please enter your optional auth method:" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2QF-LY-OJl">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Or enter your optional auth method:" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2QF-LY-OJl">
                                         <rect key="frame" x="0.0" y="299.33333333333331" width="353" height="20.333333333333314"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -1396,14 +1396,14 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="53" translatesAutoresizingMaskIntoConstraints="NO" id="fGU-L0-UL4">
                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="34"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ckg-U2-pby">
-                                                        <rect key="frame" x="0.0" y="0.0" width="40.666666666666664" height="34"/>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ChallengeType" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ckg-U2-pby">
+                                                        <rect key="frame" x="0.0" y="0.0" width="111.66666666666667" height="34"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
-                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="8qZ-pi-WKT">
-                                                        <rect key="frame" x="93.666666666666657" y="0.0" width="259.33333333333337" height="34"/>
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="8qZ-pi-WKT" userLabel="Email Text Field">
+                                                        <rect key="frame" x="164.66666666666663" y="0.0" width="188.33333333333337" height="34"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                         <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="new-password"/>
                                                     </textField>
@@ -1428,7 +1428,7 @@
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Submit"/>
                                                         <connections>
-                                                            <action selector="submitPressed:" destination="jsX-mg-s1F" eventType="touchUpInside" id="tau-gL-aBe"/>
+                                                            <action selector="submitPressed:" destination="C5v-HB-ehb" eventType="touchUpInside" id="Epy-Fx-b2q"/>
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yG8-Eb-bWd">
@@ -1436,7 +1436,7 @@
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Cancel"/>
                                                         <connections>
-                                                            <action selector="cancelPressed:" destination="jsX-mg-s1F" eventType="touchUpInside" id="ofd-ws-Wzn"/>
+                                                            <action selector="cancelPressed:" destination="C5v-HB-ehb" eventType="touchUpInside" id="an4-qz-Y48"/>
                                                         </connections>
                                                     </button>
                                                 </subviews>
@@ -1466,10 +1466,16 @@
                             <constraint firstAttribute="trailing" secondItem="AZj-IT-n13" secondAttribute="trailing" constant="20" id="rJI-mM-oxy"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="authMethodPicker" destination="If5-jF-jHT" id="3VG-c7-NNo"/>
+                        <outlet property="emailTextField" destination="8qZ-pi-WKT" id="vep-c5-4LC"/>
+                        <outlet property="errorLabel" destination="WXH-uE-CLM" id="vAK-FY-g8w"/>
+                        <outletCollection property="challengeTypeLabel" destination="ckg-U2-pby" collectionClass="NSMutableArray" id="43m-tu-hEn"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Vo7-wo-7e4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="674.04580152671758" y="1485.9154929577467"/>
+            <point key="canvasLocation" x="666" y="1486"/>
         </scene>
     </scenes>
     <resources>
