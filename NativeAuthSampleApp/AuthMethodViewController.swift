@@ -26,7 +26,7 @@ import UIKit
 import MSAL
 
 class AuthMethodViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    var onSubmit: ((_ loginHint: String) -> Void)?
+    var onSubmit: ((_ authMethod: MSALAuthMethod) -> Void)?
     var onCancel: (() -> Void)?
     
     @IBOutlet weak var authMethodPicker: UIPickerView!
@@ -34,21 +34,10 @@ class AuthMethodViewController: UIViewController, UIPickerViewDelegate, UIPicker
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var challengeTypeLabel: UILabel!
     
-    struct MSALAuthMethod {
-        let challengeType: String
-        let loginHint: String
-    }
-    
-    private var authMethods: [MSALAuthMethod] = []
+    var authMethods: [MSALAuthMethod] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Example of setting auth methods
-        authMethods = [
-            MSALAuthMethod(challengeType: "email", loginHint: "test@gmail.com"),
-            MSALAuthMethod(challengeType: "sms", loginHint: "123456")
-        ]
             
         authMethodPicker.delegate = self
         authMethodPicker.dataSource = self
@@ -140,7 +129,8 @@ class AuthMethodViewController: UIViewController, UIPickerViewDelegate, UIPicker
         // If auth methods list is empty, just use whatever the user entered
         if authMethods.isEmpty {
             if let inputText = emailTextField.text, !inputText.isEmpty {
-                onSubmit?(inputText)
+                // Cannot access MSALAuthMethod
+                // onSubmit?(MSALAuthMethod(challengeType: "email", loginHint: inputText))
                 dismiss(animated: true)
             } else {
                 errorLabel.text = "Please enter an authentication method"
@@ -156,7 +146,7 @@ class AuthMethodViewController: UIViewController, UIPickerViewDelegate, UIPicker
             let method = authMethods[selectedRow]
             
             if let userInput = emailTextField.text, !userInput.isEmpty {
-                onSubmit?(userInput)
+                onSubmit?(method)
                 dismiss(animated: true)
             } else {
                 errorLabel.text = "Please enter the required information"
