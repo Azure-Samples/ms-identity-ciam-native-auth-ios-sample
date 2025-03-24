@@ -1531,18 +1531,18 @@
                                         <rect key="frame" x="0.0" y="279.33333333333331" width="576" height="119"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="500" insetsLayoutMarginsFromSafeArea="NO" axis="vertical" distribution="fillProportionally" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="8CK-Kh-UCn" userLabel="Buttons Stack View">
-                                                <rect key="frame" x="197" y="0.0" width="182.33333333333337" height="119"/>
+                                                <rect key="frame" x="201.66666666666669" y="0.0" width="172.66666666666669" height="119"/>
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Poj-2W-XuQ">
-                                                        <rect key="frame" x="0.0" y="0.0" width="182.33333333333334" height="34.333333333333336"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="172.66666666666666" height="34.333333333333336"/>
                                                         <state key="normal" title="Button"/>
-                                                        <buttonConfiguration key="configuration" style="filled" title="Reregister Challenge"/>
+                                                        <buttonConfiguration key="configuration" style="filled" title="Register Again"/>
                                                         <connections>
                                                             <action selector="resendPressed:" destination="qb8-XF-uQL" eventType="touchUpInside" id="i9U-tT-NK7"/>
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t3L-JW-DDG">
-                                                        <rect key="frame" x="0.0" y="42.333333333333371" width="182.33333333333334" height="34.333333333333343"/>
+                                                        <rect key="frame" x="0.0" y="42.333333333333371" width="172.66666666666666" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Submit"/>
                                                         <connections>
@@ -1550,7 +1550,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="edE-Kh-Tyb">
-                                                        <rect key="frame" x="0.0" y="84.666666666666686" width="182.33333333333334" height="34.333333333333343"/>
+                                                        <rect key="frame" x="0.0" y="84.666666666666686" width="172.66666666666666" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Cancel"/>
                                                         <connections>

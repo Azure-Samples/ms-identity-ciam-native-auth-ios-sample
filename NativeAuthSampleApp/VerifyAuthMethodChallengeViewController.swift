@@ -26,15 +26,15 @@ import UIKit
 
 class VerifyAuthMethodChallengeViewController: UIViewController {
     var onSubmit: ((_ challenge: String) -> Void)?
-    var onReregister: (() -> Void)?
+    var onRegister: (() -> Void)?
     var onCancel: (() -> Void)?
     
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var challengeTextField: UITextField!
 
-    @IBAction func reregisterPressed(_: Any) {
+    @IBAction func registerPressed(_: Any) {
         challengeTextField.resignFirstResponder()
-        onReregister?()
+        onRegister?()
     }
 
     @IBAction func cancelPressed(_: Any) {
