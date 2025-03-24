@@ -340,16 +340,30 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
             showVerifyChallengeModal(submitCallback: { [weak self] challenge in
                                     guard let self = self else { return }
 
-                                    // TODO: Error here (Cannot find 'newState' in scope)
+                                    guard let newState = result.newState else {
+                                        print("newState is nil")
+                                        dismissVerifyChallengeModal()
+                                        return
+                                    }
+                                    
+                                    // TODO: Error here. ('submitChallenge' is inaccessible due to 'internal' protection level)
                                     newState.submitChallenge(challenge: challenge, delegate: self)
                                 },
                                 registerCallback: { [weak self] in
                                     guard let self = self else { return }
+                
+                                    guard let newState = result.newState else {
+                                        print("newState is nil")
+                                        dismissVerifyChallengeModal()
+                                        return
+                                    }
                                     
+                                    // TODO: Error here. (MSALAuthMethod' initializer is inaccessible due to 'internal' protection level ; Cannot convert value of type 'MSALNativeAuthChannelType' to expected argument type 'String' ; Missing arguments for parameters 'id', 'channelTargetType' in call)
                                     // TODO: Maybe authMethod should return by SDK here
-                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: )
-                                    // TODO: Error here (Cannot find 'newState' in scope)
+                                    let authmethod = MSALAuthMethod(challengeType: result.channelTargetType,loginHint: result.sentTo)
+                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authmethod )
                                     newState.challengeAuthMethod(parameter, delegate: self)
+                
                                 }, cancelCallback: { [weak self] in
                                     guard let self = self else { return }
 
