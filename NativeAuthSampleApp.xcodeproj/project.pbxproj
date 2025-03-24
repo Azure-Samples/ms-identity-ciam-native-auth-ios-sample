@@ -10,6 +10,7 @@
 		1220D5CE2D90C1A400B92305 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1220D5972D90C18A00B92305 /* MSAL.framework */; };
 		1220D5CF2D90C1A400B92305 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1220D5972D90C18A00B92305 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1220D5D52D90C52200B92305 /* AuthMethodViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */; };
+		12266F092D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */; };
 		8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */; };
 		9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477329969264003BA4B4 /* AppDelegate.swift */; };
 		9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477529969264003BA4B4 /* SceneDelegate.swift */; };
@@ -174,6 +175,7 @@
 /* Begin PBXFileReference section */
 		1220D5812D90C18A00B92305 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = "../microsoft-authentication-library-for-objc/MSAL/MSAL.xcodeproj"; sourceTree = "<group>"; };
 		1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethodViewController.swift; sourceTree = "<group>"; };
+		12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAuthMethodChallengeViewController.swift; sourceTree = "<group>"; };
 		8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtectedAPIViewController.swift; sourceTree = "<group>"; };
 		9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeAuthSampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B08477329969264003BA4B4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -275,6 +277,7 @@
 				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
 				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
 				1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */,
+				12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */,
 			);
 			name = "Modal View Controllers";
 			sourceTree = "<group>";
@@ -531,6 +534,7 @@
 				9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
 				9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */,
+				12266F092D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift in Sources */,
 				9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */,
 				9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */,
 				9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */,

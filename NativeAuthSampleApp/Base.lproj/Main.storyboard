@@ -1477,6 +1477,120 @@
             </objects>
             <point key="canvasLocation" x="666" y="1486"/>
         </scene>
+        <!--Verify Auth Method Challenge View Controller-->
+        <scene sceneID="3nK-nJ-qCh">
+            <objects>
+                <viewController storyboardIdentifier="VerifyAuthMethodChallengeViewController" id="qb8-XF-uQL" customClass="VerifyAuthMethodChallengeViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="TdI-5i-f9C">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="37" translatesAutoresizingMaskIntoConstraints="NO" id="DTC-kM-Hmn">
+                                <rect key="frame" x="20" y="99" width="576" height="703"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Verification Challenge" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K1y-7H-7GQ">
+                                        <rect key="frame" x="0.0" y="0.0" width="576" height="40.666666666666664"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please enter the verification challenge that was registered as strong auth." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QWA-CM-h9J">
+                                        <rect key="frame" x="0.0" y="77.666666666666657" width="576" height="20.333333333333329"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="11" translatesAutoresizingMaskIntoConstraints="NO" id="tzZ-yB-Ayf" userLabel="Fields Stack View">
+                                        <rect key="frame" x="0.0" y="135" width="576" height="20.333333333333343"/>
+                                        <subviews>
+                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="53" translatesAutoresizingMaskIntoConstraints="NO" id="sG7-84-LGc">
+                                                <rect key="frame" x="0.0" y="0.0" width="576" height="20.333333333333332"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Challenge" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u0b-HH-RI2">
+                                                        <rect key="frame" x="0.0" y="0.0" width="76" height="20.333333333333332"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Qke-jV-sad">
+                                                        <rect key="frame" x="129" y="0.0" width="447" height="20.333333333333332"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <textInputTraits key="textInputTraits" keyboardType="numberPad" textContentType="one-time-code"/>
+                                                    </textField>
+                                                </subviews>
+                                            </stackView>
+                                        </subviews>
+                                    </stackView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AOS-jX-HX8" userLabel="Error Label">
+                                        <rect key="frame" x="0.0" y="192.33333333333331" width="576" height="50"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" systemColor="systemRedColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bYt-dH-VYg" userLabel="Buttons View">
+                                        <rect key="frame" x="0.0" y="279.33333333333331" width="576" height="119"/>
+                                        <subviews>
+                                            <stackView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="500" insetsLayoutMarginsFromSafeArea="NO" axis="vertical" distribution="fillProportionally" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="8CK-Kh-UCn" userLabel="Buttons Stack View">
+                                                <rect key="frame" x="197" y="0.0" width="182.33333333333337" height="119"/>
+                                                <subviews>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Poj-2W-XuQ">
+                                                        <rect key="frame" x="0.0" y="0.0" width="182.33333333333334" height="34.333333333333336"/>
+                                                        <state key="normal" title="Button"/>
+                                                        <buttonConfiguration key="configuration" style="filled" title="Reregister Challenge"/>
+                                                        <connections>
+                                                            <action selector="resendPressed:" destination="qb8-XF-uQL" eventType="touchUpInside" id="i9U-tT-NK7"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t3L-JW-DDG">
+                                                        <rect key="frame" x="0.0" y="42.333333333333371" width="182.33333333333334" height="34.333333333333343"/>
+                                                        <state key="normal" title="Button"/>
+                                                        <buttonConfiguration key="configuration" style="filled" title="Submit"/>
+                                                        <connections>
+                                                            <action selector="submitPressed:" destination="qb8-XF-uQL" eventType="touchUpInside" id="wWB-jf-M47"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="edE-Kh-Tyb">
+                                                        <rect key="frame" x="0.0" y="84.666666666666686" width="182.33333333333334" height="34.333333333333343"/>
+                                                        <state key="normal" title="Button"/>
+                                                        <buttonConfiguration key="configuration" style="filled" title="Cancel"/>
+                                                        <connections>
+                                                            <action selector="cancelPressed:" destination="qb8-XF-uQL" eventType="touchUpInside" id="2Vz-4a-zCY"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                            </stackView>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstItem="8CK-Kh-UCn" firstAttribute="centerX" secondItem="bYt-dH-VYg" secondAttribute="centerX" id="D92-5H-gNa"/>
+                                            <constraint firstItem="8CK-Kh-UCn" firstAttribute="width" relation="greaterThanOrEqual" secondItem="bYt-dH-VYg" secondAttribute="width" multiplier="0.3" id="IeT-w8-8Yn"/>
+                                            <constraint firstItem="8CK-Kh-UCn" firstAttribute="top" secondItem="bYt-dH-VYg" secondAttribute="top" id="Iuk-jZ-qbD"/>
+                                            <constraint firstAttribute="bottom" secondItem="8CK-Kh-UCn" secondAttribute="bottom" id="wx0-En-SMk"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7tF-Um-CP1">
+                                        <rect key="frame" x="0.0" y="435.33333333333337" width="576" height="267.66666666666663"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                    </view>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="x3Q-oC-oiZ"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="x3Q-oC-oiZ" firstAttribute="bottom" secondItem="DTC-kM-Hmn" secondAttribute="bottom" constant="16" id="JLp-YW-gUH"/>
+                            <constraint firstItem="DTC-kM-Hmn" firstAttribute="leading" secondItem="x3Q-oC-oiZ" secondAttribute="leading" constant="20" id="Yp8-wf-gZh"/>
+                            <constraint firstItem="DTC-kM-Hmn" firstAttribute="top" secondItem="x3Q-oC-oiZ" secondAttribute="top" constant="40" id="mFF-xE-7U4"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="challengeTextField" destination="Qke-jV-sad" id="4pC-WL-SfS"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="nTq-gU-jPy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1589" y="1486"/>
+        </scene>
     </scenes>
     <resources>
         <image name="curlybraces.square" catalog="system" width="128" height="114"/>
