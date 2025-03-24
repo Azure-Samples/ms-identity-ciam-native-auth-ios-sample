@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1220D5CE2D90C1A400B92305 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1220D5972D90C18A00B92305 /* MSAL.framework */; };
+		1220D5CF2D90C1A400B92305 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1220D5972D90C18A00B92305 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1220D5D52D90C52200B92305 /* AuthMethodViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */; };
 		8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */; };
 		9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477329969264003BA4B4 /* AppDelegate.swift */; };
 		9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477529969264003BA4B4 /* SceneDelegate.swift */; };
@@ -22,9 +25,137 @@
 		9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1949529F820980023905D /* EmailAndCodeViewController.swift */; };
 		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
 		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
-		DE00FD9E2B8CADF100DB3A77 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = DE00FD9D2B8CADF100DB3A77 /* MSAL */; };
 		E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1220D5962D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F431E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+		1220D5982D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FC11E3FF47D00C69FBA;
+			remoteInfo = "MSAL iOS Unit Tests";
+		};
+		1220D59A2D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F501E3FD32D00C69FBA;
+			remoteInfo = "MSAL (Mac Framework)";
+		};
+		1220D59C2D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FD01E3FF49C00C69FBA;
+			remoteInfo = "MSAL Mac Unit Tests";
+		};
+		1220D59E2D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D61A64331E5A29580086D120;
+			remoteInfo = "MSAL Test App (iOS)";
+		};
+		1220D5A02D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 962E37BC1E720C5D00DE71FE;
+			remoteInfo = "MSAL Test Automation (iOS)";
+		};
+		1220D5A22D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D672279F1EBD111900F3422A;
+			remoteInfo = "unit-test-host";
+		};
+		1220D5A42D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B2BB73702112C32C000EA4C5;
+			remoteInfo = InteractiveiOSTests;
+		};
+		1220D5A62D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B29E2ACE21238F5200B170ED;
+			remoteInfo = MultiAppiOSTests;
+		};
+		1220D5A82D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1E614BDA22558D8300EBF62F;
+			remoteInfo = "MSAL Test App (Mac)";
+		};
+		1220D5AA2D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B57B226921890035C7C2;
+			remoteInfo = "MSAL (iOS Static Library)";
+		};
+		1220D5AC2D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B59C2269286F0035C7C2;
+			remoteInfo = "MSAL (Mac Static Library)";
+		};
+		1220D5AE2D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B295A16422D0348400FFB313;
+			remoteInfo = "unit-test-host-mac";
+		};
+		1220D5B02D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 28D1D56C29BF62E900CE75F4;
+			remoteInfo = "MSAL iOS Native Auth Integration Tests";
+		};
+		1220D5B22D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 91AA24522BDF6439005037EA;
+			remoteInfo = "MSAL Test App (visionOS)";
+		};
+		1220D5B42D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 28CED2E82C21E0F9004320D1;
+			remoteInfo = "MSAL iOS Native Auth E2E Tests";
+		};
+		1220D5B62D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DE1BD0CF2C3C275200B0888E;
+			remoteInfo = "MSAL Mac Native Auth Integration Tests";
+		};
+		1220D5B82D90C18A00B92305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DE1BD0F62C3C282900B0888E;
+			remoteInfo = "MSAL Mac Native Auth E2E Tests";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		9BB32E4D29A6750800BD7D89 /* Embed Frameworks */ = {
@@ -33,6 +164,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1220D5CF2D90C1A400B92305 /* MSAL.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -40,6 +172,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1220D5812D90C18A00B92305 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = "../microsoft-authentication-library-for-objc/MSAL/MSAL.xcodeproj"; sourceTree = "<group>"; };
+		1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethodViewController.swift; sourceTree = "<group>"; };
 		8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtectedAPIViewController.swift; sourceTree = "<group>"; };
 		9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeAuthSampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B08477329969264003BA4B4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -68,16 +202,42 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE00FD9E2B8CADF100DB3A77 /* MSAL in Frameworks */,
+				1220D5CE2D90C1A400B92305 /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1220D5822D90C18A00B92305 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1220D5972D90C18A00B92305 /* MSAL.framework */,
+				1220D5992D90C18A00B92305 /* "MSAL-iOS-UI-Tests".xctest */,
+				1220D59B2D90C18A00B92305 /* MSAL.framework */,
+				1220D59D2D90C18A00B92305 /* "MSAL-Mac-Unit-Tests".xctest */,
+				1220D59F2D90C18A00B92305 /* MSAL Test App.app */,
+				1220D5A12D90C18A00B92305 /* MSAL Test Automation (iOS).app */,
+				1220D5A32D90C18A00B92305 /* unit-test-host.app */,
+				1220D5A52D90C18A00B92305 /* InteractiveiOSTests.xctest */,
+				1220D5A72D90C18A00B92305 /* MultiAppiOSTests.xctest */,
+				1220D5A92D90C18A00B92305 /* MSAL Test App (Mac).app */,
+				1220D5AB2D90C18A00B92305 /* libMSAL (iOS Static Library).a */,
+				1220D5AD2D90C18A00B92305 /* libMSAL (macOS Static Library).a */,
+				1220D5AF2D90C18A00B92305 /* unit-test-host-mac.app */,
+				1220D5B12D90C18A00B92305 /* MSAL iOS Native Auth Integration Tests.xctest */,
+				1220D5B32D90C18A00B92305 /* MSAL Test App.app */,
+				1220D5B52D90C18A00B92305 /* MSAL iOS Native Auth E2E Tests.xctest */,
+				1220D5B72D90C18A00B92305 /* MSAL Mac Native Auth Integration Tests.xctest */,
+				1220D5B92D90C18A00B92305 /* MSAL Mac Native Auth E2E Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		9B08476729969264003BA4B4 = {
 			isa = PBXGroup;
 			children = (
+				1220D5812D90C18A00B92305 /* MSAL.xcodeproj */,
 				9B08477229969264003BA4B4 /* NativeAuthSampleApp */,
 				9B08477129969264003BA4B4 /* Products */,
 				9BB32E4A29A6750800BD7D89 /* Frameworks */,
@@ -114,6 +274,7 @@
 			children = (
 				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
 				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
+				1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */,
 			);
 			name = "Modal View Controllers";
 			sourceTree = "<group>";
@@ -168,7 +329,6 @@
 			);
 			name = NativeAuthSampleApp;
 			packageProductDependencies = (
-				DE00FD9D2B8CADF100DB3A77 /* MSAL */,
 			);
 			productName = NativeAuthSampleApp;
 			productReference = 9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */;
@@ -200,16 +360,150 @@
 			);
 			mainGroup = 9B08476729969264003BA4B4;
 			packageReferences = (
-				DE00FD9C2B8CADF100DB3A77 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
 			);
 			productRefGroup = 9B08477129969264003BA4B4 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1220D5822D90C18A00B92305 /* Products */;
+					ProjectRef = 1220D5812D90C18A00B92305 /* MSAL.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				9B08476F29969264003BA4B4 /* NativeAuthSampleApp */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1220D5972D90C18A00B92305 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = 1220D5962D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5992D90C18A00B92305 /* "MSAL-iOS-UI-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-iOS-UI-Tests\".xctest";
+			remoteRef = 1220D5982D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D59B2D90C18A00B92305 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = 1220D59A2D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D59D2D90C18A00B92305 /* "MSAL-Mac-Unit-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-Mac-Unit-Tests\".xctest";
+			remoteRef = 1220D59C2D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D59F2D90C18A00B92305 /* MSAL Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App.app";
+			remoteRef = 1220D59E2D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5A12D90C18A00B92305 /* MSAL Test Automation (iOS).app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test Automation (iOS).app";
+			remoteRef = 1220D5A02D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5A32D90C18A00B92305 /* unit-test-host.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "unit-test-host.app";
+			remoteRef = 1220D5A22D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5A52D90C18A00B92305 /* InteractiveiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = InteractiveiOSTests.xctest;
+			remoteRef = 1220D5A42D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5A72D90C18A00B92305 /* MultiAppiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = MultiAppiOSTests.xctest;
+			remoteRef = 1220D5A62D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5A92D90C18A00B92305 /* MSAL Test App (Mac).app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App (Mac).app";
+			remoteRef = 1220D5A82D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5AB2D90C18A00B92305 /* libMSAL (iOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (iOS Static Library).a";
+			remoteRef = 1220D5AA2D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5AD2D90C18A00B92305 /* libMSAL (macOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (macOS Static Library).a";
+			remoteRef = 1220D5AC2D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5AF2D90C18A00B92305 /* unit-test-host-mac.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "unit-test-host-mac.app";
+			remoteRef = 1220D5AE2D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5B12D90C18A00B92305 /* MSAL iOS Native Auth Integration Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL iOS Native Auth Integration Tests.xctest";
+			remoteRef = 1220D5B02D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5B32D90C18A00B92305 /* MSAL Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App.app";
+			remoteRef = 1220D5B22D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5B52D90C18A00B92305 /* MSAL iOS Native Auth E2E Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL iOS Native Auth E2E Tests.xctest";
+			remoteRef = 1220D5B42D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5B72D90C18A00B92305 /* MSAL Mac Native Auth Integration Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL Mac Native Auth Integration Tests.xctest";
+			remoteRef = 1220D5B62D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1220D5B92D90C18A00B92305 /* MSAL Mac Native Auth E2E Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL Mac Native Auth E2E Tests.xctest";
+			remoteRef = 1220D5B82D90C18A00B92305 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9B08476E29969264003BA4B4 /* Resources */ = {
@@ -232,6 +526,7 @@
 				8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */,
 				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
 				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
+				1220D5D52D90C52200B92305 /* AuthMethodViewController.swift in Sources */,
 				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
 				9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
@@ -468,25 +763,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		DE00FD9C2B8CADF100DB3A77 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/AzureAD/microsoft-authentication-library-for-objc";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.7.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		DE00FD9D2B8CADF100DB3A77 /* MSAL */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DE00FD9C2B8CADF100DB3A77 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
-			productName = MSAL;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9B08476829969264003BA4B4 /* Project object */;
 }
