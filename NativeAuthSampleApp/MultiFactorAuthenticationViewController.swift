@@ -169,7 +169,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         let alert = UIAlertController(title: "JIT required", message: "Strong Auth not found. Do you want to proceed with Just In Time Registration?", preferredStyle: .alert)
 
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            showAuthMethodModal(submitCallback: { [weak self] authMethod in
+            self.showAuthMethodModal(submitCallback: { [weak self] authMethod in
                                     guard let self = self else { return }
 
                                     let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
@@ -340,29 +340,20 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
             showVerifyChallengeModal(submitCallback: { [weak self] challenge in
                                     guard let self = self else { return }
 
-                                    guard let newState = result.newState else {
-                                        print("newState is nil")
-                                        dismissVerifyChallengeModal()
-                                        return
-                                    }
+                                    let newState = result.newState
                                     
-                                    // TODO: Error here. ('submitChallenge' is inaccessible due to 'internal' protection level)
                                     newState.submitChallenge(challenge: challenge, delegate: self)
                                 },
                                 registerCallback: { [weak self] in
                                     guard let self = self else { return }
                 
-                                    guard let newState = result.newState else {
-                                        print("newState is nil")
-                                        dismissVerifyChallengeModal()
-                                        return
-                                    }
+                                    let newState = result.newState
                                     
-                                    // TODO: Error here. (MSALAuthMethod' initializer is inaccessible due to 'internal' protection level ; Cannot convert value of type 'MSALNativeAuthChannelType' to expected argument type 'String' ; Missing arguments for parameters 'id', 'channelTargetType' in call)
-                                    // TODO: Maybe authMethod should return by SDK here
-                                    let authmethod = MSALAuthMethod(challengeType: result.channelTargetType,loginHint: result.sentTo)
-                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authmethod )
-                                    newState.challengeAuthMethod(parameter, delegate: self)
+//                                    // TODO: Error here. (MSALAuthMethod' initializer is inaccessible due to 'internal' protection level ; Cannot convert value of type 'MSALNativeAuthChannelType' to expected argument type 'String' ; Missing arguments for parameters 'id', 'channelTargetType' in call)
+//                                    // TODO: Maybe authMethod should return by SDK here
+//                                    let authmethod = MSALAuthMethod(challengeType: result.channelTargetType,loginHint: result.sentTo)
+//                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authmethod )
+//                                    newState.challengeAuthMethod(parameter, delegate: self)
                 
                                 }, cancelCallback: { [weak self] in
                                     guard let self = self else { return }
@@ -392,14 +383,13 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                       submitCallback: { [weak self] challenge in
                                           guard let self = self else { return }
                                         
-                                          // TODO: Error here ('submitChallenge' is inaccessible due to 'internal' protection level)
                                           newState.submitChallenge(challenge: challenge, delegate: self)
                                       }, registerCallback: { [weak self] in
                                           guard let self = self else { return }
 
-                                          // TODO: Maybe authMethod should return by SDK here
-                                          let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: )
-                                          newState.challengeAuthMethod(parameter, delegate: self)
+//                                          // TODO: Maybe authMethod should return by SDK here
+//                                          let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: )
+//                                          newState.challengeAuthMethod(parameter, delegate: self)
                                       }, cancelCallback: { [weak self] in
                                           guard let self = self else { return }
 
@@ -411,16 +401,6 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                 dismissVerifyChallengeModal()
             }
         }
-    
-//  TODO: Error here (Invalid redeclaration of 'onSignInCompleted(result:)')
-    func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
-        print("Signed in: \(result.account.username ?? "")")
-
-        accountResult = result
-
-        let parameters = MSALNativeAuthGetAccessTokenParameters()
-        result.getAccessToken(parameters: parameters, delegate: self)
-    }
 }
 
 
@@ -545,14 +525,14 @@ extension MultiFactorAuthenticationViewController {
             }
         }
     }
-
-    func dismissAuthMethodModal() {
+    
+    func dismissAuthMethodModal(completion: (() -> Void)? = nil) {
         guard authMethodViewController != nil else {
             print("Unexpected error: Auth Method view controller is nil")
             return
         }
 
-        dismiss(animated: true)
+        dismiss(animated: true, completion: completion)
         authMethodViewController = nil
     }
 }
