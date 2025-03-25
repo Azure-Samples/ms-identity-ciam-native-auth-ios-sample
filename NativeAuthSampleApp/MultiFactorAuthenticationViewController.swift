@@ -46,6 +46,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
     var authMethodViewController: AuthMethodViewController?
 
     var accountResult: MSALNativeAuthUserAccountResult?
+    var selectedAuthMethod: MSALAuthMethod?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -173,7 +174,6 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
                                     guard let self = self else { return }
 
                                     let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                    // TODO: Error here ('challengeAuthMethod' is inaccessible due to 'internal' protection level)
                                     newState.challengeAuthMethod(parameters: parameter, delegate: self)
                 
                                 }, cancelCallback: { [weak self] in
@@ -319,7 +319,6 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                         guard let self = self else { return }
 
                                         let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                        // TODO: Error here ('challengeAuthMethod' is inaccessible due to 'internal' protection level)
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
                     
                                     }, cancelCallback: { [weak self] in
@@ -348,12 +347,13 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                     guard let self = self else { return }
                 
                                     let newState = result.newState
-                                    
-//                                    // TODO: Error here. (MSALAuthMethod' initializer is inaccessible due to 'internal' protection level ; Cannot convert value of type 'MSALNativeAuthChannelType' to expected argument type 'String' ; Missing arguments for parameters 'id', 'channelTargetType' in call)
-//                                    // TODO: Maybe authMethod should return by SDK here
-//                                    let authmethod = MSALAuthMethod(challengeType: result.channelTargetType,loginHint: result.sentTo)
-//                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authmethod )
-//                                    newState.challengeAuthMethod(parameter, delegate: self)
+                
+                                    if let authMethod = self.selectedAuthMethod {
+                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                        newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                    } else {
+                                        print("Error: No auth method selected")
+                                    }
                 
                                 }, cancelCallback: { [weak self] in
                                     guard let self = self else { return }
@@ -386,10 +386,21 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                           newState.submitChallenge(challenge: challenge, delegate: self)
                                       }, registerCallback: { [weak self] in
                                           guard let self = self else { return }
+                                          
+                                          if let authMethod = self.selectedAuthMethod {
+                                              let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                              newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                          } else {
+                                              print("Error: No auth method selected")
+                                          }
 
-//                                          // TODO: Maybe authMethod should return by SDK here
-//                                          let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: )
-//                                          newState.challengeAuthMethod(parameter, delegate: self)
+                                          if let authMethod = self.selectedAuthMethod {
+                                              let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                              newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                          } else {
+                                              print("Error: No auth method selected")
+                                          }
+                                          
                                       }, cancelCallback: { [weak self] in
                                           guard let self = self else { return }
 
@@ -515,6 +526,7 @@ extension MultiFactorAuthenticationViewController {
 
         authMethodViewController.onSubmit = { authMethod in
             DispatchQueue.main.async {
+                self.selectedAuthMethod = authMethod // Store the selected auth method
                 submitCallback(authMethod)
             }
         }
