@@ -46,7 +46,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
     var authMethodViewController: AuthMethodViewController?
 
     var accountResult: MSALNativeAuthUserAccountResult?
-    var selectedAuthMethod: MSALAuthMethod?
+    var authMethod: MSALAuthMethod?
     var verificationContact: String?
 
     override func viewDidLoad() {
@@ -171,14 +171,29 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
 
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            self.showAuthMethodModal(submitCallback: { [weak self] authMethod, verificationContact in
+            self.showAuthMethodModal(continueCallback: { [weak self] verificationContact in
                                     guard let self = self else { return }
+                
+                                    if let authMethod = authMethods.first {
+                                        self.authMethod = authMethod // Set up the auth method
+                                        
+                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                        parameter.verificationContact = verificationContact
+                                        
+                                        newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                    } else {
+                                        print("Error: No authentication methods available")
+                                    }
+                
+                                    self.authMethod = authMethods[0]
 
-                                    // TODO: Error here. The authMethod could be nil however parameter required
-                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod!)
-                                    parameter.verificationContact = verificationContact
-                                    
-                                    newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                    if let authMethod = self.authMethod {
+                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                        parameter.verificationContact = verificationContact
+                                        newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                    } else {
+                                        print("Error: No default auth method")
+                                    }
                 
                                 }, cancelCallback: { [weak self] in
                                     guard let self = self else { return }
@@ -321,11 +336,14 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                 updateAuthMethodModal(errorMessage: "Invalid verification contact",
                                       continueCallback: { [weak self] verificationContact in
                                         guard let self = self else { return }
-
-                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod!)
-                                        parameter.verificationContact = verificationContact
-                                        newState.challengeAuthMethod(parameters: parameter, delegate: self)
                     
+                                        if let authMethod = self.authMethod {
+                                            let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                            parameter.verificationContact = verificationContact
+                                            newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                        } else {
+                                            print("Error: No default auth method")
+                                        }
                                     }, cancelCallback: { [weak self] in
                                         guard let self = self else { return }
 
@@ -353,12 +371,11 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                 
                                     let newState = result.newState
                 
-                                    if let authMethod = self.selectedAuthMethod {
+                                    if let authMethod = self.authMethod {
                                         let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                     } else {
                                         print("Error: No auth method selected")
-                                        showResultText("No auth method selected")
                                     }
                 
                                 }, cancelCallback: { [weak self] in
@@ -393,7 +410,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                       }, registerCallback: { [weak self] in
                                           guard let self = self else { return }
                                           
-                                          if let authMethod = self.selectedAuthMethod {
+                                          if let authMethod = self.authMethod {
                                               let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
                                               newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                           } else {
