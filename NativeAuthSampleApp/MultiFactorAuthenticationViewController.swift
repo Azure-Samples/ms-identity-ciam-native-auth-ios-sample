@@ -47,6 +47,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
 
     var accountResult: MSALNativeAuthUserAccountResult?
     var selectedAuthMethod: MSALAuthMethod?
+    var verificationContact: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -167,13 +168,16 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
     func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState){
         print("SignInStartDelegate: onSignInStrongAuthMethodRegistration")
 
-        let alert = UIAlertController(title: "JIT required", message: "Strong Auth not found. Do you want to proceed with Just In Time Registration?", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
 
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            self.showAuthMethodModal(submitCallback: { [weak self] authMethod in
+            self.showAuthMethodModal(submitCallback: { [weak self] authMethod, verificationContact in
                                     guard let self = self else { return }
 
-                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                    // TODO: Error here. The authMethod could be nil however parameter required
+                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod!)
+                                    parameter.verificationContact = verificationContact
+                                    
                                     newState.challengeAuthMethod(parameters: parameter, delegate: self)
                 
                                 }, cancelCallback: { [weak self] in
@@ -315,10 +319,12 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                 }
                 
                 updateAuthMethodModal(errorMessage: "Invalid auth method",
-                                      submitCallback: { [weak self] authMethod in
+                                      submitCallback: { [weak self] authMethod, verificationContact in
                                         guard let self = self else { return }
 
-                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                        // TODO: Error here. The authMethod could be nil however parameter required
+                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod!)
+                                        parameter.verificationContact = verificationContact
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
                     
                                     }, cancelCallback: { [weak self] in
@@ -490,7 +496,7 @@ extension MultiFactorAuthenticationViewController {
 
     func showAuthMethodModal(
         authMethods: [MSALAuthMethod] = [],
-        submitCallback: @escaping (_ authMethod: MSALAuthMethod) -> Void,
+        submitCallback: @escaping (_ authMethod: MSALAuthMethod?, _ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
         authMethodViewController = storyboard?.instantiateViewController(
@@ -513,7 +519,7 @@ extension MultiFactorAuthenticationViewController {
 
     func updateAuthMethodModal(
         errorMessage: String?,
-        submitCallback: @escaping (_ authMethod: MSALAuthMethod) -> Void,
+        submitCallback: @escaping (_ authMethod: MSALAuthMethod?, _ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
         guard let authMethodViewController = authMethodViewController else {
@@ -524,10 +530,11 @@ extension MultiFactorAuthenticationViewController {
             authMethodViewController.errorLabel.text = errorMessage
         }
 
-        authMethodViewController.onSubmit = { authMethod in
+        authMethodViewController.onSubmit = { authMethod, verificationContact in
             DispatchQueue.main.async {
                 self.selectedAuthMethod = authMethod // Store the selected auth method
-                submitCallback(authMethod)
+                self.verificationContact = verificationContact
+                submitCallback(authMethod, verificationContact)
             }
         }
 

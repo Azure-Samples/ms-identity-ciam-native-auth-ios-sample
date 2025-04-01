@@ -26,7 +26,7 @@ import UIKit
 import MSAL
 
 class AuthMethodViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    var onSubmit: ((_ authMethod: MSALAuthMethod) -> Void)?
+    var onSubmit: ((_ authMethod: MSALAuthMethod?, _ verificationContact: String?) -> Void)?
     var onCancel: (() -> Void)?
     
     @IBOutlet weak var authMethodPicker: UIPickerView!
@@ -130,7 +130,7 @@ class AuthMethodViewController: UIViewController, UIPickerViewDelegate, UIPicker
         if authMethods.isEmpty {
             if let inputText = emailTextField.text, !inputText.isEmpty {
                 // Cannot access MSALAuthMethod
-                // onSubmit?(MSALAuthMethod(challengeType: "email", loginHint: inputText))
+                onSubmit?(nil, emailTextField.text)
                 dismiss(animated: true)
             } else {
                 errorLabel.text = "Please enter an authentication method"
@@ -146,7 +146,7 @@ class AuthMethodViewController: UIViewController, UIPickerViewDelegate, UIPicker
             let method = authMethods[selectedRow]
             
             if let userInput = emailTextField.text, !userInput.isEmpty {
-                onSubmit?(method)
+                onSubmit?(method, emailTextField.text)
                 dismiss(animated: true)
             } else {
                 errorLabel.text = "Please enter the required information"
