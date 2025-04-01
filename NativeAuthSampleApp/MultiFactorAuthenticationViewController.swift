@@ -175,7 +175,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
                                     guard let self = self else { return }
                 
                                     if let authMethod = authMethods.first {
-                                        self.authMethod = authMethod // Set up the auth method
+                                        self.authMethod = authMethod // Set up the defaut auth method
                                         
                                         let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
                                         parameter.verificationContact = verificationContact
@@ -183,18 +183,8 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                     } else {
                                         print("Error: No authentication methods available")
+                                        showResultText("No authentication methods available")
                                     }
-                
-                                    self.authMethod = authMethods[0]
-
-                                    if let authMethod = self.authMethod {
-                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                        parameter.verificationContact = verificationContact
-                                        newState.challengeAuthMethod(parameters: parameter, delegate: self)
-                                    } else {
-                                        print("Error: No default auth method")
-                                    }
-                
                                 }, cancelCallback: { [weak self] in
                                     guard let self = self else { return }
 
@@ -343,6 +333,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                             newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                         } else {
                                             print("Error: No default auth method")
+                                            showResultText("No default auth method")
                                         }
                                     }, cancelCallback: { [weak self] in
                                         guard let self = self else { return }
@@ -376,6 +367,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                     } else {
                                         print("Error: No auth method selected")
+                                        showResultText("No default auth method")
                                     }
                 
                                 }, cancelCallback: { [weak self] in
@@ -415,6 +407,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                               newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                           } else {
                                               print("Error: No auth method selected")
+                                              showResultText("No default auth method")
                                           }
                                       }, cancelCallback: { [weak self] in
                                           guard let self = self else { return }
