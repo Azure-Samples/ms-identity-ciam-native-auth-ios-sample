@@ -400,14 +400,6 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                           } else {
                                               print("Error: No auth method selected")
                                           }
-
-                                          if let authMethod = self.selectedAuthMethod {
-                                              let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                              newState.challengeAuthMethod(parameters: parameter, delegate: self)
-                                          } else {
-                                              print("Error: No auth method selected")
-                                          }
-                                          
                                       }, cancelCallback: { [weak self] in
                                           guard let self = self else { return }
 
