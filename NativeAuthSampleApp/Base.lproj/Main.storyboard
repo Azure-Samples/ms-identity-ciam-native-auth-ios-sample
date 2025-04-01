@@ -1375,7 +1375,7 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please confirm the default auth method:" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dd4-EX-kbb">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please confirm the default contact:" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dd4-EX-kbb">
                                         <rect key="frame" x="0.0" y="77.666666666666671" width="353" height="20.333333333333329"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -1431,6 +1431,7 @@
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Continue"/>
                                                         <connections>
+                                                            <action selector="continuePressed:" destination="xTn-Zl-JJl" eventType="touchUpInside" id="bsP-Wx-AXt"/>
                                                             <action selector="submitPressed:" destination="jsX-mg-s1F" eventType="touchUpInside" id="lCD-Jg-yjS"/>
                                                         </connections>
                                                     </button>
@@ -1440,6 +1441,7 @@
                                                         <buttonConfiguration key="configuration" style="filled" title="Cancel"/>
                                                         <connections>
                                                             <action selector="cancelPressed:" destination="jsX-mg-s1F" eventType="touchUpInside" id="9dl-Qo-6FK"/>
+                                                            <action selector="cancelPressed:" destination="xTn-Zl-JJl" eventType="touchUpInside" id="FKW-VV-hKT"/>
                                                         </connections>
                                                     </button>
                                                 </subviews>
@@ -1470,6 +1472,11 @@
                         </constraints>
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <connections>
+                        <outlet property="authMethodLabel" destination="7sZ-yd-sVA" id="yaN-GK-mt2"/>
+                        <outlet property="emailTextField" destination="eUX-Sr-fMi" id="Edc-0K-fYs"/>
+                        <outlet property="errorLabel" destination="Eqa-of-F8I" id="kZy-7L-GQ9"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="n42-XV-dLa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
