@@ -26,32 +26,11 @@ import UIKit
 import MSAL
 
 class AuthMethodViewController: UIViewController {
-    var onSubmit: ((_ authMethod: MSALAuthMethod?, _ verificationContact: String?) -> Void)?
+    var onContinue: ((_ verificationContact: String?) -> Void)?
     var onCancel: (() -> Void)?
     
-    @IBOutlet weak var authMethodLabel: UILabel!
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var emailTextField: UITextField!
-    
-    var authMethods: [MSALAuthMethod] = []
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        errorLabel.isHidden = true
-        
-        // Update UI based on available auth methods
-        updateUIForAuthMethods()
-    }
-    
-    // Helper method to update UI based on available auth methods
-    private func updateUIForAuthMethods() {
-        if authMethods.isEmpty {
-            authMethodLabel.text = "No default auth method."
-        } else {
-            authMethodLabel.text = authMethods[0].loginHint
-        }
-    }
     
     @IBAction func cancelPressed(_ sender: Any) {
         emailTextField.resignFirstResponder()
@@ -63,12 +42,8 @@ class AuthMethodViewController: UIViewController {
 
     @IBAction func continuePressed(_ sender: Any) {
         if let userInput = emailTextField.text, !userInput.isEmpty {
-            let authMethod = authMethods.isEmpty ? nil : authMethods[0]
-            onSubmit?(authMethod, userInput)
+            onContinue?(userInput)
             dismiss(animated: true)
-        } else {
-            errorLabel.text = "Please enter the email as the authentication method registration."
-            errorLabel.isHidden = false
         }
     }
 }

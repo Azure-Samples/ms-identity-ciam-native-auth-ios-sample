@@ -319,10 +319,9 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                 }
                 
                 updateAuthMethodModal(errorMessage: "Invalid verification contact",
-                                      submitCallback: { [weak self] authMethod, verificationContact in
+                                      continueCallback: { [weak self] verificationContact in
                                         guard let self = self else { return }
 
-                                        // TODO: Error here. The authMethod could be nil however parameter required
                                         let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod!)
                                         parameter.verificationContact = verificationContact
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
@@ -489,7 +488,7 @@ extension MultiFactorAuthenticationViewController {
 
     func showAuthMethodModal(
         authMethods: [MSALAuthMethod] = [],
-        submitCallback: @escaping (_ authMethod: MSALAuthMethod?, _ verificationContact: String?) -> Void,
+        continueCallback: @escaping (_ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
         authMethodViewController = storyboard?.instantiateViewController(
@@ -499,12 +498,9 @@ extension MultiFactorAuthenticationViewController {
             print("Error creating Auth Method view controller")
             return
         }
-        
-        // Set auth methods
-        authMethodViewController.authMethods = authMethods
 
         updateAuthMethodModal(errorMessage: nil,
-                             submitCallback: submitCallback,
+                             continueCallback: continueCallback,
                              cancelCallback: cancelCallback)
 
         present(authMethodViewController, animated: true)
@@ -512,7 +508,7 @@ extension MultiFactorAuthenticationViewController {
 
     func updateAuthMethodModal(
         errorMessage: String?,
-        submitCallback: @escaping (_ authMethod: MSALAuthMethod?, _ verificationContact: String?) -> Void,
+        continueCallback: @escaping (_ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
         guard let authMethodViewController = authMethodViewController else {
@@ -523,11 +519,10 @@ extension MultiFactorAuthenticationViewController {
             authMethodViewController.errorLabel.text = errorMessage
         }
 
-        authMethodViewController.onSubmit = { authMethod, verificationContact in
+        authMethodViewController.onContinue = { verificationContact in
             DispatchQueue.main.async {
-                self.selectedAuthMethod = authMethod // Store the selected auth method
                 self.verificationContact = verificationContact
-                submitCallback(authMethod, verificationContact)
+                continueCallback(verificationContact)
             }
         }
 
