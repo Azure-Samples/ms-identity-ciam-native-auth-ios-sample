@@ -311,14 +311,14 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
         newState: RegisterStrongAuthState?) {
             if error.isInvalidInput {
                 guard let newState = newState else {
-                    print("Unexpected state. Received invalidCode but newState is nil")
+                    print("Unexpected state. Received invalidInput but newState is nil")
 
                     showResultText("Internal error registering auth method")
                     dismissAuthMethodModal()
                     return
                 }
                 
-                updateAuthMethodModal(errorMessage: "Invalid auth method",
+                updateAuthMethodModal(errorMessage: "Invalid verification contact",
                                       submitCallback: { [weak self] authMethod, verificationContact in
                                         guard let self = self else { return }
 
@@ -359,6 +359,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                     } else {
                                         print("Error: No auth method selected")
+                                        showResultText("No auth method selected")
                                     }
                 
                                 }, cancelCallback: { [weak self] in
@@ -379,13 +380,13 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
         newState: RegisterStrongAuthVerificationRequiredState?) {
             if error.isInvalidChallenge {
                 guard let newState = newState else {
-                    print("Unexpected state. Received invalidPassword but newState is nil")
+                    print("Unexpected state. Received isInvalidChallenge but newState is nil")
 
                     showResultText("Internal error verifying challenge")
                     return
                 }
                 
-                updateVerifyChallengeModal(errorMessage: "Invalid challenge",
+                updateVerifyChallengeModal(errorMessage: "Invalid challenge code",
                                       submitCallback: { [weak self] challenge in
                                           guard let self = self else { return }
                                         
