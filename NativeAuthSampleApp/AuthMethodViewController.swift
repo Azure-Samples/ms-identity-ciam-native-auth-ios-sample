@@ -41,9 +41,11 @@ class AuthMethodViewController: UIViewController {
     
 
     @IBAction func continuePressed(_ sender: Any) {
-        if let userInput = emailTextField.text, !userInput.isEmpty {
-            onContinue?(userInput)
-            dismiss(animated: true)
+        guard let optionalContact = emailTextField.text else {
+            return
         }
+
+        emailTextField.resignFirstResponder()
+        onContinue?(optionalContact)
     }
 }
