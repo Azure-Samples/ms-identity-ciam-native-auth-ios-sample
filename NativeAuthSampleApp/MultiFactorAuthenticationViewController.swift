@@ -159,7 +159,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         }))
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
-            self.resultTextView.text = "Second factor authentication required"
+            self.resultTextView.text = "Second factor authentication is required"
         }))
 
         present(alert, animated: true)
@@ -193,7 +193,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         }))
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
-            self.resultTextView.text = "Just In Time Registration required"
+            self.resultTextView.text = "Just In Time Registration is required"
         }))
 
         present(alert, animated: true)
