@@ -390,7 +390,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                 guard let newState = newState else {
                     print("Unexpected state. Received isInvalidChallenge but newState is nil")
 
-                    showResultText("Internal error verifying challenge")
+                    showResultText("Internal error verifying code")
                     return
                 }
                 
@@ -416,7 +416,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                           showResultText("Action cancelled")
                                       })
             } else {
-                showResultText("Unexpected error verifying challenge: \(error.errorDescription ?? "No error description")")
+                showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
                 dismissVerifyChallengeModal()
             }
         }
