@@ -151,6 +151,8 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 
     func onSignInAwaitingMFA(newState: AwaitingMFAState) {
         print("SignInStartDelegate: onSignInAwaitingMFA")
+        
+        showResultText("Second factor authentication is required")
 
         let alert = UIAlertController(title: "MFA required", message: "Do you want to proceed with MFA?", preferredStyle: .alert)
 
@@ -167,6 +169,8 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
     
     func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState){
         print("SignInStartDelegate: onSignInStrongAuthMethodRegistration")
+        
+        showResultText("Just In Time Registration is required")
 
         let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
 
