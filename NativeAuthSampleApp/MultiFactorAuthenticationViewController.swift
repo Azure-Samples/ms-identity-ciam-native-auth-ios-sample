@@ -43,7 +43,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
 
     var verifyCodeViewController: VerifyCodeViewController?
     var verifyChallengeViewController: VerifyAuthMethodChallengeViewController?
-    var authMethodViewController: AuthMethodViewController?
+    var verificationContactViewController: VerificationContactViewController?
 
     var accountResult: MSALNativeAuthUserAccountResult?
     var authMethod: MSALAuthMethod?
@@ -505,10 +505,10 @@ extension MultiFactorAuthenticationViewController {
         continueCallback: @escaping (_ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
-        authMethodViewController = storyboard?.instantiateViewController(
-            withIdentifier: "AuthMethodViewController") as? AuthMethodViewController
+        verificationContactViewController = storyboard?.instantiateViewController(
+            withIdentifier: "AuthMethodViewController") as? VerificationContactViewController
 
-        guard let authMethodViewController = authMethodViewController else {
+        guard let verificationContactViewController = verificationContactViewController else {
             print("Error creating Auth Method view controller")
             return
         }
@@ -517,7 +517,7 @@ extension MultiFactorAuthenticationViewController {
                              continueCallback: continueCallback,
                              cancelCallback: cancelCallback)
 
-        present(authMethodViewController, animated: true)
+        present(verificationContactViewController, animated: true)
     }
 
     func updateAuthMethodModal(
@@ -525,22 +525,22 @@ extension MultiFactorAuthenticationViewController {
         continueCallback: @escaping (_ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
-        guard let authMethodViewController = authMethodViewController else {
+        guard let verificationContactViewController = verificationContactViewController else {
             return
         }
 
         if let errorMessage = errorMessage {
-            authMethodViewController.errorLabel.text = errorMessage
+            verificationContactViewController.errorLabel.text = errorMessage
         }
 
-        authMethodViewController.onContinue = { verificationContact in
+        verificationContactViewController.onContinue = { verificationContact in
             DispatchQueue.main.async {
                 self.verificationContact = verificationContact
                 continueCallback(verificationContact)
             }
         }
 
-        authMethodViewController.onCancel = {
+        verificationContactViewController.onCancel = {
             DispatchQueue.main.async {
                 cancelCallback()
             }
@@ -548,13 +548,13 @@ extension MultiFactorAuthenticationViewController {
     }
     
     func dismissAuthMethodModal(completion: (() -> Void)? = nil) {
-        guard authMethodViewController != nil else {
+        guard verificationContactViewController != nil else {
             print("Unexpected error: Auth Method view controller is nil")
             return
         }
 
         dismiss(animated: true, completion: completion)
-        authMethodViewController = nil
+        verificationContactViewController = nil
     }
 }
 

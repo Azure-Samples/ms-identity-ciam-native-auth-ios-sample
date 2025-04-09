@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1220D5D52D90C52200B92305 /* AuthMethodViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */; };
+		1220D5D52D90C52200B92305 /* VerificationContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1220D5D42D90C52200B92305 /* VerificationContactViewController.swift */; };
 		12266F092D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */; };
 		12800ED62D9AEDDF00D45FD8 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 12800ED52D9AEDDF00D45FD8 /* MSAL */; };
 		8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */; };
@@ -29,7 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethodViewController.swift; sourceTree = "<group>"; };
+		1220D5D42D90C52200B92305 /* VerificationContactViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationContactViewController.swift; sourceTree = "<group>"; };
 		12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAuthMethodChallengeViewController.swift; sourceTree = "<group>"; };
 		8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtectedAPIViewController.swift; sourceTree = "<group>"; };
 		9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeAuthSampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,7 +105,7 @@
 			children = (
 				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
 				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
-				1220D5D42D90C52200B92305 /* AuthMethodViewController.swift */,
+				1220D5D42D90C52200B92305 /* VerificationContactViewController.swift */,
 				12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */,
 			);
 			name = "Modal View Controllers";
@@ -224,7 +224,7 @@
 				8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */,
 				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
 				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
-				1220D5D52D90C52200B92305 /* AuthMethodViewController.swift in Sources */,
+				1220D5D52D90C52200B92305 /* VerificationContactViewController.swift in Sources */,
 				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
 				9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,

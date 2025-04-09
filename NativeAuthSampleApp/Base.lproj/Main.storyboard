@@ -1358,10 +1358,10 @@
             </objects>
             <point key="canvasLocation" x="3593" y="742"/>
         </scene>
-        <!--Auth Method View Controller-->
+        <!--Verification Contact View Controller-->
         <scene sceneID="hYq-Bu-3m2">
             <objects>
-                <viewController storyboardIdentifier="AuthMethodViewController" id="xTn-Zl-JJl" customClass="AuthMethodViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="VerificationContactViewController" id="xTn-Zl-JJl" customClass="VerificationContactViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="zXi-ug-Sh3">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
