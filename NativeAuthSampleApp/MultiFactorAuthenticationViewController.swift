@@ -173,22 +173,17 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         showResultText("Stong authentication method registration is required")
 
         let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
+        
+        guard let authMethod = authMethods.first else { return }
 
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            self.showAuthMethodModal(continueCallback: { [weak self] verificationContact in
+            self.showVerificationContactModal(loginHint: authMethod.loginHint, continueCallback: { [weak self] verificationContact in
                                     guard let self = self else { return }
                 
-                                    if let authMethod = authMethods.first {
-                                        self.authMethod = authMethod // Set up the defaut auth method
-                                        
-                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                        parameter.verificationContact = verificationContact
-                                        
-                                        newState.challengeAuthMethod(parameters: parameter, delegate: self)
-                                    } else {
-                                        print("Error: No authentication methods available")
-                                        showResultText("No authentication methods available")
-                                    }
+                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                    parameter.verificationContact = verificationContact
+                                    newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                    
                                 }, cancelCallback: { [weak self] in
                                     guard let self = self else { return }
 
@@ -323,11 +318,11 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                     print("Unexpected state. Received invalidInput but newState is nil")
 
                     showResultText("Internal error registering auth method")
-                    dismissAuthMethodModal()
+                    dismissVerificationContactModal()
                     return
                 }
                 
-                updateAuthMethodModal(errorMessage: "Invalid verification contact",
+                updateVerificationContactModal(errorMessage: "Invalid verification contact",
                                       continueCallback: { [weak self] verificationContact in
                                         guard let self = self else { return }
                         
@@ -350,7 +345,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
     func onRegisterStrongAuthVerificationRequired(result: MSALNativeAuthRegisterStrongAuthVerificationRequiredResult) {
         print("RegisterStrongAuthChallengeDelegate: onRegisterStrongAuthVerificationRequired: \(result)")
         
-        dismissAuthMethodModal { [self] in
+        dismissVerificationContactModal { [self] in
             showVerifyChallengeModal(submitCallback: { [weak self] challenge in
                                     guard let self = self else { return }
 
@@ -486,31 +481,33 @@ extension MultiFactorAuthenticationViewController {
     }
 }
 
-// MARK: - Auth Method modal methods
+// MARK: - Verification Contact modal methods
 
 extension MultiFactorAuthenticationViewController {
 
-    func showAuthMethodModal(
-        authMethods: [MSALAuthMethod] = [],
+    func showVerificationContactModal(
+        loginHint: String,
         continueCallback: @escaping (_ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
         verificationContactViewController = storyboard?.instantiateViewController(
-            withIdentifier: "AuthMethodViewController") as? VerificationContactViewController
+            withIdentifier: "VerificationContactViewController") as? VerificationContactViewController
 
         guard let verificationContactViewController = verificationContactViewController else {
             print("Error creating Auth Method view controller")
             return
         }
+        
+        verificationContactViewController.loginHint = loginHint
 
-        updateAuthMethodModal(errorMessage: nil,
+        updateVerificationContactModal(errorMessage: nil,
                              continueCallback: continueCallback,
                              cancelCallback: cancelCallback)
 
         present(verificationContactViewController, animated: true)
     }
 
-    func updateAuthMethodModal(
+    func updateVerificationContactModal(
         errorMessage: String?,
         continueCallback: @escaping (_ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
@@ -537,7 +534,7 @@ extension MultiFactorAuthenticationViewController {
         }
     }
     
-    func dismissAuthMethodModal(completion: (() -> Void)? = nil) {
+    func dismissVerificationContactModal(completion: (() -> Void)? = nil) {
         guard verificationContactViewController != nil else {
             print("Unexpected error: Auth Method view controller is nil")
             return
