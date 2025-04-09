@@ -170,7 +170,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
     func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState){
         print("SignInStartDelegate: onSignInStrongAuthMethodRegistration")
         
-        showResultText("Just In Time Registration is required")
+        showResultText("Stong authentication method registration is required")
 
         let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
 
