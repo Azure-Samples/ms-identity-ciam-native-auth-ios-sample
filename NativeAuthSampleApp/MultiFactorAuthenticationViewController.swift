@@ -192,7 +192,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         }))
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
-            self.resultTextView.text = "Just In Time Registration is required"
+            self.resultTextView.text = "Strong authentication method registration is required"
         }))
 
         present(alert, animated: true)
@@ -386,7 +386,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                     return
                 }
                 
-                updateVerifyChallengeModal(errorMessage: "Invalid challenge code",
+                updateVerifyChallengeModal(errorMessage: "Invalid code",
                                       submitCallback: { [weak self] challenge in
                                           guard let self = self else { return }
                                         

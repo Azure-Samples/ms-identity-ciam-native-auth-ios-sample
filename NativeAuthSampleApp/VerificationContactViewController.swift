@@ -38,10 +38,7 @@ class VerificationContactViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let text = hintLabel.text {
-            let labelText = text.replacingOccurrences(of: "loginHint", with: loginHint)
-            hintLabel.text = labelText
-        }
+        hintLabel.text = (hintLabel.text ?? "") + loginHint
     }
     
     @IBAction func cancelPressed(_ sender: Any) {
