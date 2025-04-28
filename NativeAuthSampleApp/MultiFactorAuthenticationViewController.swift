@@ -175,6 +175,7 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
         
         guard let authMethod = authMethods.first else { return }
+        self.authMethod = authMethod
 
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
             self.showVerificationContactModal(loginHint: authMethod.loginHint, continueCallback: { [weak self] verificationContact in
@@ -297,6 +298,7 @@ extension MultiFactorAuthenticationViewController: CredentialsDelegate {
         showResultText("Signed in. Access Token: \(result.accessToken)")
         updateUI()
         dismissVerifyCodeModal()
+        dismissVerifyChallengeModal()
     }
 
     func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
@@ -360,6 +362,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                 
                                     guard let authMethod = self.authMethod else { return }
                                     let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                    parameter.verificationContact = verificationContact
                                     newState.challengeAuthMethod(parameters: parameter, delegate: self)
                 
                                 }, cancelCallback: { [weak self] in
@@ -396,6 +399,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                           
                                           guard let authMethod = self.authMethod else { return }
                                           let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                          parameter.verificationContact = verificationContact
                                           newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                           
                                       }, cancelCallback: { [weak self] in
