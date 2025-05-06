@@ -42,8 +42,12 @@ class MultiFactorAuthenticationViewController: UIViewController {
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
+    var verifyChallengeViewController: VerifyAuthMethodChallengeViewController?
+    var verificationContactViewController: VerificationContactViewController?
 
     var accountResult: MSALNativeAuthUserAccountResult?
+    var authMethod: MSALAuthMethod?
+    var verificationContact: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -147,6 +151,8 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 
     func onSignInAwaitingMFA(newState: AwaitingMFAState) {
         print("SignInStartDelegate: onSignInAwaitingMFA")
+        
+        showResultText("Second factor authentication is required")
 
         let alert = UIAlertController(title: "MFA required", message: "Do you want to proceed with MFA?", preferredStyle: .alert)
 
@@ -155,7 +161,39 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         }))
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
-            self.resultTextView.text = "Second factor authentication required"
+            self.resultTextView.text = "Second factor authentication is required"
+        }))
+
+        present(alert, animated: true)
+    }
+    
+    func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState){
+        print("SignInStartDelegate: onSignInStrongAuthMethodRegistration")
+        
+        showResultText("Stong authentication method registration is required")
+
+        let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
+        
+        guard let authMethod = authMethods.first else { return }
+        self.authMethod = authMethod
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            self.showVerificationContactModal(loginHint: authMethod.loginHint, continueCallback: { [weak self] verificationContact in
+                                    guard let self = self else { return }
+                
+                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                    parameter.verificationContact = verificationContact
+                                    newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                    
+                                }, cancelCallback: { [weak self] in
+                                    guard let self = self else { return }
+
+                                    showResultText("Action cancelled")
+                                })
+        }))
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            self.resultTextView.text = "Strong authentication method registration is required"
         }))
 
         present(alert, animated: true)
@@ -260,12 +298,123 @@ extension MultiFactorAuthenticationViewController: CredentialsDelegate {
         showResultText("Signed in. Access Token: \(result.accessToken)")
         updateUI()
         dismissVerifyCodeModal()
+        dismissVerifyChallengeModal()
     }
 
     func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
         showResultText("Error retrieving access token: \(error.errorDescription ?? "No error description")")
     }
 }
+
+
+// MARK: - JIT delegates
+
+// MARK: RegisterStrongAuthChallengeDelegate
+
+extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDelegate {
+    func onRegisterStrongAuthChallengeError(
+        error: RegisterStrongAuthChallengeError,
+        newState: RegisterStrongAuthState?) {
+            if error.isInvalidInput {
+                guard let newState = newState else {
+                    print("Unexpected state. Received invalidInput but newState is nil")
+
+                    showResultText("Internal error registering auth method")
+                    dismissVerificationContactModal()
+                    return
+                }
+                
+                updateVerificationContactModal(errorMessage: "Invalid verification contact",
+                                      continueCallback: { [weak self] verificationContact in
+                                        guard let self = self else { return }
+                        
+                                        guard let authMethod = self.authMethod else { return }
+                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                        parameter.verificationContact = verificationContact
+                                        newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                    
+                                    }, cancelCallback: { [weak self] in
+                                        guard let self = self else { return }
+
+                                        showResultText("Action cancelled")
+                                    })
+            } else {
+                showResultText("Unexpected error registering auth method: \(error.errorDescription ?? "No error description")")
+                dismissVerifyChallengeModal()
+            }
+    }
+    
+    func onRegisterStrongAuthVerificationRequired(result: MSALNativeAuthRegisterStrongAuthVerificationRequiredResult) {
+        print("RegisterStrongAuthChallengeDelegate: onRegisterStrongAuthVerificationRequired: \(result)")
+        
+        dismissVerificationContactModal { [self] in
+            showVerifyChallengeModal(submitCallback: { [weak self] challenge in
+                                    guard let self = self else { return }
+
+                                    let newState = result.newState
+                                    
+                                    newState.submitChallenge(challenge: challenge, delegate: self)
+                                },
+                                registerCallback: { [weak self] in
+                                    guard let self = self else { return }
+                
+                                    let newState = result.newState
+                
+                                    guard let authMethod = self.authMethod else { return }
+                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                    parameter.verificationContact = verificationContact
+                                    newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                
+                                }, cancelCallback: { [weak self] in
+                                    guard let self = self else { return }
+
+                                    self.dismissVerifyChallengeModal()
+                                    showResultText("Action cancelled")
+                                })
+        }
+    }
+}
+
+// MARK: RegisterStrongAuthChallengeDelegate
+
+extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChallengeDelegate {
+    func onRegisterStrongAuthSubmitChallengeError(
+        error: RegisterStrongAuthSubmitChallengeError,
+        newState: RegisterStrongAuthVerificationRequiredState?) {
+            if error.isInvalidChallenge {
+                guard let newState = newState else {
+                    print("Unexpected state. Received isInvalidChallenge but newState is nil")
+
+                    showResultText("Internal error verifying code")
+                    return
+                }
+                
+                updateVerifyChallengeModal(errorMessage: "Invalid code",
+                                      submitCallback: { [weak self] challenge in
+                                          guard let self = self else { return }
+                                        
+                                          newState.submitChallenge(challenge: challenge, delegate: self)
+                                      }, registerCallback: { [weak self] in
+                                          guard let self = self else { return }
+                                          
+                                          guard let authMethod = self.authMethod else { return }
+                                          let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+                                          parameter.verificationContact = verificationContact
+                                          newState.challengeAuthMethod(parameters: parameter, delegate: self)
+                                          
+                                      }, cancelCallback: { [weak self] in
+                                          guard let self = self else { return }
+
+                                          self.dismissVerifyChallengeModal()
+                                          showResultText("Action cancelled")
+                                      })
+            } else {
+                showResultText("Unexpected error verifying code: \(error.errorDescription ?? "No error description")")
+                dismissVerifyChallengeModal()
+            }
+        }
+}
+
 
 // MARK: - Verify Code modal methods
 
@@ -335,3 +484,137 @@ extension MultiFactorAuthenticationViewController {
         verifyCodeViewController = nil
     }
 }
+
+// MARK: - Verification Contact modal methods
+
+extension MultiFactorAuthenticationViewController {
+
+    func showVerificationContactModal(
+        loginHint: String,
+        continueCallback: @escaping (_ verificationContact: String?) -> Void,
+        cancelCallback: @escaping () -> Void
+    ) {
+        verificationContactViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerificationContactViewController") as? VerificationContactViewController
+
+        guard let verificationContactViewController = verificationContactViewController else {
+            print("Error creating Auth Method view controller")
+            return
+        }
+        
+        verificationContactViewController.loginHint = loginHint
+
+        updateVerificationContactModal(errorMessage: nil,
+                             continueCallback: continueCallback,
+                             cancelCallback: cancelCallback)
+
+        present(verificationContactViewController, animated: true)
+    }
+
+    func updateVerificationContactModal(
+        errorMessage: String?,
+        continueCallback: @escaping (_ verificationContact: String?) -> Void,
+        cancelCallback: @escaping () -> Void
+    ) {
+        guard let verificationContactViewController = verificationContactViewController else {
+            return
+        }
+
+        if let errorMessage = errorMessage {
+            verificationContactViewController.errorLabel.text = errorMessage
+        }
+
+        verificationContactViewController.onContinue = { verificationContact in
+            DispatchQueue.main.async {
+                self.verificationContact = verificationContact
+                continueCallback(verificationContact)
+            }
+        }
+
+        verificationContactViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
+            }
+        }
+    }
+    
+    func dismissVerificationContactModal(completion: (() -> Void)? = nil) {
+        guard verificationContactViewController != nil else {
+            print("Unexpected error: Auth Method view controller is nil")
+            return
+        }
+
+        dismiss(animated: true, completion: completion)
+        verificationContactViewController = nil
+    }
+}
+
+// MARK: - Verify Challenge modal methods
+
+extension MultiFactorAuthenticationViewController {
+
+    func showVerifyChallengeModal(
+        submitCallback: @escaping (_ code: String) -> Void,
+        registerCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
+    ) {
+        verifyChallengeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyAuthMethodChallengeViewController") as? VerifyAuthMethodChallengeViewController
+
+        guard let verifyChallengeViewController = verifyChallengeViewController else {
+            print("Error creating Verify Auth Method Challenge view controller")
+            return
+        }
+
+        updateVerifyChallengeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              registerCallback: registerCallback,
+                              cancelCallback: cancelCallback)
+
+        present(verifyChallengeViewController, animated: true)
+    }
+
+    func updateVerifyChallengeModal(
+        errorMessage: String?,
+        submitCallback: @escaping (_ code: String) -> Void,
+        registerCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
+    ) {
+        guard let verifyChallengeViewController = verifyChallengeViewController else {
+            return
+        }
+
+        if let errorMessage = errorMessage {
+            verifyChallengeViewController.errorLabel.text = errorMessage
+        }
+
+        verifyChallengeViewController.onSubmit = { challenge in
+            DispatchQueue.main.async {
+                submitCallback(challenge)
+            }
+        }
+
+        verifyChallengeViewController.onRegister = {
+            DispatchQueue.main.async {
+                registerCallback()
+            }
+        }
+
+        verifyChallengeViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
+            }
+        }
+    }
+
+    func dismissVerifyChallengeModal() {
+        guard verifyChallengeViewController != nil else {
+            print("Unexpected error: Verify Auth Method Challenge view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+        verifyChallengeViewController = nil
+    }
+}
+
