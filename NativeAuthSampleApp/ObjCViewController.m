@@ -48,13 +48,24 @@
     [super viewDidLoad];
 
     NSError *error = nil;
-    self.nativeAuth = [[MSALNativeAuthPublicClientApplication alloc]
-                       initWithClientId:Configuration.clientId
-                       tenantSubdomain:Configuration.tenantSubdomain
-                       challengeTypes:MSALNativeAuthChallengeTypeOOB | MSALNativeAuthChallengeTypePassword
-                       redirectUri:nil
-                       error:&error];
+    MSALNativeAuthPublicClientApplicationConfig *config = [[MSALNativeAuthPublicClientApplicationConfig alloc]
+                                                           initWithClientId:Configuration.clientId
+                                                           tenantSubdomain:Configuration.tenantSubdomain
+                                                           challengeTypes:MSALNativeAuthChallengeTypeOOB | MSALNativeAuthChallengeTypePassword
+                                                           error:&error];
 
+    if (config && !error) {
+        config.capabilities = MSALNativeAuthCapabilityMFARequired | MSALNativeAuthCapabilityRegistrationRequired;
+        
+        self.nativeAuth = [[MSALNativeAuthPublicClientApplication alloc]
+                           initWithNativeAuthConfiguration:config
+                           error:&error];
+    }
+
+    if (error) {
+        // Handle error
+        NSLog(@"Error initializing MSAL: %@", error.localizedDescription);
+    }
     if (error != nil) {
         NSLog(@"Unable to initialize MSAL %@", error);
     } else {
