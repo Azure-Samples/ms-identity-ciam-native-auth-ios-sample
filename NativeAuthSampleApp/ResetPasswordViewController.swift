@@ -43,11 +43,13 @@ class ResetPasswordViewController: UIViewController {
         super.viewDidLoad()
 
         do {
-            nativeAuth = try MSALNativeAuthPublicClientApplication(
+            let config = try MSALNativeAuthPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
                 tenantSubdomain: Configuration.tenantSubdomain,
                 challengeTypes: [.OOB, .password]
             )
+            config.capabilities = [.mfaRequired, .registrationRequired]
+            nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         } catch {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL")
