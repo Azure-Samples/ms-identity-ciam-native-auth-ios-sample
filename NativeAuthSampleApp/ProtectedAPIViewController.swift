@@ -68,7 +68,7 @@ class ProtectedAPIViewController: UIViewController {
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         } catch {
             print("Unable to initialize MSAL \(error)")
-            showResultText("Unable to initialize MSAL")
+            showResultText("Unable to initialize MSAL: \(error.localizedDescription)")
         }
     }
 
