@@ -65,9 +65,6 @@
     if (error) {
         // Handle error
         NSLog(@"Error initializing MSAL: %@", error.localizedDescription);
-    }
-    if (error != nil) {
-        NSLog(@"Unable to initialize MSAL %@", error);
     } else {
         NSLog(@"Initialized MSAL successfully");
     }
