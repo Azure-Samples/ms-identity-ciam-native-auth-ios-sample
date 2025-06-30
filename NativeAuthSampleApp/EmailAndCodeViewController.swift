@@ -47,9 +47,8 @@ class EmailAndCodeViewController: UIViewController {
             let config = try MSALNativeAuthPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
                 tenantSubdomain: Configuration.tenantSubdomain,
-                challengeTypes: [.OOB, .password]
+                challengeTypes: [.OOB]
             )
-            config.capabilities = [.mfaRequired, .registrationRequired]
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         } catch {
             print("Unable to initialize MSAL \(error)")
