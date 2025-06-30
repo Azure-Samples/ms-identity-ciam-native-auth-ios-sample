@@ -55,8 +55,6 @@
                                                            error:&error];
 
     if (config && !error) {
-        config.capabilities = MSALNativeAuthCapabilityMFARequired | MSALNativeAuthCapabilityRegistrationRequired;
-        
         self.nativeAuth = [[MSALNativeAuthPublicClientApplication alloc]
                            initWithNativeAuthConfiguration:config
                            error:&error];
