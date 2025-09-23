@@ -151,15 +151,20 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         }
     }
 
-    func onSignInAwaitingMFA(newState: AwaitingMFAState) {
+    func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState) {
         print("SignInStartDelegate: onSignInAwaitingMFA")
         
         showResultText("Second factor authentication is required")
 
         let alert = UIAlertController(title: "MFA required", message: "Do you want to proceed with MFA?", preferredStyle: .alert)
-
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            newState.requestChallenge(delegate: self)
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [self] _ in
+            guard let authMethod = authMethods.first else {
+                showResultText("Error while sending MFA challenge: No auth methods available")
+                return
+            }
+            self.authMethod = authMethod
+            newState.requestChallenge(authMethod:authMethod, delegate: self)
         }))
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
@@ -176,7 +181,10 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 
         let alert = UIAlertController(title: "Missing strong authentication method", message: "Registration of strong authentication method is required. Do you want to proceed with registration?", preferredStyle: .alert)
         
-        guard let authMethod = authMethods.first else { return }
+        guard let authMethod = authMethods.first else {
+            showResultText("Error while retrieving Register Strong Auth methods: No auth methods available")
+            return
+        }
         self.authMethod = authMethod
 
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
@@ -232,7 +240,8 @@ extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
                             resendCallback: { [weak self] in
                                 guard let self = self else { return }
 
-                                newState.requestChallenge(delegate: self)
+                                guard let authMethod = self.authMethod else { return }
+                                newState.requestChallenge(authMethod: authMethod, delegate: self)
                             }, cancelCallback: { [weak self] in
                                 guard let self = self else { return }
 
@@ -266,7 +275,8 @@ extension MultiFactorAuthenticationViewController: MFASubmitChallengeDelegate {
                                   }, resendCallback: { [weak self] in
                                       guard let self = self else { return }
 
-                                      newState.requestChallenge(delegate: self)
+                                      guard let authMethod = self.authMethod else { return }
+                                      newState.requestChallenge(authMethod: authMethod, delegate: self)
                                   }, cancelCallback: { [weak self] in
                                       guard let self = self else { return }
 
@@ -309,7 +319,7 @@ extension MultiFactorAuthenticationViewController: CredentialsDelegate {
 }
 
 
-// MARK: - JIT delegates
+// MARK: - RegisterStrongAuth delegates
 
 // MARK: RegisterStrongAuthChallengeDelegate
 
@@ -354,14 +364,13 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                     guard let self = self else { return }
 
                                     let newState = result.newState
-                                    
                                     newState.submitChallenge(challenge: challenge, delegate: self)
                                 },
                                 registerCallback: { [weak self] in
                                     guard let self = self else { return }
-                
+
                                     let newState = result.newState
-                
+
                                     guard let authMethod = self.authMethod else { return }
                                     let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
                                     parameter.verificationContact = verificationContact
@@ -377,7 +386,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
     }
 }
 
-// MARK: RegisterStrongAuthChallengeDelegate
+// MARK: RegisterStrongAuthSubmitChallengeDelegate
 
 extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChallengeDelegate {
     func onRegisterStrongAuthSubmitChallengeError(
