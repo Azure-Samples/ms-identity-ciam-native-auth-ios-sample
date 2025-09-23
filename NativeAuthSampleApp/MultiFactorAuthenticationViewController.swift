@@ -237,6 +237,7 @@ extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
                             },
                             resendCallback: { [weak self] in
                                 guard let self = self else { return }
+
                                 guard let mfaAuthMethod = self.mfaAuthMethod else { return }
                                 newState.requestChallenge(authMethod: mfaAuthMethod, delegate: self)
                             }, cancelCallback: { [weak self] in
@@ -271,6 +272,7 @@ extension MultiFactorAuthenticationViewController: MFASubmitChallengeDelegate {
                                       newState.submitChallenge(challenge: code, delegate: self)
                                   }, resendCallback: { [weak self] in
                                       guard let self = self else { return }
+
                                       guard let mfaAuthMethod = self.mfaAuthMethod else { return }
                                       newState.requestChallenge(authMethod: mfaAuthMethod, delegate: self)
                                   }, cancelCallback: { [weak self] in
@@ -360,11 +362,11 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                     guard let self = self else { return }
 
                                     let newState = result.newState
-                                    
                                     newState.submitChallenge(challenge: challenge, delegate: self)
                                 },
                                 registerCallback: { [weak self] in
                                     guard let self = self else { return }
+
                                     let newState = result.newState
 
                                     guard let jitAuthMethod = self.jitAuthMethod else { return }
