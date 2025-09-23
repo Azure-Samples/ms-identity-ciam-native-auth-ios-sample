@@ -190,9 +190,12 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
             self.showVerificationContactModal(loginHint: authMethod.loginHint, continueCallback: { [weak self] verificationContact in
                                     guard let self = self else { return }
+                                    guard let verificationContact = verificationContact else {
+                                        showResultText("Verification contact is required")
+                                        return
+                                    }
                 
-                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                    parameter.verificationContact = verificationContact
+                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: verificationContact)
                                     newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                     
                                 }, cancelCallback: { [weak self] in
@@ -339,10 +342,13 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                 updateVerificationContactModal(errorMessage: "Invalid verification contact",
                                       continueCallback: { [weak self] verificationContact in
                                         guard let self = self else { return }
+                                        guard let verificationContact = verificationContact else {
+                                            showResultText("Verification contact is required")
+                                            return
+                                        }
                         
                                         guard let authMethod = self.authMethod else { return }
-                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                        parameter.verificationContact = verificationContact
+                                        let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: verificationContact)
                                         newState.challengeAuthMethod(parameters: parameter, delegate: self)
                     
                                     }, cancelCallback: { [weak self] in
@@ -368,12 +374,15 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
                                 },
                                 registerCallback: { [weak self] in
                                     guard let self = self else { return }
-
+                                    guard let verificationContact = verificationContact else {
+                                        showResultText("Verification contact is required")
+                                        return
+                                    }
+                
                                     let newState = result.newState
 
                                     guard let authMethod = self.authMethod else { return }
-                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                    parameter.verificationContact = verificationContact
+                                    let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: verificationContact)
                                     newState.challengeAuthMethod(parameters: parameter, delegate: self)
                 
                                 }, cancelCallback: { [weak self] in
@@ -408,9 +417,13 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
                                       }, registerCallback: { [weak self] in
                                           guard let self = self else { return }
                                           
+                                          guard let verificationContact = verificationContact else {
+                                              showResultText("Verification contact is required")
+                                              return
+                                          }
+                                          
                                           guard let authMethod = self.authMethod else { return }
-                                          let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-                                          parameter.verificationContact = verificationContact
+                                          let parameter = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: verificationContact)
                                           newState.challengeAuthMethod(parameters: parameter, delegate: self)
                                           
                                       }, cancelCallback: { [weak self] in
