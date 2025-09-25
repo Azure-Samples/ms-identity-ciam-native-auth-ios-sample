@@ -24,6 +24,7 @@
 
 import UIKit
 import MSAL
+
 class VerifyAuthMethodChallengeViewController: UIViewController {
     var onSubmit: ((_ challenge: String) -> Void)?
     var onRegister: (() -> Void)?
