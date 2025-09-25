@@ -514,7 +514,7 @@ extension MultiFactorAuthenticationViewController {
 extension MultiFactorAuthenticationViewController {
 
     func showVerificationContactModal(
-        loginHint: String,
+        loginHint: String?,
         continueCallback: @escaping (_ verificationContact: String?) -> Void,
         cancelCallback: @escaping () -> Void
     ) {

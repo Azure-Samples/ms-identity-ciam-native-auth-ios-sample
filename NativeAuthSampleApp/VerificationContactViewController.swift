@@ -29,8 +29,8 @@ class VerificationContactViewController: UIViewController {
     var onContinue: ((_ verificationContact: String?) -> Void)?
     var onCancel: (() -> Void)?
     
-    var loginHint: String = ""
-    
+    var loginHint: String? = ""
+
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var hintLabel: UILabel!
@@ -38,7 +38,7 @@ class VerificationContactViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        hintLabel.text = (hintLabel.text ?? "") + loginHint
+        hintLabel.text = (hintLabel.text ?? "") + (loginHint ?? "")
     }
     
     @IBAction func cancelPressed(_ sender: Any) {
