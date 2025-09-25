@@ -1,4 +1,3 @@
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -24,45 +23,48 @@
 
 import UIKit
 import MSAL
-class VerifyAuthMethodChallengeViewController: UIViewController {
-    var onSubmit: ((_ challenge: String) -> Void)?
-    var onRegister: (() -> Void)?
-    var onCancel: (() -> Void)?
 
+class VerifyAuthMethodDetailViewController: UIViewController {
+    var onContinue: ((_ verificationContact: String?) -> Void)?
+    var onCancel: (() -> Void)?
     var authMethod: MSALAuthMethod?
 
-    @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var errorLabel: UILabel!
-    @IBOutlet weak var challengeTextField: UITextField!
-
+    @IBOutlet weak var messageLabel: UILabel!
+    @IBOutlet weak var challengeChannelName: UILabel!
+    @IBOutlet weak var verificationContactValue: UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let authMethod, authMethod.channelTargetType.isEmailType {
-            messageLabel.text = "Please enter the verification code that was sent to your email. This step is needed to register a new strong authentication method."
-        } else if let authMethod, authMethod.channelTargetType.isSMSType {
-            messageLabel.text = "Please enter the verification code that was sent to your phone. This step is needed to register a new strong authentication method."
+        if authMethod?.channelTargetType.isEmailType == true {
+            messageLabel.text = "For Multi-factor authentication, you can enter a separate email address (optional). If you don't provide one, we will use your primary email address " + (authMethod?.loginHint ?? "")
+            challengeChannelName.text = "Email"
+            verificationContactValue.keyboardType = .emailAddress
+        } else if authMethod?.channelTargetType.isSMSType == true {
+            messageLabel.text = "For Multi-factor authentication using SMS please enter your phone number. The format needs to be \"+<country code> <number>\", for example \"+1 000111222\""
+            challengeChannelName.text = "Phone"
+            verificationContactValue.keyboardType = .phonePad
         } else {
             messageLabel.text = "The authentication method selected is not supported in this sample app."
+            challengeChannelName.text = "N/A"
+            verificationContactValue.keyboardType = .default
         }
     }
-    @IBAction func registerPressed(_: Any) {
-        challengeTextField.resignFirstResponder()
-        onRegister?()
-    }
 
-    @IBAction func cancelPressed(_: Any) {
-        challengeTextField.resignFirstResponder()
+    @IBAction func cancelPressed(_ sender: Any) {
+        verificationContactValue.resignFirstResponder()
         onCancel?()
-        
+
         dismiss(animated: true)
     }
 
-    @IBAction func submitPressed(_: Any) {
-        guard let challenge = challengeTextField.text else {
+
+    @IBAction func continuePressed(_ sender: Any) {
+        guard let optionalContact = verificationContactValue.text else {
             return
         }
 
-        challengeTextField.resignFirstResponder()
-        onSubmit?(challenge)
+        verificationContactValue.resignFirstResponder()
+        onContinue?(optionalContact)
     }
 }

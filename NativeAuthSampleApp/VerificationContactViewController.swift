@@ -25,36 +25,58 @@
 import UIKit
 import MSAL
 
-class VerificationContactViewController: UIViewController {
+class VerificationContactViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+
+    var onAuthMethodSelection: ((_ authMethod: MSALAuthMethod?) -> Void)?
     var onContinue: ((_ verificationContact: String?) -> Void)?
     var onCancel: (() -> Void)?
-    
-    var loginHint: String = ""
-    
-    @IBOutlet weak var errorLabel: UILabel!
-    @IBOutlet weak var emailTextField: UITextField!
-    @IBOutlet weak var hintLabel: UILabel!
-    
+
+    var authMethods: [MSALAuthMethod]!
+    var verifyAuthMethodDetailViewController : VerifyAuthMethodDetailViewController?
+    @IBOutlet weak var tableView: UITableView!
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        hintLabel.text = (hintLabel.text ?? "") + loginHint
+
+        tableView.delegate = self
+        tableView.dataSource = self
     }
-    
-    @IBAction func cancelPressed(_ sender: Any) {
-        emailTextField.resignFirstResponder()
+
+    @IBAction func dismissButtonPressed(_ sender: Any) {
         onCancel?()
-        
-        dismiss(animated: true)
+        self.dismiss(animated: true, completion: nil)
+    }
+
+    func setDetailErrorMessage(_ error: String) {
+        verifyAuthMethodDetailViewController?.errorLabel.text = error
+    }
+
+    // MARK: - Table View
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return authMethods.count
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 64
     }
     
+    internal func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "AuthMethodCell", for: indexPath) as! AuthMethodCell
+        let authMethod = authMethods[indexPath.row]
+        cell.authMethod = authMethod
+        cell.setup()
+        return cell
+    }
 
-    @IBAction func continuePressed(_ sender: Any) {
-        guard let optionalContact = emailTextField.text else {
-            return
-        }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cell = tableView.cellForRow(at: indexPath) as! AuthMethodCell
+        verifyAuthMethodDetailViewController = storyboard?.instantiateViewController(withIdentifier: "VerifyAuthMethodDetailViewController") as? VerifyAuthMethodDetailViewController
+        verifyAuthMethodDetailViewController?.onCancel = onCancel
+        verifyAuthMethodDetailViewController?.onContinue = onContinue
+        verifyAuthMethodDetailViewController?.authMethod = cell.authMethod
+        onAuthMethodSelection?(cell.authMethod)
 
-        emailTextField.resignFirstResponder()
-        onContinue?(optionalContact)
+        self.present(verifyAuthMethodDetailViewController!, animated: true, completion: nil)
     }
 }
