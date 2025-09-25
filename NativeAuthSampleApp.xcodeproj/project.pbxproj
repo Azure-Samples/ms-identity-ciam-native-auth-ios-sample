@@ -25,6 +25,8 @@
 		9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1949529F820980023905D /* EmailAndCodeViewController.swift */; };
 		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
 		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
+		DE2D14EC2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */; };
+		DE2D14EF2E858B24001FC199 /* AuthMethodCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */; };
 		E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,6 +53,8 @@
 		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
 		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
+		DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAuthMethodDetailViewController.swift; sourceTree = "<group>"; };
+		DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethodCell.swift; sourceTree = "<group>"; };
 		E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiFactorAuthenticationViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -91,6 +95,7 @@
 				9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */,
 				9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */,
 				9B73CACB29F6DAA300FC7129 /* Modal View Controllers */,
+				DE2D14EE2E858B24001FC199 /* Table View Cells */,
 				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
 				9B08477929969264003BA4B4 /* Main.storyboard */,
 				9B08477C29969265003BA4B4 /* Assets.xcassets */,
@@ -103,6 +108,7 @@
 		9B73CACB29F6DAA300FC7129 /* Modal View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */,
 				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
 				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
 				1220D5D42D90C52200B92305 /* VerificationContactViewController.swift */,
@@ -141,6 +147,14 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DE2D14EE2E858B24001FC199 /* Table View Cells */ = {
+			isa = PBXGroup;
+			children = (
+				DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */,
+			);
+			path = "Table View Cells";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -232,10 +246,12 @@
 				12266F092D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift in Sources */,
 				9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */,
 				9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */,
+				DE2D14EF2E858B24001FC199 /* AuthMethodCell.swift in Sources */,
 				9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */,
 				E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */,
 				9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */,
 				9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */,
+				DE2D14EC2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
