@@ -370,6 +370,9 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthChallengeDe
 
                     showResultText("Action cancelled")
                 })
+            } else if error.isVerificationContactBlocked {
+                showResultText("The provided verification contact is blocked. Please use a different contact.")
+                dismissVerificationContactModal()
             } else {
                 showResultText("Unexpected error registering auth method: \(error.errorDescription ?? "No error description")")
                 dismissVerificationContactModal()
