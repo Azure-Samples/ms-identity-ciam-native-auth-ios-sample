@@ -1358,10 +1358,10 @@
             </objects>
             <point key="canvasLocation" x="3593" y="742"/>
         </scene>
-        <!--Verification Contact View Controller-->
+        <!--Select Auth Method View Controller-->
         <scene sceneID="hYq-Bu-3m2">
             <objects>
-                <viewController storyboardIdentifier="VerificationContactViewController" id="xTn-Zl-JJl" customClass="VerificationContactViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SelectAuthMethodViewController" id="xTn-Zl-JJl" customClass="SelectAuthMethodViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="zXi-ug-Sh3">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="793"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1683,7 +1683,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.2196078431372549" blue="0.23529411764705882" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
