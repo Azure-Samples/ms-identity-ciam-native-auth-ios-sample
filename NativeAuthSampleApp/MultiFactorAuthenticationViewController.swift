@@ -244,7 +244,8 @@ extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
             return
         }
 
-        showVerifyCodeModal(submitCallback: { [weak self] code in
+        showVerifyCodeModal(channelTargetType: channelTargetType,
+                            submitCallback: { [weak self] code in
                                 guard let self = self else { return }
 
                                 newState.submitChallenge(challenge: code, delegate: self)
@@ -462,6 +463,7 @@ extension MultiFactorAuthenticationViewController: RegisterStrongAuthSubmitChall
 extension MultiFactorAuthenticationViewController {
 
     func showVerifyCodeModal(
+        channelTargetType: MSALNativeAuthChannelType,
         submitCallback: @escaping (_ code: String) -> Void,
         resendCallback: @escaping () -> Void,
         cancelCallback: @escaping () -> Void
@@ -473,6 +475,8 @@ extension MultiFactorAuthenticationViewController {
             print("Error creating Verify Code view controller")
             return
         }
+
+        verifyCodeViewController.channelTargetType = channelTargetType
 
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: submitCallback,

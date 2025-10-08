@@ -38,9 +38,9 @@ class VerifyAuthMethodChallengeViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let authMethod, authMethod.channelTargetType.isEmailType {
+        if authMethod?.channelTargetType.isEmailType == true {
             messageLabel.text = "Please enter the verification code that was sent to your email. This step is needed to register a new strong authentication method."
-        } else if let authMethod, authMethod.channelTargetType.isSMSType {
+        } else if authMethod?.channelTargetType.isSMSType == true {
             messageLabel.text = "Please enter the verification code that was sent to your phone. This step is needed to register a new strong authentication method."
         } else {
             messageLabel.text = "The authentication method selected is not supported in this sample app."
