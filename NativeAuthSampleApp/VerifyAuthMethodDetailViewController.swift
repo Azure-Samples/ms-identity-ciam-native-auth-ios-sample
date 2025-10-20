@@ -1,4 +1,3 @@
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -25,36 +24,47 @@
 import UIKit
 import MSAL
 
-class VerificationContactViewController: UIViewController {
+class VerifyAuthMethodDetailViewController: UIViewController {
     var onContinue: ((_ verificationContact: String?) -> Void)?
     var onCancel: (() -> Void)?
-    
-    var loginHint: String? = ""
+    var authMethod: MSALAuthMethod?
 
     @IBOutlet weak var errorLabel: UILabel!
-    @IBOutlet weak var emailTextField: UITextField!
-    @IBOutlet weak var hintLabel: UILabel!
+    @IBOutlet weak var messageLabel: UILabel!
+    @IBOutlet weak var challengeChannelName: UILabel!
+    @IBOutlet weak var verificationContactValue: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        hintLabel.text = (hintLabel.text ?? "") + (loginHint ?? "")
+        if authMethod?.channelTargetType.isEmailType == true {
+            messageLabel.text = "For Multi-factor authentication, you can enter a separate email address (optional). If you don't provide one, we will use your primary email address " + (authMethod?.loginHint ?? "")
+            challengeChannelName.text = "Email"
+            verificationContactValue.keyboardType = .emailAddress
+        } else if authMethod?.channelTargetType.isSMSType == true {
+            messageLabel.text = "For Multi-factor authentication using SMS please enter your phone number. The format needs to be \"+<country code> <number>\", for example \"+1 000111222\""
+            challengeChannelName.text = "Phone"
+            verificationContactValue.keyboardType = .phonePad
+        } else {
+            messageLabel.text = "The authentication method selected is not supported in this sample app."
+            challengeChannelName.text = "N/A"
+            verificationContactValue.keyboardType = .default
+        }
     }
-    
+
     @IBAction func cancelPressed(_ sender: Any) {
-        emailTextField.resignFirstResponder()
+        verificationContactValue.resignFirstResponder()
         onCancel?()
-        
+
         dismiss(animated: true)
     }
-    
+
 
     @IBAction func continuePressed(_ sender: Any) {
-        guard let optionalContact = emailTextField.text else {
+        guard let optionalContact = verificationContactValue.text else {
             return
         }
 
-        emailTextField.resignFirstResponder()
+        verificationContactValue.resignFirstResponder()
         onContinue?(optionalContact)
     }
 }

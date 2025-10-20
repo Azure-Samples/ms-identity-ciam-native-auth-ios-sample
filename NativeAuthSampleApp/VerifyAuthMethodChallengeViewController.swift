@@ -23,15 +23,29 @@
 // THE SOFTWARE.
 
 import UIKit
+import MSAL
 
 class VerifyAuthMethodChallengeViewController: UIViewController {
     var onSubmit: ((_ challenge: String) -> Void)?
     var onRegister: (() -> Void)?
     var onCancel: (() -> Void)?
-    
+
+    var authMethod: MSALAuthMethod?
+
+    @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var challengeTextField: UITextField!
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        if authMethod?.channelTargetType.isEmailType == true {
+            messageLabel.text = "Please enter the verification code that was sent to your email. This step is needed to register a new strong authentication method."
+        } else if authMethod?.channelTargetType.isSMSType == true {
+            messageLabel.text = "Please enter the verification code that was sent to your phone. This step is needed to register a new strong authentication method."
+        } else {
+            messageLabel.text = "The authentication method selected is not supported in this sample app."
+        }
+    }
     @IBAction func registerPressed(_: Any) {
         challengeTextField.resignFirstResponder()
         onRegister?()

@@ -23,14 +23,30 @@
 // THE SOFTWARE.
 
 import UIKit
+import MSAL
 
 class VerifyCodeViewController: UIViewController {
     var onSubmit: ((_ code: String) -> Void)?
     var onResend: (() -> Void)?
     var onCancel: (() -> Void)?
+    var channelTargetType: MSALNativeAuthChannelType?
+
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var codeTextField: UITextField!
+    @IBOutlet weak var messageLabel: UILabel!
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        if channelTargetType?.isEmailType == true {
+            messageLabel.text = "Please enter the verification code that was sent to your email."
+        } else if channelTargetType?.isSMSType == true {
+            messageLabel.text = "Please enter the verification code that was sent to your phone number."
+        } else {
+            //Default when VerifyCodeViewController is used without setting authMethod or authMethod.channelTargetType it's unknown type
+            messageLabel.text = "Please enter the verification code that was sent to your email or device."
+        }
+
+    }
     @IBAction func resendPressed(_: Any) {
         codeTextField.resignFirstResponder()
         onResend?()
