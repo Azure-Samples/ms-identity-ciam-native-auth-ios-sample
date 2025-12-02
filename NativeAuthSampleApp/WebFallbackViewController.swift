@@ -31,6 +31,11 @@ class WebFallbackViewController: UIViewController {
     @IBOutlet weak var resultTextView: UITextView!
 
     @IBOutlet weak var signInButton: UIButton!
+    @IBOutlet weak var signInWithGoogle: UIButton!
+    @IBOutlet weak var signInWithFacebook: UIButton!
+    @IBOutlet weak var signInWithApple: UIButton!
+    @IBOutlet weak var signInWithLinkedIn: UIButton!
+    
     @IBOutlet weak var signOutButton: UIButton!
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
@@ -57,6 +62,22 @@ class WebFallbackViewController: UIViewController {
         webviewParams = MSALWebviewParameters(authPresentationViewController: self)
     }
 
+    @IBAction func signInWithGooglePressed(_: Any) {
+        signInWithWebUX(domainHint: "Google")
+    }
+    
+    @IBAction func signInWithFacebookPressed(_: Any) {
+        signInWithWebUX(domainHint: "Facebook")
+    }
+    
+    @IBAction func signInWithApplePressed(_: Any) {
+        signInWithWebUX(domainHint: "Apple")
+    }
+    
+    @IBAction func signInWithLinkedInPressed(_: Any) {
+        signInWithWebUX(domainHint: "www.linkedin.com") // Custom OIDC
+    }
+    
     @IBAction func signInPressed(_: Any) {
         view.endEditing(true)
 
@@ -100,11 +121,17 @@ class WebFallbackViewController: UIViewController {
         let signedIn = msalAccount != nil || accountResult != nil
 
         signInButton.isEnabled = !signedIn
+        signInWithGoogle.isEnabled = !signedIn
+        signInWithFacebook.isEnabled = !signedIn
+        signInWithApple.isEnabled = !signedIn
+        signInWithLinkedIn.isEnabled = !signedIn
+        
         signOutButton.isEnabled = signedIn
     }
 
-    fileprivate func signInWithWebUX() {
+    fileprivate func signInWithWebUX(domainHint: String? = nil) {
         let parameters = MSALInteractiveTokenParameters(scopes: ["User.Read"], webviewParameters: webviewParams)
+        parameters.domainHint = domainHint
 
         nativeAuth.acquireToken(with: parameters) { [weak self] (result: MSALResult?, error: Error?) in
             guard let self = self else { return }
@@ -124,6 +151,11 @@ class WebFallbackViewController: UIViewController {
             self.updateUI()
 
             self.showResultText("Signed in successfully with Web UX: \(msalAccount.accountClaims!.description)")
+            
+            if let account = nativeAuth.getNativeAuthUserAccount() {
+                self.onSignInCompleted(result: account)
+            }
+            
         }
     }
 
@@ -149,6 +181,7 @@ class WebFallbackViewController: UIViewController {
 
             self.showResultText("Signed out successfully")
             self.msalAccount = nil
+            self.accountResult = nil
 
             self.updateUI()
         }
