@@ -600,8 +600,18 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="mji-4B-vhE">
+                                        <rect key="frame" x="0.0" y="77.666666666666657" width="353" height="32"/>
+                                        <segments>
+                                            <segment title="Sign Up"/>
+                                            <segment title="Sign In"/>
+                                        </segments>
+                                        <connections>
+                                            <action selector="onFlowValueChanged:" destination="wyW-Cb-gAD" eventType="valueChanged" id="AOP-jt-WgJ"/>
+                                        </connections>
+                                    </segmentedControl>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="11" translatesAutoresizingMaskIntoConstraints="NO" id="vRw-WY-eFB" userLabel="Fields Stack View">
-                                        <rect key="frame" x="0.0" y="77.666666666666657" width="353" height="51.666666666666657"/>
+                                        <rect key="frame" x="0.0" y="145.66666666666666" width="353" height="51.666666666666657"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="53" translatesAutoresizingMaskIntoConstraints="NO" id="bA0-ma-uIo">
                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="20.333333333333332"/>
@@ -638,7 +648,7 @@
                                         </subviews>
                                     </stackView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DBz-vX-Jqo" userLabel="Buttons View">
-                                        <rect key="frame" x="0.0" y="166.33333333333337" width="353" height="246"/>
+                                        <rect key="frame" x="0.0" y="234.33333333333331" width="353" height="246"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="500" insetsLayoutMarginsFromSafeArea="NO" axis="vertical" distribution="fillProportionally" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="6IW-lX-989" userLabel="Buttons Stack View">
                                                 <rect key="frame" x="81.666666666666686" y="0.0" width="190" height="246"/>
@@ -652,7 +662,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D9v-Am-asI">
-                                                        <rect key="frame" x="0.0" y="42.333333333333343" width="190" height="34.333333333333343"/>
+                                                        <rect key="frame" x="0.0" y="42.333333333333371" width="190" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="plain" title="Sign in with Google"/>
                                                         <connections>
@@ -660,7 +670,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dM2-p5-8Xq">
-                                                        <rect key="frame" x="0.0" y="84.666666666666657" width="190" height="34.333333333333343"/>
+                                                        <rect key="frame" x="0.0" y="84.666666666666686" width="190" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="plain" title="Sign in with Facebook"/>
                                                         <connections>
@@ -668,7 +678,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U30-9h-QZi">
-                                                        <rect key="frame" x="0.0" y="126.99999999999996" width="190" height="34.333333333333329"/>
+                                                        <rect key="frame" x="0.0" y="126.99999999999999" width="190" height="34.333333333333329"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="plain" title="Sign in with Apple"/>
                                                         <connections>
@@ -676,7 +686,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RZf-nf-4YS">
-                                                        <rect key="frame" x="0.0" y="169.33333333333334" width="190" height="34.333333333333343"/>
+                                                        <rect key="frame" x="0.0" y="169.33333333333337" width="190" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="plain" title="Sign in with LinkedIn"/>
                                                         <connections>
@@ -684,7 +694,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lcp-NG-GOF">
-                                                        <rect key="frame" x="0.0" y="211.66666666666666" width="190" height="34.333333333333343"/>
+                                                        <rect key="frame" x="0.0" y="211.66666666666669" width="190" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Sign Out"/>
                                                         <connections>
@@ -705,7 +715,7 @@
                                         </constraints>
                                     </view>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="95D-4Q-ArN" userLabel="Results Stack View">
-                                        <rect key="frame" x="0.0" y="449.33333333333331" width="353" height="244.66666666666669"/>
+                                        <rect key="frame" x="0.0" y="517.33333333333337" width="353" height="176.66666666666663"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Results:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="a18-51-wXs">
                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="20.333333333333332"/>
@@ -714,7 +724,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="XHs-qB-VJJ">
-                                                <rect key="frame" x="0.0" y="28.333333333333329" width="353" height="216.33333333333337"/>
+                                                <rect key="frame" x="0.0" y="28.333333333333258" width="353" height="148.33333333333334"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <color key="textColor" systemColor="labelColor"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -737,6 +747,7 @@
                     <tabBarItem key="tabBarItem" title="Fallback to Web UX" image="globe.badge.chevron.backward" catalog="system" id="pDE-hZ-QNr"/>
                     <connections>
                         <outlet property="emailTextField" destination="tUh-3I-LbV" id="Iwj-I0-JRZ"/>
+                        <outlet property="flowControl" destination="mji-4B-vhE" id="hYp-aB-uLI"/>
                         <outlet property="passwordTextField" destination="SUE-9B-DU9" id="9Pt-Pc-idI"/>
                         <outlet property="resultTextView" destination="XHs-qB-VJJ" id="RRD-pI-3GB"/>
                         <outlet property="signInButton" destination="plQ-qL-Lm8" id="TFm-4L-9kA"/>

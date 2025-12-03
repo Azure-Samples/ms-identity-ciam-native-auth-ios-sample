@@ -25,6 +25,11 @@
 import MSAL
 import UIKit
 
+enum Flow {
+    case signUp
+    case signIn
+}
+
 class WebFallbackViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
@@ -36,6 +41,7 @@ class WebFallbackViewController: UIViewController {
     @IBOutlet weak var signInWithApple: UIButton!
     @IBOutlet weak var signInWithLinkedIn: UIButton!
     
+    @IBOutlet weak var flowControl: UISegmentedControl!
     @IBOutlet weak var signOutButton: UIButton!
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
@@ -43,6 +49,7 @@ class WebFallbackViewController: UIViewController {
 
     var accountResult: MSALNativeAuthUserAccountResult?
     var msalAccount: MSALAccount?
+    var flow: Flow = .signIn
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,6 +65,8 @@ class WebFallbackViewController: UIViewController {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL: \(error.localizedDescription)")
         }
+        
+        updateUI()
 
         webviewParams = MSALWebviewParameters(authPresentationViewController: self)
     }
@@ -97,6 +106,11 @@ class WebFallbackViewController: UIViewController {
         nativeAuth.signIn(parameters: parameters, delegate: self)
     }
 
+    @IBAction func onFlowValueChanged(_ segmentedControl: UISegmentedControl)
+    {
+        updateUI()
+    }
+    
     @IBAction func signOutPressed(_: Any) {
         view.endEditing(true)
 
@@ -119,18 +133,32 @@ class WebFallbackViewController: UIViewController {
 
     fileprivate func updateUI() {
         let signedIn = msalAccount != nil || accountResult != nil
+        
+        flow = flowControl.selectedSegmentIndex == 0 ? .signUp: .signIn
+        let stateLabel = flowControl.selectedSegmentIndex == 0 ? "Sign Up": "Sign In"
 
         signInButton.isEnabled = !signedIn
+        signInButton.setTitle(stateLabel, for: .normal)
+        
         signInWithGoogle.isEnabled = !signedIn
+        signInWithGoogle.setTitle("\(stateLabel) with Google", for: .normal)
+        
         signInWithFacebook.isEnabled = !signedIn
+        signInWithFacebook.setTitle("\(stateLabel) with Facebook", for: .normal)
+        
         signInWithApple.isEnabled = !signedIn
+        signInWithApple.setTitle("\(stateLabel) with Apple", for: .normal)
+        
         signInWithLinkedIn.isEnabled = !signedIn
+        signInWithLinkedIn.setTitle("\(stateLabel) with LinkedIn", for: .normal)
         
         signOutButton.isEnabled = signedIn
     }
 
     fileprivate func signInWithWebUX(domainHint: String? = nil) {
         let parameters = MSALInteractiveTokenParameters(scopes: ["User.Read"], webviewParameters: webviewParams)
+        parameters.promptType = flow == .signUp ? .create : .login
+        
         parameters.domainHint = domainHint
 
         nativeAuth.acquireToken(with: parameters) { [weak self] (result: MSALResult?, error: Error?) in
