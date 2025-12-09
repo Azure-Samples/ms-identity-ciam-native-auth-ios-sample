@@ -49,6 +49,11 @@ class EmailAndPasswordViewController: UIViewController {
                 tenantSubdomain: Configuration.tenantSubdomain,
                 challengeTypes: [.OOB, .password]
             )
+            
+//            let authority = try MSALCIAMAuthority(url: URL(string: "https://sergeicustomers.ciamlogin.com/")!)
+
+//            let config = MSALNativeAuthPublicClientApplicationConfig(clientId: "18eb7a6e-61ba-48bb-bc50-4f971ec352bf", authority: authority, challengeTypes: [.OOB, .password])
+            
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         } catch {
             print("Unable to initialize MSAL \(error)")
@@ -75,7 +80,7 @@ class EmailAndPasswordViewController: UIViewController {
         showResultText("Signing up...")
 
         let parameters = MSALNativeAuthSignUpParameters(username: email)
-        parameters.password = password
+//        parameters.password = password
         nativeAuth.signUp(parameters: parameters, delegate: self)
     }
 
@@ -93,6 +98,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         let parameters = MSALNativeAuthSignInParameters(username: email)
         parameters.password = password
+        parameters.scopes = ["c1610180-92d8-47a6-91aa-5fcef8226022/Customer.Read"]
         nativeAuth.signIn(parameters: parameters, delegate: self)
     }
 
@@ -179,6 +185,35 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
 
                                 showResultText("Action cancelled")
                             })
+    }
+    
+    func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState) {
+        newState.submitPassword(password: "Microsoft5784594@", delegate: self)
+    }
+}
+
+extension EmailAndPasswordViewController : SignUpPasswordRequiredDelegate {
+    func onSignUpPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignUpPasswordRequiredState?)
+    {
+        let a = 0
+    }
+    
+    func onSignUpPasswordCompleted(newState: MSAL.SignUpCodeRequiredState) {
+        let a = 0
+    }
+    
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState)
+    {
+//        newState.submitAttributes(attributes: ["a": "b", "qwe": "c"], delegate: self)
+        
+        
+    }
+}
+
+extension EmailAndPasswordViewController: SignUpAttributesRequiredDelegate {
+    func onSignUpAttributesRequiredError(error: MSAL.AttributesRequiredError)
+    {
+        let a = 0
     }
 }
 

@@ -75,6 +75,7 @@ class EmailAndCodeViewController: UIViewController {
         showResultText("Signing up...")
 
         let parameters = MSALNativeAuthSignUpParameters(username: email)
+        parameters.attributes = ["country":"CA", "city":"Toronto"]
         nativeAuth.signUp(parameters: parameters, delegate: self)
     }
 
@@ -117,8 +118,8 @@ class EmailAndCodeViewController: UIViewController {
     func updateUI() {
         let signedIn = (accountResult != nil)
 
-        signUpButton.isEnabled = !signedIn
-        signInButton.isEnabled = !signedIn
+        signUpButton.isEnabled = true// !signedIn
+        signInButton.isEnabled = true// !signedIn
         signOutButton.isEnabled = signedIn
     }
 
@@ -142,6 +143,7 @@ class EmailAndCodeViewController: UIViewController {
 }
 
 // MARK: - Sign Up delegates
+
 
 // MARK: SignUpStartDelegate
 

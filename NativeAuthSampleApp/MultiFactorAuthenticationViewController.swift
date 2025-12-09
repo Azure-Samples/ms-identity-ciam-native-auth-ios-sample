@@ -31,7 +31,15 @@ import UIKit
  * In order for this flow to work properly, you must enable MFA in the Portal. Follow the link below for more information.
  * Learn documentation: TBD
  */
-class MultiFactorAuthenticationViewController: UIViewController {
+class MultiFactorAuthenticationViewController: UIViewController, SignInVerifyCodeDelegate, SignInResendCodeDelegate {
+    func onSignInResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignInCodeRequiredState?) {
+        print(error)
+    }
+    
+    func onSignInVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignInCodeRequiredState?) {
+        print(error)
+    }
+    
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
@@ -42,6 +50,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
+    var verifyCodeSignInViewController: VerifyCodeViewController?
     var verifyChallengeViewController: VerifyAuthMethodChallengeViewController?
     var selectAuthMethodViewController: SelectAuthMethodViewController?
 
@@ -86,7 +95,10 @@ class MultiFactorAuthenticationViewController: UIViewController {
         showResultText("Signing in...")
 
         let parameters = MSALNativeAuthSignInParameters(username: email)
-        parameters.password = password
+//        parameters.password = password
+        //parameters.scopes = ["Device.Read", "Notes.Read"]
+        var error: NSError? = nil
+        parameters.claimsRequest = MSALClaimsRequest(jsonString: "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}", error: &error)
         nativeAuth.signIn(parameters: parameters, delegate: self)
     }
     
@@ -141,6 +153,31 @@ class MultiFactorAuthenticationViewController: UIViewController {
 // MARK: SignInStartDelegate
 
 extension MultiFactorAuthenticationViewController: SignInStartDelegate {
+    func onSignInCodeRequired(
+        newState: MSAL.SignInCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSAL.MSALNativeAuthChannelType,
+        codeLength: Int
+    ) {
+        print("SignInStartDelegate: onSignInCodeRequired: \(newState)")
+
+        showResultText("Email verification required")
+
+        showVerifySingInCodeModal(submitCallback: { [weak self] code in
+                                guard let self = self else { return }
+
+                                newState.submitCode(code: code, delegate: self)
+                            },
+                            resendCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                newState.resendCode(delegate: self)
+                            }, cancelCallback: { [weak self] in
+                                guard let self = self else { return }
+
+                                showResultText("Action cancelled")
+                            })
+    }
 
     func onSignInStartError(error: MSAL.SignInStartError) {
         print("SignInStartDelegate: onSignInStartError: \(error.errorDescription ?? "No error description")")
@@ -227,6 +264,11 @@ extension MultiFactorAuthenticationViewController: SignInStartDelegate {
 extension MultiFactorAuthenticationViewController: MFARequestChallengeDelegate {
 
     func onMFARequestChallengeError(error: MFARequestChallengeError, newState: MFARequiredState?) {
+        if error.isBrowserRequired {
+            showResultText("Interactive sign-in required. Please sign-in again.")
+        } else if error.isAuthMethodBlocked {
+            showResultText("Test")
+        }
         print("MFARequestChallengeDelegate: onMFARequestChallengeError: \(error.errorDescription ?? "No error description")")
         showResultText("Unexpected error while requesting challenge: \(error.errorDescription ?? "No error description")")
         dismissVerifyCodeModal()
@@ -672,6 +714,73 @@ extension MultiFactorAuthenticationViewController {
 
         dismiss(animated: true)
         verifyChallengeViewController = nil
+    }
+}
+
+
+extension MultiFactorAuthenticationViewController {
+    func showVerifySingInCodeModal(
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
+    ) {
+        verifyCodeSignInViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeSignInViewController = verifyCodeSignInViewController else {
+            print("Error creating Verify Code view controller")
+            return
+        }
+
+        updateVerifySingInCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback,
+                              cancelCallback: cancelCallback)
+
+        present(verifyCodeSignInViewController, animated: true)
+    }
+
+    func updateVerifySingInCodeModal(
+        errorMessage: String?,
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void,
+        cancelCallback: @escaping () -> Void
+    ) {
+        guard let verifyCodeSignInViewController = verifyCodeSignInViewController else {
+            return
+        }
+
+        if let errorMessage = errorMessage {
+            verifyCodeSignInViewController.errorLabel.text = errorMessage
+        }
+
+        verifyCodeSignInViewController.onSubmit = { code in
+            DispatchQueue.main.async {
+                submitCallback(code)
+            }
+        }
+
+        verifyCodeSignInViewController.onResend = {
+            DispatchQueue.main.async {
+                resendCallback()
+            }
+        }
+
+        verifyCodeSignInViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
+            }
+        }
+    }
+
+    func dismissVerifySingInCodeModal() {
+        guard verifyCodeSignInViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+        verifyCodeSignInViewController = nil
     }
 }
 
