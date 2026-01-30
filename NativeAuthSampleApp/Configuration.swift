@@ -34,7 +34,7 @@ class Configuration: NSObject {
 //    static let clientId = "7dfc59db-51f2-4979-a134-761ca6cecd9e"  // Andy
 //    static let clientId = "18eb7a6e-61ba-48bb-bc50-4f971ec352bf" // Sergei
 //    static let clientId = "430146fc-27b5-4c63-a677-2e5f2fa9aa00" // Silviu tenant
-    static let clientId = "852e2544-572b-49a4-be67-6a08fef202df" // Silviu tenant -- OTP
+    static let clientId = "b91b095d-1892-43ff-88e0-b07efff0ec89" // Silviu tenant -- OTP
     
     
 //    static let tenantSubdomain = "MSIDLABCIAM6"
