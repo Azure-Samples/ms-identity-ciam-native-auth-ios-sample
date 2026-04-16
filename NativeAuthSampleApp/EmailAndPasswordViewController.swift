@@ -25,6 +25,23 @@
 import MSAL
 import UIKit
 
+extension EmailAndPasswordViewController: MSALNativeAuthRequestInterceptor
+{
+    func addAdditionalHeaderFields(_ requestUrl: URL?, completionBlock: @escaping MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock)
+    {
+        if requestUrl?.absoluteString.contains("oauth2/v2.0/initiate") == true {
+            completionBlock(
+                ["value_1": "customer_header_1", // Will be ignored: doesn't start with "x-"
+                 "x-client-header": "customer_header_2", // Will be ignored: starts with reserved prefix "x-client-"
+                 "X-my-custom-header": "my data" // Will be added to the network request.
+                ])
+            return;
+        }
+        
+        completionBlock(nil)
+    }
+}
+
 class EmailAndPasswordViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
@@ -50,9 +67,7 @@ class EmailAndPasswordViewController: UIViewController {
                 challengeTypes: [.OOB, .password]
             )
             
-//            let authority = try MSALCIAMAuthority(url: URL(string: "https://sergeicustomers.ciamlogin.com/")!)
-
-//            let config = MSALNativeAuthPublicClientApplicationConfig(clientId: "18eb7a6e-61ba-48bb-bc50-4f971ec352bf", authority: authority, challengeTypes: [.OOB, .password])
+            config.requestInterceptor = self
             
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         } catch {
