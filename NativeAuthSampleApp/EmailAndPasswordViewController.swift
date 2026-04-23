@@ -240,6 +240,10 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
         newState.signIn(parameters: parameters, delegate: self)
     }
+
+    func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthRequiredAttribute], newState: MSAL.SignUpAttributesRequiredState) {
+
+    }
 }
 
 // MARK: SignUpResendCodeDelegate
