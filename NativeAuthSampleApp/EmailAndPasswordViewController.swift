@@ -54,6 +54,7 @@ class EmailAndPasswordViewController: UIViewController {
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
+    var attributeCollectionViewController: AttributeCollectionViewController?
 
     var accountResult: MSALNativeAuthUserAccountResult?
 
@@ -237,12 +238,54 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
     func onSignUpCompleted(newState: MSAL.SignInAfterSignUpState) {
         showResultText("Signed up successfully!")
         dismissVerifyCodeModal()
+        dismissAttributeCollectionModal()
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
         newState.signIn(parameters: parameters, delegate: self)
     }
 
     func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthRequiredAttribute], newState: MSAL.SignUpAttributesRequiredState) {
+        print("SignUpVerifyCodeDelegate: onSignUpAttributesRequired: \(attributes)")
 
+        let showAttributes = { [weak self] in
+            guard let self = self else { return }
+
+            self.showAttributeCollectionModal(
+                submitCallback: { [weak self] username in
+                    guard let self = self else { return }
+
+                    let attributes: [String: Any] = ["username": username]
+                    newState.submitAttributes(attributes: attributes, delegate: self)
+                },
+                cancelCallback: { [weak self] in
+                    guard let self = self else { return }
+
+                    self.showResultText("Action cancelled")
+                }
+            )
+        }
+
+        if verifyCodeViewController != nil {
+            dismiss(animated: true) {
+                self.verifyCodeViewController = nil
+                showAttributes()
+            }
+        } else {
+            showAttributes()
+        }
+    }
+}
+
+// MARK: SignUpAttributesRequiredDelegate
+
+extension EmailAndPasswordViewController: SignUpAttributesRequiredDelegate {
+    func onSignUpAttributesRequiredError(error: AttributesRequiredError) {
+        showResultText("Error submitting attributes: \(error.errorDescription ?? "No error description")")
+        dismissAttributeCollectionModal()
+    }
+
+    func onSignUpAttributesInvalid(attributeNames: [String], newState: SignUpAttributesRequiredState) {
+        showResultText("Invalid attribute(s): \(attributeNames.joined(separator: ", "))")
+        dismissAttributeCollectionModal()
     }
 }
 
@@ -392,5 +435,46 @@ extension EmailAndPasswordViewController {
 
         dismiss(animated: true)
         verifyCodeViewController = nil
+    }
+}
+
+// MARK: - Attribute Collection modal methods
+
+extension EmailAndPasswordViewController {
+    func showAttributeCollectionModal(
+        submitCallback: @escaping (_ username: String) -> Void,
+        cancelCallback: @escaping () -> Void
+    ) {
+        attributeCollectionViewController = storyboard?.instantiateViewController(
+            withIdentifier: "AttributeCollectionViewContoller") as? AttributeCollectionViewController
+
+        guard let attributeCollectionViewController = attributeCollectionViewController else {
+            print("Error creating Attribute Collection view controller")
+            return
+        }
+
+        attributeCollectionViewController.onSubmit = { username in
+            DispatchQueue.main.async {
+                submitCallback(username)
+            }
+        }
+
+        attributeCollectionViewController.onCancel = {
+            DispatchQueue.main.async {
+                cancelCallback()
+            }
+        }
+
+        present(attributeCollectionViewController, animated: true)
+    }
+
+    func dismissAttributeCollectionModal() {
+        guard attributeCollectionViewController != nil else {
+            print("Unexpected error: Attribute Collection view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+        attributeCollectionViewController = nil
     }
 }

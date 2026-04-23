@@ -27,7 +27,6 @@ import MSAL
 
 class AttributeCollectionViewController: UIViewController {
     var onSubmit: ((_ code: String) -> Void)?
-    var onResend: (() -> Void)?
     var onCancel: (() -> Void)?
     var channelTargetType: MSALNativeAuthChannelType?
 
@@ -40,11 +39,6 @@ class AttributeCollectionViewController: UIViewController {
         messageLabel.text = "Additional attributes are required, please enter them below."
     }
     
-    @IBAction func resendPressed(_: Any) {
-        usernameTextField.resignFirstResponder()
-        onResend?()
-    }
-
     @IBAction func cancelPressed(_: Any) {
         usernameTextField.resignFirstResponder()
         onCancel?()
