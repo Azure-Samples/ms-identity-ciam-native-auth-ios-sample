@@ -246,31 +246,34 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
     func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthRequiredAttribute], newState: MSAL.SignUpAttributesRequiredState) {
         print("SignUpVerifyCodeDelegate: onSignUpAttributesRequired: \(attributes)")
 
-        let showAttributes = { [weak self] in
-            guard let self = self else { return }
+        // Custom implementation for Flat Username / Alias
+        if attributes.filter({$0.name == "flatusername"}).isEmpty == false && attributes.count == 1 {
+            let showAttributes = { [weak self] in
+                guard let self = self else { return }
 
-            self.showAttributeCollectionModal(
-                submitCallback: { [weak self] username in
-                    guard let self = self else { return }
+                self.showAttributeCollectionModal(
+                    submitCallback: { [weak self] username in
+                        guard let self = self else { return }
 
-                    let attributes: [String: Any] = ["username": username]
-                    newState.submitAttributes(attributes: attributes, delegate: self)
-                },
-                cancelCallback: { [weak self] in
-                    guard let self = self else { return }
+                        let attributes: [String: Any] = ["flatusername": username]
+                        newState.submitAttributes(attributes: attributes, delegate: self)
+                    },
+                    cancelCallback: { [weak self] in
+                        guard let self = self else { return }
 
-                    self.showResultText("Action cancelled")
+                        self.showResultText("Action cancelled")
+                    }
+                )
+            }
+
+            if verifyCodeViewController != nil {
+                dismiss(animated: true) {
+                    self.verifyCodeViewController = nil
+                    showAttributes()
                 }
-            )
-        }
-
-        if verifyCodeViewController != nil {
-            dismiss(animated: true) {
-                self.verifyCodeViewController = nil
+            } else {
                 showAttributes()
             }
-        } else {
-            showAttributes()
         }
     }
 }

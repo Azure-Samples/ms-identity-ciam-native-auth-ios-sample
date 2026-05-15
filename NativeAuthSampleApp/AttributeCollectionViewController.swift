@@ -26,7 +26,7 @@ import UIKit
 import MSAL
 
 class AttributeCollectionViewController: UIViewController {
-    var onSubmit: ((_ code: String) -> Void)?
+    var onSubmit: ((_ username: String) -> Void)?
     var onCancel: (() -> Void)?
     var channelTargetType: MSALNativeAuthChannelType?
 
