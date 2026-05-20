@@ -27,6 +27,7 @@
 		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
 		DE2D14EC2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */; };
 		DE2D14EF2E858B24001FC199 /* AuthMethodCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */; };
+		DE894AAA2F9A00300034147E /* AttributeCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE894AA92F9A00300034147E /* AttributeCollectionViewController.swift */; };
 		E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +56,7 @@
 		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
 		DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAuthMethodDetailViewController.swift; sourceTree = "<group>"; };
 		DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethodCell.swift; sourceTree = "<group>"; };
+		DE894AA92F9A00300034147E /* AttributeCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributeCollectionViewController.swift; sourceTree = "<group>"; };
 		E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiFactorAuthenticationViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -108,6 +110,7 @@
 		9B73CACB29F6DAA300FC7129 /* Modal View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				DE894AA92F9A00300034147E /* AttributeCollectionViewController.swift */,
 				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
 				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
 				1220D5D42D90C52200B92305 /* SelectAuthMethodViewController.swift */,
@@ -236,6 +239,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */,
+				DE894AAA2F9A00300034147E /* AttributeCollectionViewController.swift in Sources */,
 				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
 				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
 				1220D5D52D90C52200B92305 /* SelectAuthMethodViewController.swift in Sources */,
@@ -487,7 +491,7 @@
 			repositoryURL = "https://github.com/AzureAD/microsoft-authentication-library-for-objc";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.5.0;
+				minimumVersion = 2.11.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
