@@ -60,6 +60,7 @@ class WebFallbackViewController: UIViewController {
                 tenantSubdomain: Configuration.tenantSubdomain,
                 challengeTypes: [.OOB, .password]
             )
+            config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         } catch {
             print("Unable to initialize MSAL \(error)")

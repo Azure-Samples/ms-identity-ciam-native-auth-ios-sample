@@ -50,6 +50,7 @@ class ResetPasswordViewController: UIViewController {
                 tenantSubdomain: Configuration.tenantSubdomain,
                 challengeTypes: [.OOB, .password]
             )
+            config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
             configureAuthManager()
         } catch {
@@ -59,28 +60,93 @@ class ResetPasswordViewController: UIViewController {
     }
 
     /// Wires the V2 unified delegate (``AuthManager``) up to this screen. The manager — not
-    /// `self` — is the ``MSALNativeAuthFlowDelegate``; here we only observe its result and update
-    /// the result text. UI flows (modals) are intentionally not invoked yet.
+    /// `self` — is the ``MSALNativeAuthFlowDelegate``; here we map each server-driven action onto
+    /// the *same* reusable modal UI that the V1 delegate path uses (`showVerifyCodeModal` /
+    /// `showNewPasswordModal`). The modals are driven "depending on need" (per action) so V2 and
+    /// V1 share one UI without V1 being affected.
     func configureAuthManager() {
         authManager = AuthManager(application: nativeAuth)
 
         authManager.onActionRequired = { [weak self] action in
-            self?.showResultText("Reset password — action required: \(AuthManager.describe(action))")
+            guard let self = self else { return }
+
+            switch action {
+            case .codeRequired(let sentTo, _, let codeLength):
+                self.showResultText("Code sent to \(sentTo) (\(codeLength) digits)")
+                self.presentVerifyCodeModalV2()
+            case .newPasswordRequired, .passwordRequired:
+                self.presentNewPasswordModalV2()
+            default:
+                self.showResultText("Reset password — action required: \(AuthManager.describe(action))")
+            }
         }
 
         authManager.onCompleted = { [weak self] result in
             guard let self = self else { return }
+            self.dismissAnyV2Modal()
             self.accountResult = result
             self.updateUI()
             self.showResultText("Password reset successfully and user signed in.")
         }
 
         authManager.onError = { [weak self] error in
-            self?.showResultText("Unable to reset password. Error: \(error.errorDescription ?? "No error description")")
+            guard let self = self else { return }
+
+            if error.isInvalidCode {
+                self.updateVerifyCodeModal(errorMessage: "Check the code and try again",
+                                           submitCallback: { [weak self] code in self?.authManager.submitCode(code) },
+                                           resendCallback: { [weak self] in self?.authManager.resendCode() },
+                                           cancelCallback: { [weak self] in self?.showResultText("Action cancelled") })
+            } else if error.kind == .invalidPassword {
+                self.updateNewPasswordModal(errorMessage: "Invalid password",
+                                            submitCallback: { [weak self] password in self?.authManager.submitNewPassword(password) },
+                                            cancelCallback: { [weak self] in self?.showResultText("Action cancelled") })
+            } else {
+                self.dismissAnyV2Modal()
+                self.showResultText("Unable to reset password. Error: \(error.errorDescription ?? "No error description")")
+            }
         }
 
         authManager.onBrowserRequired = { [weak self] url in
-            self?.showResultText("Unable to reset password: Web UX required (\(url.absoluteString))")
+            guard let self = self else { return }
+            self.dismissAnyV2Modal()
+            self.showResultText("Unable to reset password: Web UX required (\(url.absoluteString))")
+        }
+    }
+
+    /// Presents (or refreshes) the shared verify-code modal, wiring its callbacks to the V2 manager.
+    private func presentVerifyCodeModalV2() {
+        let submit: (String) -> Void = { [weak self] code in self?.authManager.submitCode(code) }
+        let resend: () -> Void = { [weak self] in self?.authManager.resendCode() }
+        let cancel: () -> Void = { [weak self] in self?.showResultText("Action cancelled") }
+
+        if verifyCodeViewController != nil {
+            updateVerifyCodeModal(errorMessage: nil, submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+        } else {
+            showVerifyCodeModal(submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+        }
+    }
+
+    /// Presents the shared new-password modal, dismissing the verify-code modal first if needed.
+    private func presentNewPasswordModalV2() {
+        let submit: (String) -> Void = { [weak self] password in self?.authManager.submitNewPassword(password) }
+
+        if verifyCodeViewController != nil {
+            dismissVerifyCodeModal { [weak self] in
+                self?.showNewPasswordModal(submittedCallback: submit)
+            }
+        } else {
+            showNewPasswordModal(submittedCallback: submit)
+        }
+    }
+
+    /// Dismisses whichever shared modal is currently presented by the V2 flow.
+    private func dismissAnyV2Modal() {
+        if verifyCodeViewController != nil {
+            dismissVerifyCodeModal()
+        }
+        if newPasswordViewController != nil {
+            dismissNewPasswordModal()
         }
     }
 

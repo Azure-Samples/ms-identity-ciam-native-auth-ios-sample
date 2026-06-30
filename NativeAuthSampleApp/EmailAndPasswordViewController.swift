@@ -73,6 +73,7 @@ class EmailAndPasswordViewController: UIViewController {
             
             config.requestInterceptor = self
             
+            config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
             configureAuthManager()
         } catch {
@@ -82,29 +83,108 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     /// Wires the V2 unified delegate (``AuthManager``) up to this screen. The manager — not
-    /// `self` — is the ``MSALNativeAuthFlowDelegate``; here we only observe its result and update
-    /// the result text. UI flows (modals) are intentionally not invoked yet.
+    /// `self` — is the ``MSALNativeAuthFlowDelegate``; each server-driven action is mapped onto the
+    /// *same* reusable modals the V1 delegate path uses, so V2 and V1 share one UI without V1 being
+    /// affected.
     func configureAuthManager() {
         authManager = AuthManager(application: nativeAuth)
 
         authManager.onActionRequired = { [weak self] action in
-            self?.showResultText("Action required: \(AuthManager.describe(action))")
+            guard let self = self else { return }
+
+            switch action {
+            case .codeRequired(let sentTo, _, let codeLength),
+                 .mfaVerificationRequired(let sentTo, _, let codeLength),
+                 .strongAuthVerificationRequired(let sentTo, _, let codeLength):
+                self.showResultText("Code sent to \(sentTo) (\(codeLength) digits)")
+                self.presentVerifyCodeModalV2()
+            case .attributesRequired:
+                self.presentAttributeCollectionModalV2()
+            case .attributesInvalid(let attributeNames):
+                self.showResultText("Invalid attributes: \(attributeNames.joined(separator: ", "))")
+                self.presentAttributeCollectionModalV2()
+            case .mfaRequired(let authMethods), .strongAuthRegistrationRequired(let authMethods):
+                guard let method = authMethods.first else {
+                    self.showResultText("No auth methods available")
+                    return
+                }
+                self.authManager.selectAuthMethod(method, verificationContact: nil)
+            default:
+                self.showResultText("Action required: \(AuthManager.describe(action))")
+            }
         }
 
         authManager.onCompleted = { [weak self] result in
             guard let self = self else { return }
+            self.dismissAnyV2Modal()
             self.accountResult = result
             self.updateUI()
             self.showResultText("Signed in: \(result.account.username ?? "")")
         }
 
         authManager.onError = { [weak self] error in
-            self?.showResultText("Error: \(error.errorDescription ?? "No error description")")
+            guard let self = self else { return }
+
+            if error.isInvalidCode {
+                self.updateVerifyCodeModal(errorMessage: "Invalid code",
+                                           submitCallback: { [weak self] code in self?.submitCodeOrChallengeV2(code) },
+                                           resendCallback: { [weak self] in self?.authManager.resendCode() },
+                                           cancelCallback: { [weak self] in
+                                               self?.dismissVerifyCodeModal()
+                                               self?.showResultText("Action cancelled")
+                                           })
+            } else {
+                self.dismissAnyV2Modal()
+                self.showResultText("Error: \(error.errorDescription ?? "No error description")")
+            }
         }
 
         authManager.onBrowserRequired = { [weak self] url in
-            self?.showResultText("Web UX required (\(url.absoluteString))")
+            guard let self = self else { return }
+            self.dismissAnyV2Modal()
+            self.showResultText("Web UX required (\(url.absoluteString))")
         }
+    }
+
+    /// Routes a verify-code submission to the correct V2 continuation: primary OOB codes use
+    /// `submitCode`, whereas MFA / strong-auth verification codes use `submitChallenge`.
+    private func submitCodeOrChallengeV2(_ code: String) {
+        switch authManager.latestAction {
+        case .mfaVerificationRequired, .strongAuthVerificationRequired:
+            authManager.submitChallenge(code)
+        default:
+            authManager.submitCode(code)
+        }
+    }
+
+    private func presentVerifyCodeModalV2() {
+        let submit: (String) -> Void = { [weak self] code in self?.submitCodeOrChallengeV2(code) }
+        let resend: () -> Void = { [weak self] in self?.authManager.resendCode() }
+        let cancel: () -> Void = { [weak self] in
+            self?.dismissVerifyCodeModal()
+            self?.showResultText("Action cancelled")
+        }
+
+        if verifyCodeViewController != nil {
+            updateVerifyCodeModal(errorMessage: nil, submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+        } else {
+            showVerifyCodeModal(submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+        }
+    }
+
+    private func presentAttributeCollectionModalV2() {
+        guard attributeCollectionViewController == nil else { return }
+
+        showAttributeCollectionModal(submitCallback: { [weak self] username in
+            self?.authManager.submitAttributes(["flatusername": username])
+        }, cancelCallback: { [weak self] in
+            self?.showResultText("Action cancelled")
+        })
+    }
+
+    private func dismissAnyV2Modal() {
+        if verifyCodeViewController != nil { dismissVerifyCodeModal() }
+        if attributeCollectionViewController != nil { dismissAttributeCollectionModal() }
     }
 
     override func viewWillAppear(_ animated: Bool) {

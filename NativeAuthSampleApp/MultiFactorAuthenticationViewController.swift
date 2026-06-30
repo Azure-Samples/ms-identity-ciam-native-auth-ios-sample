@@ -41,6 +41,8 @@ class MultiFactorAuthenticationViewController: UIViewController {
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
+    var authManager: AuthManager!
+
     var verifyCodeViewController: VerifyCodeViewController?
     var verifyChallengeViewController: VerifyAuthMethodChallengeViewController?
     var selectAuthMethodViewController: SelectAuthMethodViewController?
@@ -60,7 +62,9 @@ class MultiFactorAuthenticationViewController: UIViewController {
                 challengeTypes: [.OOB, .password]
             )
             config.capabilities = [.mfaRequired, .registrationRequired]
+            config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
+            configureAuthManager()
         } catch {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL: \(error.localizedDescription)")
@@ -84,6 +88,11 @@ class MultiFactorAuthenticationViewController: UIViewController {
         print("Signing in with email \(email) and password")
 
         showResultText("Signing in...")
+
+        if Configuration.useNativeAuthV2 {
+            authManager.signIn(email: email, password: password)
+            return
+        }
 
         let parameters = MSALNativeAuthSignInParameters(username: email)
         parameters.password = password
@@ -133,6 +142,197 @@ class MultiFactorAuthenticationViewController: UIViewController {
 
             updateUI()
         }
+    }
+}
+
+// MARK: - Native Auth V2 (AuthManager) wiring
+
+extension MultiFactorAuthenticationViewController {
+
+    /// Wires the V2 unified delegate (``AuthManager``) up to this screen. The manager — not
+    /// `self` — is the ``MSALNativeAuthFlowDelegate``; each server-driven MFA/JIT action is mapped
+    /// onto the *same* reusable modals the V1 delegate path uses, so V2 and V1 share one UI.
+    func configureAuthManager() {
+        authManager = AuthManager(application: nativeAuth)
+
+        authManager.onActionRequired = { [weak self] action in
+            guard let self = self else { return }
+
+            switch action {
+            case .mfaRequired(let authMethods):
+                self.promptMFAV2(authMethods: authMethods)
+            case .codeRequired(_, let channel, _),
+                 .mfaVerificationRequired(_, let channel, _):
+                self.presentMFAVerifyCodeModalV2(channelTargetType: channel)
+            case .strongAuthRegistrationRequired(let authMethods):
+                self.promptStrongAuthRegistrationV2(authMethods: authMethods)
+            case .strongAuthVerificationRequired:
+                self.presentVerifyChallengeModalV2()
+            default:
+                self.showResultText("Action required: \(AuthManager.describe(action))")
+            }
+        }
+
+        authManager.onCompleted = { [weak self] result in
+            guard let self = self else { return }
+            self.dismissAnyV2Modal()
+            self.accountResult = result
+            self.updateUI()
+            self.showResultText("Signed in: \(result.account.username ?? "")")
+        }
+
+        authManager.onError = { [weak self] error in
+            guard let self = self else { return }
+
+            if error.isInvalidCode {
+                if self.verifyChallengeViewController != nil {
+                    self.updateVerifyChallengeModal(errorMessage: "Invalid code",
+                                                    submitCallback: { [weak self] code in self?.authManager.submitChallenge(code) },
+                                                    registerCallback: { [weak self] in self?.reRequestStrongAuthChallengeV2() },
+                                                    cancelCallback: { [weak self] in
+                                                        self?.dismissVerifyChallengeModal()
+                                                        self?.showResultText("Action cancelled")
+                                                    })
+                } else {
+                    self.updateVerifyCodeModal(errorMessage: "Invalid code",
+                                               submitCallback: { [weak self] code in self?.authManager.submitChallenge(code) },
+                                               resendCallback: { [weak self] in self?.reRequestMFAChallengeV2() },
+                                               cancelCallback: { [weak self] in
+                                                   self?.dismissVerifyCodeModal()
+                                                   self?.showResultText("Action cancelled")
+                                               })
+                }
+            } else {
+                self.dismissAnyV2Modal()
+                self.showResultText("Error: \(error.errorDescription ?? "No error description")")
+            }
+        }
+
+        authManager.onBrowserRequired = { [weak self] url in
+            guard let self = self else { return }
+            self.dismissAnyV2Modal()
+            self.showResultText("Web UX required (\(url.absoluteString))")
+        }
+    }
+
+    private func promptMFAV2(authMethods: [MSALAuthMethod]) {
+        showResultText("Second factor authentication is required")
+
+        let alert = UIAlertController(title: "MFA required", message: "Do you want to proceed with MFA?", preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak self] _ in
+            guard let self = self else { return }
+            guard let authMethod = authMethods.first else {
+                self.showResultText("Error while sending MFA challenge: No auth methods available")
+                return
+            }
+            self.selectedAuthMethod = authMethod
+            self.authManager.selectAuthMethod(authMethod, verificationContact: nil)
+        }))
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { [weak self] _ in
+            self?.showResultText("Second factor authentication is required")
+        }))
+
+        present(alert, animated: true)
+    }
+
+    private func presentMFAVerifyCodeModalV2(channelTargetType: MSALNativeAuthChannelType) {
+        let submit: (String) -> Void = { [weak self] code in self?.authManager.submitChallenge(code) }
+        let resend: () -> Void = { [weak self] in self?.reRequestMFAChallengeV2() }
+        let cancel: () -> Void = { [weak self] in
+            self?.dismissVerifyCodeModal()
+            self?.showResultText("Action cancelled")
+        }
+
+        if verifyCodeViewController != nil {
+            updateVerifyCodeModal(errorMessage: nil, submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+        } else {
+            showVerifyCodeModal(channelTargetType: channelTargetType, submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+        }
+    }
+
+    private func reRequestMFAChallengeV2() {
+        guard let authMethod = selectedAuthMethod else { return }
+        authManager.selectAuthMethod(authMethod, verificationContact: nil)
+    }
+
+    private func promptStrongAuthRegistrationV2(authMethods: [MSALAuthMethod]) {
+        showResultText("Strong authentication method registration is required")
+
+        guard !authMethods.isEmpty else {
+            showResultText("Error while retrieving Register Strong Auth methods: No auth methods available")
+            return
+        }
+        self.authMethods = authMethods
+
+        let alert = UIAlertController(title: "Missing strong authentication method",
+                                      message: "Registration of strong authentication method is required. Do you want to proceed with registration?",
+                                      preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak self] _ in
+            guard let self = self else { return }
+            self.showVerificationContactModal(continueCallback: { [weak self] verificationContact in
+                guard let self = self else { return }
+                guard let authMethod = self.selectedAuthMethod ?? authMethods.first else {
+                    self.showResultText("No auth method selected")
+                    return
+                }
+                self.selectedAuthMethod = authMethod
+                var contact = verificationContact ?? ""
+                if contact.isEmpty {
+                    contact = authMethod.loginHint ?? ""
+                }
+                self.verificationContact = contact
+                self.authManager.selectAuthMethod(authMethod, verificationContact: contact)
+            }, cancelCallback: { [weak self] in
+                self?.showResultText("Action cancelled")
+            })
+        }))
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { [weak self] _ in
+            self?.showResultText("Strong authentication method registration is required")
+        }))
+
+        present(alert, animated: true)
+    }
+
+    private func presentVerifyChallengeModalV2() {
+        let present: () -> Void = { [weak self] in
+            guard let self = self else { return }
+            let submit: (String) -> Void = { [weak self] code in self?.authManager.submitChallenge(code) }
+            let register: () -> Void = { [weak self] in self?.reRequestStrongAuthChallengeV2() }
+            let cancel: () -> Void = { [weak self] in
+                self?.dismissVerifyChallengeModal()
+                self?.showResultText("Action cancelled")
+            }
+
+            if self.verifyChallengeViewController != nil {
+                self.updateVerifyChallengeModal(errorMessage: nil, submitCallback: submit, registerCallback: register, cancelCallback: cancel)
+            } else {
+                self.showVerifyChallengeModal(submitCallback: submit, registerCallback: register, cancelCallback: cancel)
+            }
+        }
+
+        if selectAuthMethodViewController != nil {
+            dismissVerificationContactModal(completion: present)
+        } else {
+            present()
+        }
+    }
+
+    private func reRequestStrongAuthChallengeV2() {
+        guard let authMethod = selectedAuthMethod else {
+            showResultText("No auth method selected")
+            return
+        }
+        authManager.selectAuthMethod(authMethod, verificationContact: verificationContact)
+    }
+
+    private func dismissAnyV2Modal() {
+        if verifyCodeViewController != nil { dismissVerifyCodeModal() }
+        if verifyChallengeViewController != nil { dismissVerifyChallengeModal() }
+        if selectAuthMethodViewController != nil { dismissVerificationContactModal() }
     }
 }
 

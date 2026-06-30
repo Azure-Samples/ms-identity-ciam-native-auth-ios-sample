@@ -35,4 +35,17 @@ class Configuration: NSObject {
     /// (server-driven, unified delegate) SDK surfaces. Flip to `false` to use the
     /// deprecated V1 flows.
     static let useNativeAuthV2 = true
+
+    /// ESTS test slice / data-center used to pin requests to a specific scale unit.
+    /// Set to `nil` to route to production. The Native Auth request path sends this as the
+    /// `dc` query parameter.
+    ///
+    static let testSliceDataCenter: String? = "nil"
+
+    /// Slice configuration applied to every `MSALNativeAuthPublicClientApplicationConfig`.
+    /// Returns `nil` when no test slice is configured.
+    static var sliceConfig: MSALSliceConfig? {
+        guard let dc = testSliceDataCenter else { return nil }
+        return MSALSliceConfig(slice: nil, dc: dc)
+    }
 }

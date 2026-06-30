@@ -46,6 +46,10 @@ final class AuthManager: NSObject {
     /// The most recent flow state, used to continue a multi-step flow.
     private var flowState: MSALNativeAuthFlowState?
 
+    /// The most recent action the server required, so callers can route a generic input (e.g. a
+    /// verification code) to the correct continuation method.
+    private(set) var latestAction: MSALNativeAuthAction?
+
     /// Invoked when the server requires the app to perform an action to continue the flow.
     var onActionRequired: ((MSALNativeAuthAction) -> Void)?
 
@@ -68,6 +72,7 @@ final class AuthManager: NSObject {
     /// Start the server-driven reset password (SSPR) flow.
     func resetPassword(email: String) {
         flowState = nil
+        latestAction = nil
         let parameters = MSALNativeAuthResetPasswordParameters(username: email)
         application.resetPasswordV2(parameters: parameters, delegate: self)
     }
@@ -75,6 +80,7 @@ final class AuthManager: NSObject {
     /// Start the server-driven sign up flow.
     func signUp(email: String, password: String? = nil) {
         flowState = nil
+        latestAction = nil
         let parameters = MSALNativeAuthSignUpParameters(username: email)
         parameters.password = password
         application.signUpV2(parameters: parameters, delegate: self)
@@ -83,6 +89,7 @@ final class AuthManager: NSObject {
     /// Start the server-driven sign in flow.
     func signIn(email: String, password: String? = nil) {
         flowState = nil
+        latestAction = nil
         let parameters = MSALNativeAuthSignInParameters(username: email)
         parameters.password = password
         application.signInV2(parameters: parameters, delegate: self)
@@ -126,6 +133,7 @@ extension AuthManager: MSALNativeAuthFlowDelegate {
     @MainActor
     func onActionRequired(action: MSALNativeAuthAction, flowState: MSALNativeAuthFlowState) {
         self.flowState = flowState
+        self.latestAction = action
         print("AuthManager: action required — \(AuthManager.describe(action))")
         onActionRequired?(action)
     }
@@ -133,6 +141,7 @@ extension AuthManager: MSALNativeAuthFlowDelegate {
     @MainActor
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult) {
         flowState = nil
+        latestAction = nil
         print("AuthManager: flow completed for \(result.account.username ?? "unknown user")")
         onCompleted?(result)
     }
