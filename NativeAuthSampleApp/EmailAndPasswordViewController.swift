@@ -33,7 +33,8 @@ extension EmailAndPasswordViewController: MSALNativeAuthRequestInterceptor
             completionBlock(
                 ["value_1": "customer_header_1", // Will be ignored: doesn't start with "x-"
                  "x-client-header": "customer_header_2", // Will be ignored: starts with reserved prefix "x-client-"
-                 "X-my-custom-header": "my data" // Will be added to the network request.
+                 "X-my-custom-header": "my data", // Will be added to the network request.
+                 "x-test-header": "test_data" // Will be added to the network request.
                 ])
             return;
         }
@@ -53,6 +54,8 @@ class EmailAndPasswordViewController: UIViewController {
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
+    var authManager: AuthManager!
+
     var verifyCodeViewController: VerifyCodeViewController?
     var attributeCollectionViewController: AttributeCollectionViewController?
 
@@ -71,9 +74,36 @@ class EmailAndPasswordViewController: UIViewController {
             config.requestInterceptor = self
             
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
+            configureAuthManager()
         } catch {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL: \(error.localizedDescription)")
+        }
+    }
+
+    /// Wires the V2 unified delegate (``AuthManager``) up to this screen. The manager — not
+    /// `self` — is the ``MSALNativeAuthFlowDelegate``; here we only observe its result and update
+    /// the result text. UI flows (modals) are intentionally not invoked yet.
+    func configureAuthManager() {
+        authManager = AuthManager(application: nativeAuth)
+
+        authManager.onActionRequired = { [weak self] action in
+            self?.showResultText("Action required: \(AuthManager.describe(action))")
+        }
+
+        authManager.onCompleted = { [weak self] result in
+            guard let self = self else { return }
+            self.accountResult = result
+            self.updateUI()
+            self.showResultText("Signed in: \(result.account.username ?? "")")
+        }
+
+        authManager.onError = { [weak self] error in
+            self?.showResultText("Error: \(error.errorDescription ?? "No error description")")
+        }
+
+        authManager.onBrowserRequired = { [weak self] url in
+            self?.showResultText("Web UX required (\(url.absoluteString))")
         }
     }
 
@@ -97,7 +127,11 @@ class EmailAndPasswordViewController: UIViewController {
 
         let parameters = MSALNativeAuthSignUpParameters(username: email)
         parameters.password = password
-        nativeAuth.signUp(parameters: parameters, delegate: self)
+        if Configuration.useNativeAuthV2 {
+            authManager.signUp(email: email, password: password)
+        } else {
+            nativeAuth.signUp(parameters: parameters, delegate: self)
+        }
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -114,7 +148,11 @@ class EmailAndPasswordViewController: UIViewController {
 
         let parameters = MSALNativeAuthSignInParameters(username: email)
         parameters.password = password
-        nativeAuth.signIn(parameters: parameters, delegate: self)
+        if Configuration.useNativeAuthV2 {
+            authManager.signIn(email: email, password: password)
+        } else {
+            nativeAuth.signIn(parameters: parameters, delegate: self)
+        }
     }
 
     @IBAction func signOutPressed(_: Any) {

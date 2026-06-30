@@ -34,6 +34,8 @@ class ResetPasswordViewController: UIViewController {
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
+    var authManager: AuthManager!
+
     var verifyCodeViewController: VerifyCodeViewController?
     var newPasswordViewController: NewPasswordViewController?
 
@@ -49,9 +51,36 @@ class ResetPasswordViewController: UIViewController {
                 challengeTypes: [.OOB, .password]
             )
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
+            configureAuthManager()
         } catch {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL: \(error.localizedDescription)")
+        }
+    }
+
+    /// Wires the V2 unified delegate (``AuthManager``) up to this screen. The manager — not
+    /// `self` — is the ``MSALNativeAuthFlowDelegate``; here we only observe its result and update
+    /// the result text. UI flows (modals) are intentionally not invoked yet.
+    func configureAuthManager() {
+        authManager = AuthManager(application: nativeAuth)
+
+        authManager.onActionRequired = { [weak self] action in
+            self?.showResultText("Reset password — action required: \(AuthManager.describe(action))")
+        }
+
+        authManager.onCompleted = { [weak self] result in
+            guard let self = self else { return }
+            self.accountResult = result
+            self.updateUI()
+            self.showResultText("Password reset successfully and user signed in.")
+        }
+
+        authManager.onError = { [weak self] error in
+            self?.showResultText("Unable to reset password. Error: \(error.errorDescription ?? "No error description")")
+        }
+
+        authManager.onBrowserRequired = { [weak self] url in
+            self?.showResultText("Unable to reset password: Web UX required (\(url.absoluteString))")
         }
     }
 
@@ -75,7 +104,11 @@ class ResetPasswordViewController: UIViewController {
         showResultText("Resetting password...")
 
         let parameters = MSALNativeAuthResetPasswordParameters(username: email)
-        nativeAuth.resetPassword(parameters: parameters, delegate: self)
+        if Configuration.useNativeAuthV2 {
+            authManager.resetPassword(email: email)
+        } else {
+            nativeAuth.resetPassword(parameters: parameters, delegate: self)
+        }
     }
 
     @IBAction func signOutPressed(_: Any) {
