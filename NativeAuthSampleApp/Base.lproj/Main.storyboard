@@ -1832,6 +1832,7 @@ Username</string>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
                         <outlet property="errorLabel" destination="omI-l5-uNE" id="bcH-Od-f6c"/>
+                        <outlet property="fieldsStackView" destination="daE-6G-cpK" id="fld-St-Vw1"/>
                         <outlet property="messageLabel" destination="2Hs-dN-rX4" id="uw5-ka-fWu"/>
                         <outlet property="usernameTextField" destination="yIw-4F-ndi" id="bT2-6S-YWJ"/>
                     </connections>

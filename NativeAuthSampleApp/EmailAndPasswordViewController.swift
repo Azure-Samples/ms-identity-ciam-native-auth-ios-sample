@@ -59,6 +59,10 @@ class EmailAndPasswordViewController: UIViewController {
     var verifyCodeViewController: VerifyCodeViewController?
     var attributeCollectionViewController: AttributeCollectionViewController?
 
+    /// Attributes from the most recent V2 `attributesRequired` action, kept so the
+    /// collection modal can be re-presented (e.g. after `attributesInvalid`).
+    var lastRequiredAttributesV2: [MSALNativeAuthRequiredAttribute] = []
+
     var accountResult: MSALNativeAuthUserAccountResult?
 
     override func viewDidLoad() {
@@ -98,11 +102,11 @@ class EmailAndPasswordViewController: UIViewController {
                  .strongAuthVerificationRequired(let sentTo, _, let codeLength):
                 self.showResultText("Code sent to \(sentTo) (\(codeLength) digits)")
                 self.presentVerifyCodeModalV2()
-            case .attributesRequired:
-                self.presentAttributeCollectionModalV2()
+            case .attributesRequired(let attributes):
+                self.presentAttributeCollectionModalV2(attributes: attributes)
             case .attributesInvalid(let attributeNames):
                 self.showResultText("Invalid attributes: \(attributeNames.joined(separator: ", "))")
-                self.presentAttributeCollectionModalV2()
+                self.presentAttributeCollectionModalV2(attributes: self.lastRequiredAttributesV2)
             case .mfaRequired(let authMethods), .strongAuthRegistrationRequired(let authMethods):
                 guard let method = authMethods.first else {
                     self.showResultText("No auth methods available")
@@ -172,11 +176,12 @@ class EmailAndPasswordViewController: UIViewController {
         }
     }
 
-    private func presentAttributeCollectionModalV2() {
+    private func presentAttributeCollectionModalV2(attributes: [MSALNativeAuthRequiredAttribute]) {
+        lastRequiredAttributesV2 = attributes
         guard attributeCollectionViewController == nil else { return }
 
-        showAttributeCollectionModal(submitCallback: { [weak self] username in
-            self?.authManager.submitAttributes(["flatusername": username])
+        showAttributeCollectionModal(attributes: attributes, submitCallback: { [weak self] collected in
+            self?.authManager.submitAttributes(collected)
         }, cancelCallback: { [weak self] in
             self?.showResultText("Action cancelled")
         })
@@ -370,11 +375,12 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
                 guard let self = self else { return }
 
                 self.showAttributeCollectionModal(
-                    submitCallback: { [weak self] username in
+                    attributes: attributes,
+                    submitCallback: { [weak self] collected in
                         guard let self = self else { return }
 
-                        let attributes: [String: Any] = ["flatusername": username]
-                        newState.submitAttributes(attributes: attributes, delegate: self)
+                        let submitted: [String: Any] = collected
+                        newState.submitAttributes(attributes: submitted, delegate: self)
                     },
                     cancelCallback: { [weak self] in
                         guard let self = self else { return }
@@ -563,7 +569,8 @@ extension EmailAndPasswordViewController {
 
 extension EmailAndPasswordViewController {
     func showAttributeCollectionModal(
-        submitCallback: @escaping (_ username: String) -> Void,
+        attributes: [MSALNativeAuthRequiredAttribute],
+        submitCallback: @escaping (_ attributes: [String: String]) -> Void,
         cancelCallback: @escaping () -> Void
     ) {
         attributeCollectionViewController = storyboard?.instantiateViewController(
@@ -574,9 +581,11 @@ extension EmailAndPasswordViewController {
             return
         }
 
-        attributeCollectionViewController.onSubmit = { username in
+        attributeCollectionViewController.requiredAttributes = attributes
+
+        attributeCollectionViewController.onSubmit = { collected in
             DispatchQueue.main.async {
-                submitCallback(username)
+                submitCallback(collected)
             }
         }
 
