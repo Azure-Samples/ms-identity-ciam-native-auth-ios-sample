@@ -171,6 +171,16 @@ class EmailAndPasswordViewController: UIViewController {
 
         if verifyCodeViewController != nil {
             updateVerifyCodeModal(errorMessage: nil, submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+            return
+        }
+
+        // If the attribute collection modal is still on screen (e.g. after submitting
+        // attributes the server asks for a code), dismiss it first and only then present
+        // the verify-code modal — UIKit cannot present a second modal while another is up.
+        if attributeCollectionViewController != nil {
+            dismissAttributeCollectionModal { [weak self] in
+                self?.showVerifyCodeModal(submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
+            }
         } else {
             showVerifyCodeModal(submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
         }
@@ -180,11 +190,22 @@ class EmailAndPasswordViewController: UIViewController {
         lastRequiredAttributesV2 = attributes
         guard attributeCollectionViewController == nil else { return }
 
-        showAttributeCollectionModal(attributes: attributes, submitCallback: { [weak self] collected in
-            self?.authManager.submitAttributes(collected)
-        }, cancelCallback: { [weak self] in
-            self?.showResultText("Action cancelled")
-        })
+        let present: () -> Void = { [weak self] in
+            self?.showAttributeCollectionModal(attributes: attributes, submitCallback: { [weak self] collected in
+                self?.authManager.submitAttributes(collected)
+            }, cancelCallback: { [weak self] in
+                self?.showResultText("Action cancelled")
+            })
+        }
+
+        // If the verify-code modal is still on screen (e.g. the server asked for a code
+        // before collecting attributes), dismiss it first and only then present the
+        // attribute modal — UIKit cannot present a second modal while another is up.
+        if verifyCodeViewController != nil {
+            dismissVerifyCodeModal(completion: present)
+        } else {
+            present()
+        }
     }
 
     private func dismissAnyV2Modal() {
@@ -554,13 +575,14 @@ extension EmailAndPasswordViewController {
         }
     }
 
-    func dismissVerifyCodeModal() {
+    func dismissVerifyCodeModal(completion: (() -> Void)? = nil) {
         guard verifyCodeViewController != nil else {
             print("Unexpected error: Verify Code view controller is nil")
+            completion?()
             return
         }
 
-        dismiss(animated: true)
+        dismiss(animated: true, completion: completion)
         verifyCodeViewController = nil
     }
 }
@@ -598,13 +620,14 @@ extension EmailAndPasswordViewController {
         present(attributeCollectionViewController, animated: true)
     }
 
-    func dismissAttributeCollectionModal() {
+    func dismissAttributeCollectionModal(completion: (() -> Void)? = nil) {
         guard attributeCollectionViewController != nil else {
             print("Unexpected error: Attribute Collection view controller is nil")
+            completion?()
             return
         }
 
-        dismiss(animated: true)
+        dismiss(animated: true, completion: completion)
         attributeCollectionViewController = nil
     }
 }
