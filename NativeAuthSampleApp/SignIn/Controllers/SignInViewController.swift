@@ -22,27 +22,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import MSAL
+import SwiftUI
+import UIKit
 
-@objcMembers
-class Configuration: NSObject {
-    // Update the below to your client ID and tenantSubdomain you received in the portal.
+/// Thin bridge that hosts the SwiftUI ``SignInView`` inside UIKit. It owns no flow logic itself:
+/// all V2 flow wiring, action routing, and modal presentation live in ``SignInViewModel``. The
+/// controller only hands the view model a presenting controller so it can show the shared modals.
+class SignInViewController: UIHostingController<SignInView>
+{
+    private let viewModel = SignInViewModel()
 
-    static let clientId = "595671e3-5863-4589-89c6-140cc451e969"
-    static let tenantSubdomain = "nativeauthasampleapp"
+    required init?(coder aDecoder: NSCoder)
+    {
+        super.init(coder: aDecoder, rootView: SignInView(viewModel: viewModel))
+    }
 
-    /// ESTS test slice / data-center used to pin requests to a specific scale unit.
-    /// Set to `nil` to route to production. The Native Auth request path sends this as the
-    /// `dc` query parameter.
-    ///
-//    static let testSliceDataCenter: String? = "ESTS-PUB-WEULR1-AZ2-FD130-001"
-    static let testSliceDataCenter: String? = "ESTS-PUB-SEASLR1-FD000-TEST1-100"
-    
-
-    /// Slice configuration applied to every `MSALNativeAuthPublicClientApplicationConfig`.
-    /// Returns `nil` when no test slice is configured.
-    static var sliceConfig: MSALSliceConfig? {
-        guard let dc = testSliceDataCenter else { return nil }
-        return MSALSliceConfig(slice: nil, dc: dc)
+    override func viewDidLoad()
+    {
+        super.viewDidLoad()
+        viewModel.presenter = self
     }
 }

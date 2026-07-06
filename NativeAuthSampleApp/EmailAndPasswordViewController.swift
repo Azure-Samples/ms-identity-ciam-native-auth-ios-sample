@@ -54,14 +54,8 @@ class EmailAndPasswordViewController: UIViewController {
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
-    var authManager: AuthManager!
-
     var verifyCodeViewController: VerifyCodeViewController?
     var attributeCollectionViewController: AttributeCollectionViewController?
-
-    /// Attributes from the most recent V2 `attributesRequired` action, kept so the
-    /// collection modal can be re-presented (e.g. after `attributesInvalid`).
-    var lastRequiredAttributesV2: [MSALNativeAuthRequiredAttribute] = []
 
     var accountResult: MSALNativeAuthUserAccountResult?
 
@@ -79,138 +73,10 @@ class EmailAndPasswordViewController: UIViewController {
             
             config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
-            configureAuthManager()
         } catch {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL: \(error.localizedDescription)")
         }
-    }
-
-    /// Wires the V2 unified delegate (``AuthManager``) up to this screen. The manager — not
-    /// `self` — is the ``MSALNativeAuthFlowDelegate``; each server-driven action is mapped onto the
-    /// *same* reusable modals the V1 delegate path uses, so V2 and V1 share one UI without V1 being
-    /// affected.
-    func configureAuthManager() {
-        authManager = AuthManager(application: nativeAuth)
-
-        authManager.onActionRequired = { [weak self] action in
-            guard let self = self else { return }
-
-            switch action {
-            case .codeRequired(let sentTo, _, let codeLength),
-                 .mfaVerificationRequired(let sentTo, _, let codeLength),
-                 .strongAuthVerificationRequired(let sentTo, _, let codeLength):
-                self.showResultText("Code sent to \(sentTo) (\(codeLength) digits)")
-                self.presentVerifyCodeModalV2()
-            case .attributesRequired(let attributes):
-                self.presentAttributeCollectionModalV2(attributes: attributes)
-            case .attributesInvalid(let attributeNames):
-                self.showResultText("Invalid attributes: \(attributeNames.joined(separator: ", "))")
-                self.presentAttributeCollectionModalV2(attributes: self.lastRequiredAttributesV2)
-            case .mfaRequired(let authMethods), .strongAuthRegistrationRequired(let authMethods):
-                guard let method = authMethods.first else {
-                    self.showResultText("No auth methods available")
-                    return
-                }
-                self.authManager.selectAuthMethod(method, verificationContact: nil)
-            default:
-                self.showResultText("Action required: \(AuthManager.describe(action))")
-            }
-        }
-
-        authManager.onCompleted = { [weak self] result in
-            guard let self = self else { return }
-            self.dismissAnyV2Modal()
-            self.accountResult = result
-            self.updateUI()
-            self.showResultText("Signed in: \(result.account.username ?? "")")
-        }
-
-        authManager.onError = { [weak self] error in
-            guard let self = self else { return }
-
-            if error.isInvalidCode {
-                self.updateVerifyCodeModal(errorMessage: "Invalid code",
-                                           submitCallback: { [weak self] code in self?.submitCodeOrChallengeV2(code) },
-                                           resendCallback: { [weak self] in self?.authManager.resendCode() },
-                                           cancelCallback: { [weak self] in
-                                               self?.dismissVerifyCodeModal()
-                                               self?.showResultText("Action cancelled")
-                                           })
-            } else {
-                self.dismissAnyV2Modal()
-                self.showResultText("Error: \(error.errorDescription ?? "No error description")")
-            }
-        }
-
-        authManager.onBrowserRequired = { [weak self] url in
-            guard let self = self else { return }
-            self.dismissAnyV2Modal()
-            self.showResultText("Web UX required (\(url.absoluteString))")
-        }
-    }
-
-    /// Routes a verify-code submission to the correct V2 continuation: primary OOB codes use
-    /// `submitCode`, whereas MFA / strong-auth verification codes use `submitChallenge`.
-    private func submitCodeOrChallengeV2(_ code: String) {
-        switch authManager.latestAction {
-        case .mfaVerificationRequired, .strongAuthVerificationRequired:
-            authManager.submitChallenge(code)
-        default:
-            authManager.submitCode(code)
-        }
-    }
-
-    private func presentVerifyCodeModalV2() {
-        let submit: (String) -> Void = { [weak self] code in self?.submitCodeOrChallengeV2(code) }
-        let resend: () -> Void = { [weak self] in self?.authManager.resendCode() }
-        let cancel: () -> Void = { [weak self] in
-            self?.dismissVerifyCodeModal()
-            self?.showResultText("Action cancelled")
-        }
-
-        if verifyCodeViewController != nil {
-            updateVerifyCodeModal(errorMessage: nil, submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
-            return
-        }
-
-        // If the attribute collection modal is still on screen (e.g. after submitting
-        // attributes the server asks for a code), dismiss it first and only then present
-        // the verify-code modal — UIKit cannot present a second modal while another is up.
-        if attributeCollectionViewController != nil {
-            dismissAttributeCollectionModal { [weak self] in
-                self?.showVerifyCodeModal(submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
-            }
-        } else {
-            showVerifyCodeModal(submitCallback: submit, resendCallback: resend, cancelCallback: cancel)
-        }
-    }
-
-    private func presentAttributeCollectionModalV2(attributes: [MSALNativeAuthRequiredAttribute]) {
-        lastRequiredAttributesV2 = attributes
-        guard attributeCollectionViewController == nil else { return }
-
-        let present: () -> Void = { [weak self] in
-            self?.showAttributeCollectionModal(attributes: attributes, submitCallback: { [weak self] collected in
-                self?.authManager.submitAttributes(collected)
-            }, cancelCallback: { [weak self] in
-                self?.showResultText("Action cancelled")
-            })
-        }
-
-        // If the verify-code modal is still on screen (e.g. the server asked for a code
-        // before collecting attributes), dismiss it first and only then present the
-        // attribute modal — UIKit cannot present a second modal while another is up.
-        if verifyCodeViewController != nil {
-            dismissVerifyCodeModal(completion: present)
-        } else {
-            present()
-        }
-    }
-
-    private func dismissAnyV2Modal() {
-        if verifyCodeViewController != nil { dismissVerifyCodeModal() }
-        if attributeCollectionViewController != nil { dismissAttributeCollectionModal() }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -233,11 +99,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         let parameters = MSALNativeAuthSignUpParameters(username: email)
         parameters.password = password
-        if Configuration.useNativeAuthV2 {
-            authManager.signUp(email: email, password: password)
-        } else {
-            nativeAuth.signUp(parameters: parameters, delegate: self)
-        }
+        nativeAuth.signUp(parameters: parameters, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -254,11 +116,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         let parameters = MSALNativeAuthSignInParameters(username: email)
         parameters.password = password
-        if Configuration.useNativeAuthV2 {
-            authManager.signIn(email: email, password: password)
-        } else {
-            nativeAuth.signIn(parameters: parameters, delegate: self)
-        }
+        nativeAuth.signIn(parameters: parameters, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
