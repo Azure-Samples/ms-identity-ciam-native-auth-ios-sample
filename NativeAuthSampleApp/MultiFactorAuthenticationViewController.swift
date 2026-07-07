@@ -158,7 +158,7 @@ extension MultiFactorAuthenticationViewController {
         authManager.onActionRequired = { [weak self] action in
             guard let self = self else { return }
 
-            switch action {
+            switch action.kind {
             case .mfaRequired(let authMethods):
                 self.promptMFAV2(authMethods: authMethods)
             case .codeRequired(_, let channel, _),

@@ -70,7 +70,7 @@ class EmailAndCodeViewController: UIViewController {
         authManager.onActionRequired = { [weak self] action in
             guard let self = self else { return }
 
-            switch action {
+            switch action.kind {
             case .codeRequired(let sentTo, _, let codeLength):
                 self.showResultText("Code sent to \(sentTo) (\(codeLength) digits)")
                 self.presentVerifyCodeModalV2()

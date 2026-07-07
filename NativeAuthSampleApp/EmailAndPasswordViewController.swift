@@ -96,7 +96,7 @@ class EmailAndPasswordViewController: UIViewController {
         authManager.onActionRequired = { [weak self] action in
             guard let self = self else { return }
 
-            switch action {
+            switch action.kind {
             case .codeRequired(let sentTo, _, let codeLength),
                  .mfaVerificationRequired(let sentTo, _, let codeLength),
                  .strongAuthVerificationRequired(let sentTo, _, let codeLength):
@@ -153,7 +153,7 @@ class EmailAndPasswordViewController: UIViewController {
     /// Routes a verify-code submission to the correct V2 continuation: primary OOB codes use
     /// `submitCode`, whereas MFA / strong-auth verification codes use `submitChallenge`.
     private func submitCodeOrChallengeV2(_ code: String) {
-        switch authManager.latestAction {
+        switch authManager.latestAction?.kind {
         case .mfaVerificationRequired, .strongAuthVerificationRequired:
             authManager.submitChallenge(code)
         default:

@@ -167,7 +167,7 @@ extension AuthManager {
 
     /// Human-readable description of an action, used for logging.
     static func describe(_ action: MSALNativeAuthAction) -> String {
-        switch action {
+        switch action.kind {
         case .codeRequired(let sentTo, _, let codeLength):
             return "codeRequired (sentTo: \(sentTo), length: \(codeLength))"
         case .passwordRequired:
@@ -186,6 +186,8 @@ extension AuthManager {
             return "strongAuthRegistrationRequired"
         case .strongAuthVerificationRequired(let sentTo, _, let codeLength):
             return "strongAuthVerificationRequired (sentTo: \(sentTo), length: \(codeLength))"
+        case .unknown:
+            return "unknown"
         }
     }
 }
