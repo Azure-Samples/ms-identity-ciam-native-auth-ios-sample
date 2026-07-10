@@ -25,9 +25,17 @@
 import Foundation
 import MSAL
 
-// MARK: - MSALNativeAuthFlowDelegate (unified V2 delegate)
+// MARK: - Native Auth V2 per-state delegates
 
-extension SignInViewModel: MSALNativeAuthFlowDelegate
+extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
+    MSALNativeAuthPasswordRequiredDelegate,
+    MSALNativeAuthNewPasswordRequiredDelegate,
+    MSALNativeAuthAttributesRequiredDelegate,
+    MSALNativeAuthAttributesInvalidDelegate,
+    MSALNativeAuthMFARequiredDelegate,
+    MSALNativeAuthMFAVerificationRequiredDelegate,
+    MSALNativeAuthStrongAuthRegistrationRequiredDelegate,
+    MSALNativeAuthStrongAuthVerificationRequiredDelegate
 {
     private func label(_ scenario: MSALNativeAuthFlowScenario) -> String
     {

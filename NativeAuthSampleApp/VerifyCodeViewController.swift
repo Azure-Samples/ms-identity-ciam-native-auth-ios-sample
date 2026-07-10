@@ -26,9 +26,9 @@ import UIKit
 import MSAL
 
 class VerifyCodeViewController: UIViewController {
-    var onSubmit: ((_ code: String) -> Void)?
-    var onResend: (() -> Void)?
-    var onCancel: (() -> Void)?
+    @objc var onSubmit: ((_ code: String) -> Void)?
+    @objc var onResend: (() -> Void)?
+    @objc var onCancel: (() -> Void)?
     var channelTargetType: MSALNativeAuthChannelType?
 
     @IBOutlet weak var errorLabel: UILabel!

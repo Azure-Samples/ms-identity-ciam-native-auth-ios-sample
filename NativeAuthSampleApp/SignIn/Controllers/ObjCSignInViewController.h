@@ -22,28 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import UIKit
+#import <UIKit/UIKit.h>
 
-class NewPasswordViewController: UIViewController {
-    @objc var onSubmit: ((_ password: String) -> Void)?
-    @objc var onCancel: (() -> Void)?
+NS_ASSUME_NONNULL_BEGIN
 
-    @IBOutlet weak var errorLabel: UILabel!
-    @IBOutlet weak var passwordTextField: UITextField!
+/// A pure-Objective-C reimplementation of the SwiftUI ``SignInView`` / ``SignInViewModel`` screen.
+///
+/// This screen exists to verify that the MSAL Native Auth **V2** server-driven public API (and the
+/// granular **V1** API) is fully consumable from Objective-C. It mirrors the Swift screen's behavior:
+/// a V1/V2 API toggle, silent session restore on appear, sign-in and reset-password flows driven by
+/// the per-state delegate protocols, the shared verify-code / new-password modals, and sign-out.
+@interface ObjCSignInViewController : UIViewController
 
-    @IBAction func cancelPressed(_: Any) {
-        passwordTextField.resignFirstResponder()
-        onCancel?()
-        
-        dismiss(animated: true)
-    }
+@end
 
-    @IBAction func submitPressed(_: Any) {
-        guard let password = passwordTextField.text else {
-            return
-        }
-
-        passwordTextField.resignFirstResponder()
-        onSubmit?(password)
-    }
-}
+NS_ASSUME_NONNULL_END

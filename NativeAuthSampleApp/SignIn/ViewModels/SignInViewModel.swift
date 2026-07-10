@@ -27,11 +27,12 @@ import UIKit
 import MSAL
 
 /// Drives the Native Auth sign-in / reset-password flows for the sign-in screen, supporting both
-/// the granular **V1** API and the server-driven **V2** unified-delegate API. The active surface is
+/// the granular **V1** API and the server-driven **V2** per-state-delegate API. The active surface is
 /// chosen by ``useV2Api`` (toggled from the UI).
 ///
-/// This view model is both the unified ``MSALNativeAuthFlowDelegate`` (V2) and the granular V1
-/// delegates. It keeps the latest ``MSALNativeAuthState`` (V2) so a multi-step flow can be
+/// This view model conforms to the V2 per-state delegate protocols (each extending the base
+/// ``MSALNativeAuthFlowDelegate``) as well as the granular V1 delegates. It keeps the latest
+/// ``MSALNativeAuthState`` (V2) so a multi-step flow can be
 /// continued, routes each server-driven action, and presents the shared UIKit modals
 /// (`VerifyCodeViewController`, `NewPasswordViewController`). The modals are flow-agnostic: they call
 /// stored continuation callbacks that whichever flow is active populates.
