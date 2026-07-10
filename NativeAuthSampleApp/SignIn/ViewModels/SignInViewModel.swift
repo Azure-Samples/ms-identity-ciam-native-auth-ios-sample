@@ -31,7 +31,7 @@ import MSAL
 /// chosen by ``useV2Api`` (toggled from the UI).
 ///
 /// This view model is both the unified ``MSALNativeAuthFlowDelegate`` (V2) and the granular V1
-/// delegates. It keeps the latest ``MSALNativeAuthAction`` (V2) so a multi-step flow can be
+/// delegates. It keeps the latest ``MSALNativeAuthState`` (V2) so a multi-step flow can be
 /// continued, routes each server-driven action, and presents the shared UIKit modals
 /// (`VerifyCodeViewController`, `NewPasswordViewController`). The modals are flow-agnostic: they call
 /// stored continuation callbacks that whichever flow is active populates.

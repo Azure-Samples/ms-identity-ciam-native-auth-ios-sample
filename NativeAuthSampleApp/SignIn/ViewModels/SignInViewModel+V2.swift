@@ -29,114 +29,126 @@ import MSAL
 
 extension SignInViewModel: MSALNativeAuthFlowDelegate
 {
-    @MainActor
-    func onCodeRequired(action: MSALNativeAuthCodeRequiredAction)
+    private func label(_ scenario: MSALNativeAuthFlowScenario) -> String
     {
-        print("SignInViewModel: action required — \(action.description)")
-        statusMessage = "Code sent to \(action.sentTo) (\(action.codeLength) digits)."
+        switch scenario
+        {
+        case .signIn: return "signIn"
+        case .signUp: return "signUp"
+        case .passwordReset: return "passwordReset"
+        @unknown default: return "unknown"
+        }
+    }
+
+    @MainActor
+    func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
+    {
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+        statusMessage = "Code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            action.submitCode(code, delegate: self)
+            state.submitCode(code, delegate: self)
         }
         onResendCode = { [weak self] in
             guard let self = self else { return }
-            action.resendCode(delegate: self)
+            state.resendCode(delegate: self)
         }
         presentVerifyCodeModal()
     }
 
     @MainActor
-    func onPasswordRequired(action: MSALNativeAuthPasswordRequiredAction)
+    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Submitting password…"
-        action.submitPassword(password, delegate: self)
+        state.submitPassword(password, delegate: self)
     }
 
     @MainActor
-    func onNewPasswordRequired(action: MSALNativeAuthNewPasswordRequiredAction)
+    func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         onSubmitNewPassword = { [weak self] password in
             guard let self = self else { return }
-            action.submitNewPassword(password, delegate: self)
+            state.submitNewPassword(password, delegate: self)
         }
         presentNewPasswordModal()
     }
 
     @MainActor
-    func onAttributesRequired(action: MSALNativeAuthAttributesRequiredAction)
+    func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         isSigningIn = false
-        statusMessage = "Action required: \(action.description)"
+        statusMessage = "Action required: \(state.description)"
     }
 
     @MainActor
-    func onAttributesInvalid(action: MSALNativeAuthAttributesInvalidAction)
+    func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         isSigningIn = false
-        statusMessage = "Action required: \(action.description)"
+        statusMessage = "Action required: \(state.description)"
     }
 
     @MainActor
-    func onMFARequired(action: MSALNativeAuthMFARequiredAction)
+    func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
-        guard let method = action.authMethods.first else
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+        guard let method = state.authMethods.first else
         {
             isSigningIn = false
             statusMessage = "No auth methods available."
             return
         }
         statusMessage = "Selecting authentication method…"
-        action.selectAuthMethod(method, verificationContact: nil, delegate: self)
+        state.selectAuthMethod(method, verificationContact: nil, delegate: self)
     }
 
     @MainActor
-    func onMFAVerificationRequired(action: MSALNativeAuthMFAVerificationRequiredAction)
+    func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
-        statusMessage = "Verification code sent to \(action.sentTo) (\(action.codeLength) digits)."
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+        statusMessage = "Verification code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            action.submitChallenge(code, delegate: self)
+            state.submitChallenge(code, delegate: self)
         }
         onResendCode = nil
         presentVerifyCodeModal()
     }
 
     @MainActor
-    func onStrongAuthRegistrationRequired(action: MSALNativeAuthStrongAuthRegistrationRequiredAction)
+    func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
-        guard let method = action.authMethods.first else
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+        guard let method = state.authMethods.first else
         {
             isSigningIn = false
             statusMessage = "No auth methods available."
             return
         }
         statusMessage = "Selecting authentication method…"
-        action.selectAuthMethod(method, verificationContact: nil, delegate: self)
+        state.selectAuthMethod(method, verificationContact: nil, delegate: self)
     }
 
     @MainActor
-    func onStrongAuthVerificationRequired(action: MSALNativeAuthStrongAuthVerificationRequiredAction)
+    func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel: action required — \(action.description)")
-        statusMessage = "Verification code sent to \(action.sentTo) (\(action.codeLength) digits)."
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+        statusMessage = "Verification code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            action.submitChallenge(code, delegate: self)
+            state.submitChallenge(code, delegate: self)
         }
         onResendCode = nil
         presentVerifyCodeModal()
     }
 
     @MainActor
-    func onFlowCompleted(result: MSALNativeAuthUserAccountResult)
+    func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario)
     {
+        print("SignInViewModel[\(label(scenario))]: flow completed")
         accountResult = result
         dismissAnyModal()
         isSigningIn = false
@@ -145,10 +157,11 @@ extension SignInViewModel: MSALNativeAuthFlowDelegate
     }
 
     @MainActor
-    func onFlowError(error: MSALNativeAuthFlowError)
+    func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario)
     {
+        print("SignInViewModel[\(label(scenario))]: flow error — \(error.errorDescription ?? "N/A")")
         // The app decides recoverability from the error. On a recoverable error the modal's
-        // submit/resend callbacks still capture the action, so re-submitting advances the flow.
+        // submit/resend callbacks still capture the state, so re-submitting advances the flow.
         if error.isInvalidCode, isVerifyCodeModalPresented
         {
             updateVerifyCodeModal(errorMessage: "Check the code and try again")
