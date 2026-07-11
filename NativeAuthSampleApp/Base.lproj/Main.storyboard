@@ -589,22 +589,6 @@ Username</string>
             </objects>
             <point key="canvasLocation" x="766" y="-125"/>
         </scene>
-        <!--Sign In (ObjC)-->
-        <scene sceneID="OSI-sc-001">
-            <objects>
-                <viewController storyboardIdentifier="ObjCSignInViewController" id="OSI-vc-001" customClass="ObjCSignInViewController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="OSI-vw-001">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="OSI-sa-001"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="Sign In (ObjC)" id="OSI-tb-001"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="OSI-fr-001" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="344" y="-963"/>
-        </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="n6k-av-6OL">
             <objects>
@@ -624,7 +608,6 @@ Username</string>
                         <segue destination="qfh-W5-W8G" kind="relationship" relationship="viewControllers" id="1Ud-bv-FIu"/>
                         <segue destination="wyW-Cb-gAD" kind="relationship" relationship="viewControllers" id="7jh-Sq-q3b"/>
                         <segue destination="w7r-W2-1VH" kind="relationship" relationship="viewControllers" id="cs7-dH-eR6"/>
-                        <segue destination="OSI-vc-001" kind="relationship" relationship="viewControllers" id="OSI-sg-001"/>
                         <segue destination="WKc-3H-se8" kind="relationship" relationship="viewControllers" id="rNj-dA-v4m"/>
                         <segue destination="ykR-Zr-zxV" kind="relationship" relationship="viewControllers" id="rqf-ei-rDs"/>
                     </connections>

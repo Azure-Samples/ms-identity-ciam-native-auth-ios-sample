@@ -50,6 +50,11 @@ class SignInViewModel: NSObject, ObservableObject
     /// `true` uses the server-driven **V2** unified-delegate API; `false` uses the granular **V1** API.
     @Published var useV2Api: Bool = true
 
+    /// When `useV2Api` is `true`, routes the **sign-in** flow through the Objective-C driver
+    /// (``SignInViewModelV2ObjC``) instead of this Swift view model. This exists to verify the V2
+    /// public API is fully consumable from Objective-C; the UI stays in SwiftUI either way.
+    @Published var useObjCV2Driver: Bool = false
+
     /// Whether a user is currently signed in. When `true` the sign-in UI is hidden and only the
     /// sign-out affordance is shown.
     @Published var isSignedIn: Bool = false
@@ -76,6 +81,10 @@ class SignInViewModel: NSObject, ObservableObject
 
     /// The account result produced by a successful flow, used to sign the user out.
     var accountResult: MSALNativeAuthUserAccountResult?
+
+    /// The Objective-C V2 sign-in driver, retained for the duration of a flow when
+    /// ``useObjCV2Driver`` is enabled.
+    var objCDriver: SignInViewModelV2ObjC?
 
     /// Ensures the silent session restore is attempted only once per view-model lifetime.
     private var didAttemptSessionRestore = false
@@ -169,7 +178,16 @@ class SignInViewModel: NSObject, ObservableObject
 
         if useV2Api
         {
-            application.signInV2(parameters: parameters, delegate: self)
+            if useObjCV2Driver
+            {
+                let driver = SignInViewModelV2ObjC(application: application, delegate: self)
+                objCDriver = driver
+                driver.signIn(withUsername: email, password: password)
+            }
+            else
+            {
+                application.signInV2(parameters: parameters, delegate: self)
+            }
         }
         else
         {
@@ -210,6 +228,7 @@ class SignInViewModel: NSObject, ObservableObject
         onSubmitCode = nil
         onResendCode = nil
         onSubmitNewPassword = nil
+        objCDriver = nil
     }
 
     // MARK: - Sign out

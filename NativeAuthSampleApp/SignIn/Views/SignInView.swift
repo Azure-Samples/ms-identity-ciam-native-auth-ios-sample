@@ -88,13 +88,14 @@ struct SignInView: View
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Picker("API Version", selection: $viewModel.useV2Api)
+            Toggle("Use V2 API (preview)", isOn: $viewModel.useV2Api)
+                .disabled(viewModel.isSigningIn)
+
+            if viewModel.useV2Api
             {
-                Text("V1").tag(false)
-                Text("V2").tag(true)
+                Toggle("Drive V2 sign-in from Objective-C", isOn: $viewModel.useObjCV2Driver)
+                    .disabled(viewModel.isSigningIn)
             }
-            .pickerStyle(.segmented)
-            .disabled(viewModel.isSigningIn)
 
             TextField("Email", text: $viewModel.email)
                 .textContentType(.username)

@@ -12,6 +12,8 @@
 		194A56808D449E1A9F82E768 /* SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */; };
 		FE331E01CE11A4B00C4042E1 /* SignInViewModel+V1.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */; };
 		FE331E03CE11A4B00C4042E3 /* SignInViewModel+V2.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */; };
+		FE331E13CE11A4B00C4042F3 /* SignInViewModelV2ObjC.m in Sources */ = {isa = PBXBuildFile; fileRef = FE331E12CE11A4B00C4042F2 /* SignInViewModelV2ObjC.m */; };
+		FE331E15CE11A4B00C4042F5 /* SignInViewModel+V2ObjCBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E14CE11A4B00C4042F4 /* SignInViewModel+V2ObjCBridge.swift */; };
 		232A823F2FF49AF500100CFB /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 232A821C2FF49AA300100CFB /* MSAL.framework */; };
 		232A82402FF49AF500100CFB /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 232A821C2FF49AA300100CFB /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2387CCD12FFC658700E30923 /* SignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2387CCD02FFC658700E30923 /* SignInViewController.swift */; };
@@ -28,7 +30,6 @@
 		9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */; };
 		9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */; };
 		9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B9DD5192A053E8700042B43 /* ObjCViewController.m */; };
-		0B1C0000000000000000AA03 /* ObjCSignInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B1C0000000000000000AA02 /* ObjCSignInViewController.m */; };
 		9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1949529F820980023905D /* EmailAndCodeViewController.swift */; };
 		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
 		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
@@ -203,8 +204,6 @@
 		9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NativeAuthSampleApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		9B9DD5182A053E8700042B43 /* ObjCViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjCViewController.h; sourceTree = "<group>"; };
 		9B9DD5192A053E8700042B43 /* ObjCViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCViewController.m; sourceTree = "<group>"; };
-		0B1C0000000000000000AA01 /* ObjCSignInViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjCSignInViewController.h; sourceTree = "<group>"; };
-		0B1C0000000000000000AA02 /* ObjCSignInViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCSignInViewController.m; sourceTree = "<group>"; };
 		9BA1949529F820980023905D /* EmailAndCodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAndCodeViewController.swift; sourceTree = "<group>"; };
 		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
@@ -216,6 +215,9 @@
 		FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewModel.swift; sourceTree = "<group>"; };
 		FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModel+V1.swift"; sourceTree = "<group>"; };
 		FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModel+V2.swift"; sourceTree = "<group>"; };
+		FE331E10CE11A4B00C4042F0 /* SignInViewModelV2ObjC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SignInViewModelV2ObjC.h; sourceTree = "<group>"; };
+		FE331E12CE11A4B00C4042F2 /* SignInViewModelV2ObjC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SignInViewModelV2ObjC.m; sourceTree = "<group>"; };
+		FE331E14CE11A4B00C4042F4 /* SignInViewModel+V2ObjCBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModel+V2ObjCBridge.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -234,8 +236,6 @@
 			isa = PBXGroup;
 			children = (
 				2387CCD02FFC658700E30923 /* SignInViewController.swift */,
-				0B1C0000000000000000AA01 /* ObjCSignInViewController.h */,
-				0B1C0000000000000000AA02 /* ObjCSignInViewController.m */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -279,6 +279,9 @@
 				FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */,
 				FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */,
 				FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */,
+				FE331E10CE11A4B00C4042F0 /* SignInViewModelV2ObjC.h */,
+				FE331E12CE11A4B00C4042F2 /* SignInViewModelV2ObjC.m */,
+				FE331E14CE11A4B00C4042F4 /* SignInViewModel+V2ObjCBridge.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -599,9 +602,10 @@
 				194A56808D449E1A9F82E768 /* SignInViewModel.swift in Sources */,
 				FE331E01CE11A4B00C4042E1 /* SignInViewModel+V1.swift in Sources */,
 				FE331E03CE11A4B00C4042E3 /* SignInViewModel+V2.swift in Sources */,
+				FE331E13CE11A4B00C4042F3 /* SignInViewModelV2ObjC.m in Sources */,
+				FE331E15CE11A4B00C4042F5 /* SignInViewModel+V2ObjCBridge.swift in Sources */,
 				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
 				9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */,
-				0B1C0000000000000000AA03 /* ObjCSignInViewController.m in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
 				9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */,
 				12266F092D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift in Sources */,
