@@ -211,14 +211,14 @@ class SignInViewModel: NSObject, ObservableObject
         isSigningIn = true
         statusMessage = "Resetting password… (\(useV2Api ? "V2" : "V1"))"
 
-        let parameters = MSALNativeAuthResetPasswordParameters(username: email)
-
         if useV2Api
         {
+            let parameters = MSALNativeAuthResetPasswordParametersV2(username: email)
             application.resetPasswordV2(parameters: parameters, delegate: self)
         }
         else
         {
+            let parameters = MSALNativeAuthResetPasswordParameters(username: email)
             application.resetPassword(parameters: parameters, delegate: self)
         }
     }
