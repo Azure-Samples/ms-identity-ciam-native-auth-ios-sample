@@ -215,13 +215,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		14E15A5EFF65D3B65345B362 /* Controllers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Controllers;
-			sourceTree = "<group>";
-		};
 		232A82002FF49AA300100CFB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -281,7 +274,6 @@
 			children = (
 				34CDD7AE16B7ABAC6E3EC120 /* Views */,
 				5B89B5D04B426A7B5D026AE8 /* ViewModels */,
-				14E15A5EFF65D3B65345B362 /* Controllers */,
 			);
 			path = SignIn;
 			sourceTree = "<group>";
@@ -309,10 +301,8 @@
 			isa = PBXGroup;
 			children = (
 				9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */,
-				9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */,
-				9B73CACB29F6DAA300FC7129 /* Modal View Controllers */,
+				9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */,
 				689C926C019C36260FDA441D /* SignIn */,
-				DE2D14EE2E858B24001FC199 /* Table View Cells */,
 				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
 				9B08477C29969265003BA4B4 /* Assets.xcassets */,
 				9B08478129969265003BA4B4 /* Info.plist */,
@@ -320,41 +310,11 @@
 			path = NativeAuthSampleApp;
 			sourceTree = "<group>";
 		};
-		9B73CACB29F6DAA300FC7129 /* Modal View Controllers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "Modal View Controllers";
-			sourceTree = "<group>";
-		};
-		9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */ = {
-			isa = PBXGroup;
-			children = (
-				9B9125012A0A90DB006F91E8 /* Objective-C Scenario */,
-			);
-			name = "Scenario View Controllers";
-			sourceTree = "<group>";
-		};
-		9B9125012A0A90DB006F91E8 /* Objective-C Scenario */ = {
-			isa = PBXGroup;
-			children = (
-				9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */,
-			);
-			name = "Objective-C Scenario";
-			sourceTree = "<group>";
-		};
 		9BB32E4A29A6750800BD7D89 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		DE2D14EE2E858B24001FC199 /* Table View Cells */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "Table View Cells";
 			sourceTree = "<group>";
 		};
 		AA10SHEETVIEWS0001GROUP0 /* SheetViews */ = {
@@ -609,9 +569,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXVariantGroup section */
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		9B08478229969265003BA4B4 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -735,6 +692,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "NativeAuthSampleApp/NativeAuthSampleApp-macOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBF8T346G9;
@@ -749,17 +707,16 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "NativeAuthSampleApp/NativeAuthSampleApp-macOS.entitlements";
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -772,6 +729,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "NativeAuthSampleApp/NativeAuthSampleApp-macOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBF8T346G9;
@@ -786,16 +744,15 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "NativeAuthSampleApp/NativeAuthSampleApp-macOS.entitlements";
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
