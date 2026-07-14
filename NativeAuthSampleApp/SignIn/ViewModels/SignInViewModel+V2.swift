@@ -87,16 +87,25 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        isSigningIn = false
-        statusMessage = "Action required: \(state.description)"
+        statusMessage = "Additional information is required."
+        requiredAttributes = state.attributes
+        onSubmitAttributes = { [weak self, weak state] attributes in
+            guard let self = self, let state = state else { return }
+            state.submitAttributes(attributes, delegate: self)
+        }
+        presentCollectAttributesModal()
     }
 
     @MainActor
     func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
     {
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        isSigningIn = false
-        statusMessage = "Action required: \(state.description)"
+        statusMessage = "Invalid attribute value(s): \(state.attributeNames.joined(separator: ", ")). Please correct them and try again."
+        onSubmitAttributes = { [weak self, weak state] attributes in
+            guard let self = self, let state = state else { return }
+            state.submitAttributes(attributes, delegate: self)
+        }
+        presentCollectAttributesModal()
     }
 
     @MainActor
@@ -107,6 +116,17 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         {
             isSigningIn = false
             statusMessage = "No auth methods available."
+            return
+        }
+        if state.authMethods.count > 1
+        {
+            statusMessage = "Select an authentication method."
+            authMethods = state.authMethods
+            onSelectAuthMethod = { [weak self, weak state] method in
+                guard let self = self, let state = state else { return }
+                state.selectAuthMethod(method, delegate: self)
+            }
+            presentSelectAuthMethodModal()
             return
         }
         statusMessage = "Selecting authentication method…"
@@ -134,6 +154,17 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         {
             isSigningIn = false
             statusMessage = "No auth methods available."
+            return
+        }
+        if state.authMethods.count > 1
+        {
+            statusMessage = "Select an authentication method."
+            authMethods = state.authMethods
+            onSelectAuthMethod = { [weak self, weak state] method in
+                guard let self = self, let state = state else { return }
+                state.selectAuthMethod(method, delegate: self)
+            }
+            presentSelectAuthMethodModal()
             return
         }
         statusMessage = "Selecting authentication method…"

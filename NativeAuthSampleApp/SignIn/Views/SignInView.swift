@@ -23,6 +23,11 @@
 // THE SOFTWARE.
 
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 struct SignInView: View
 {
@@ -39,7 +44,7 @@ struct SignInView: View
         {
             if viewModel.isSignedIn
             {
-                signedInContent
+                SignedInView(viewModel: viewModel)
             }
             else if viewModel.isRestoringSession
             {
@@ -50,7 +55,7 @@ struct SignInView: View
                 signInContent
             }
 
-            if let statusMessage = viewModel.statusMessage
+            if !viewModel.isSignedIn, let statusMessage = viewModel.statusMessage
             {
                 Text(statusMessage)
                     .font(.footnote)
@@ -61,9 +66,27 @@ struct SignInView: View
             Spacer()
         }
         .padding()
+        .sheet(item: $viewModel.activeSheet)
+        { sheet in
+            switch sheet
+            {
+            case .verifyCode:
+                VerifyCodeSheet(viewModel: viewModel)
+            case .newPassword:
+                NewPasswordSheet(viewModel: viewModel)
+            case .collectAttributes:
+                CollectAttributesSheet(viewModel: viewModel)
+            case .selectAuthMethod:
+                SelectAuthMethodSheet(viewModel: viewModel)
+            }
+        }
         .onAppear
         {
             viewModel.loadCachedSession()
+            viewModel.presentationAnchorProvider =
+            {
+                Self.presentationAnchor()
+            }
         }
     }
 
@@ -91,24 +114,22 @@ struct SignInView: View
             Toggle("Use V2 API (preview)", isOn: $viewModel.useV2Api)
                 .disabled(viewModel.isSigningIn)
 
-            if viewModel.useV2Api
-            {
-                Toggle("Drive V2 sign-in from Objective-C", isOn: $viewModel.useObjCV2Driver)
-                    .disabled(viewModel.isSigningIn)
-            }
+            Toggle("Drive from Objective-C", isOn: $viewModel.useObjCDriver)
+                .disabled(viewModel.isSigningIn)
 
             TextField("Email", text: $viewModel.email)
-                .textContentType(.username)
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled(true)
                 .textFieldStyle(.roundedBorder)
 
-            SecureField("Password", text: $viewModel.password)
-                .textContentType(.password)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled(true)
-                .textFieldStyle(.roundedBorder)
+            VStack(spacing: 4)
+            {
+                SecureField("Password", text: $viewModel.password)
+                    .textFieldStyle(.roundedBorder)
+
+                Text("Leave the password empty to sign in with a one-time email code.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
 
             Button(action: viewModel.signIn)
             {
@@ -120,6 +141,16 @@ struct SignInView: View
             .buttonStyle(.borderedProminent)
             .disabled(viewModel.isSignInDisabled)
 
+            Button(action: viewModel.signUp)
+            {
+                Text("Sign Up")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.bordered)
+            .disabled(viewModel.isSignUpDisabled)
+
             Button(action: viewModel.resetPassword)
             {
                 Text("Reset Password")
@@ -129,27 +160,68 @@ struct SignInView: View
             }
             .buttonStyle(.bordered)
             .disabled(viewModel.isResetPasswordDisabled)
-        }
-    }
 
-    private var signedInContent: some View
-    {
-        VStack(spacing: 16)
-        {
-            Text("Signed In")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Button(action: viewModel.signOut)
+            Button(action: viewModel.signInWithBrowser)
             {
-                Text("Sign Out")
+                Text("Sign in with Browser")
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.bordered)
+            .disabled(viewModel.isSigningIn)
+
+            socialSignInContent
         }
+    }
+
+    private var socialSignInContent: some View
+    {
+        VStack(spacing: 8)
+        {
+            Text("Sign in with social")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            ForEach(SocialProvider.allCases)
+            { provider in
+                Button(action:
+                {
+                    viewModel.signInWithSocial(provider: provider)
+                })
+                {
+                    Text(provider.displayName)
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.bordered)
+                .disabled(viewModel.isSigningIn)
+            }
+        }
+    }
+
+    private static func presentationAnchor() -> Any?
+    {
+        #if os(iOS)
+        return UIApplication.shared.connectedScenes
+            .compactMap
+            {
+                $0 as? UIWindowScene
+            }
+            .flatMap
+            {
+                $0.windows
+            }
+            .first
+            {
+                $0.isKeyWindow
+            }
+        #elseif os(macOS)
+        return NSApplication.shared.keyWindow
+        #else
+        return nil
+        #endif
     }
 }
 

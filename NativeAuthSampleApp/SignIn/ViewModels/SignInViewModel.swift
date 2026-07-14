@@ -23,22 +23,53 @@
 // THE SOFTWARE.
 
 import Foundation
-import UIKit
 import MSAL
 
-/// Drives the Native Auth sign-in / reset-password flows for the sign-in screen, supporting both
-/// the granular **V1** API and the server-driven **V2** per-state-delegate API. The active surface is
-/// chosen by ``useV2Api`` (toggled from the UI).
+/// Identifies which cross-platform SwiftUI sheet the auth flow is currently presenting. The flows
+/// populate the flow-agnostic continuation closures (``onSubmitCode`` / ``onResendCode`` /
+/// ``onSubmitNewPassword`` / ``onSubmitAttributes`` / ``onSelectAuthMethod``) before setting the
+/// matching sheet, so the sheets stay flow-agnostic.
+enum AuthSheet: String, Identifiable
+{
+    case verifyCode
+    case newPassword
+    case collectAttributes
+    case selectAuthMethod
+
+    var id: String { rawValue }
+}
+
+/// The social identity providers offered by the browser-based ("web fallback") sign-in.
+enum SocialProvider: String, CaseIterable, Identifiable
+{
+    case google
+    case facebook
+    case apple
+    case linkedin
+
+    var id: String { rawValue }
+
+    var displayName: String
+    {
+        switch self
+        {
+        case .google: return "Google"
+        case .facebook: return "Facebook"
+        case .apple: return "Apple"
+        case .linkedin: return "LinkedIn"
+        }
+    }
+}
+
+/// Drives every Native Auth flow behind the single unified SwiftUI authentication screen — sign-in
+/// (password **or** email one-time-code), sign-up, self-service password reset, the browser / social
+/// "web fallback", and post-sign-in protected-API access. It supports both the granular **V1** API
+/// and the server-driven **V2** per-state-delegate API, chosen by ``useV2Api``; either API can also
+/// be driven from Objective-C (``useObjCDriver``) to prove the public API is Obj-C-consumable.
 ///
-/// This view model conforms to the V2 per-state delegate protocols (each extending the base
-/// ``MSALNativeAuthFlowDelegate``) as well as the granular V1 delegates. It keeps the latest
-/// ``MSALNativeAuthState`` (V2) so a multi-step flow can be
-/// continued, routes each server-driven action, and presents the shared UIKit modals
-/// (`VerifyCodeViewController`, `NewPasswordViewController`). The modals are flow-agnostic: they call
-/// stored continuation callbacks that whichever flow is active populates.
-///
-/// Modals are presented on a weakly-held presenting `UIViewController` (set by the hosting
-/// `SignInViewController`), so the view model never retains the controller.
+/// The view model is fully SwiftUI/AppKit-agnostic (no UIKit): every interactive step is surfaced as
+/// a cross-platform SwiftUI sheet selected by ``activeSheet``. The sheets are flow-agnostic — they
+/// invoke the stored continuation closures that whichever flow is active populates.
 class SignInViewModel: NSObject, ObservableObject
 {
     @Published var email: String = ""
@@ -46,45 +77,70 @@ class SignInViewModel: NSObject, ObservableObject
     @Published var statusMessage: String?
     @Published var isSigningIn: Bool = false
 
-    /// Selects which Native Auth API surface the sign-in / reset-password flows use.
-    /// `true` uses the server-driven **V2** unified-delegate API; `false` uses the granular **V1** API.
+    /// Selects which Native Auth API surface the flows use. `true` uses the server-driven **V2**
+    /// unified-delegate API; `false` uses the granular **V1** API.
     @Published var useV2Api: Bool = true
 
-    /// When `useV2Api` is `true`, routes the **sign-in** flow through the Objective-C driver
-    /// (``SignInViewModelV2ObjC``) instead of this Swift view model. This exists to verify the V2
-    /// public API is fully consumable from Objective-C; the UI stays in SwiftUI either way.
-    @Published var useObjCV2Driver: Bool = false
+    /// Routes the flow through an Objective-C driver (``SignInViewModelV2ObjC`` for V2,
+    /// ``SignInViewModelV1ObjC`` for V1) instead of this Swift view model. This exists to verify the
+    /// V1 **and** V2 public APIs are fully consumable from Objective-C; the UI stays in SwiftUI.
+    @Published var useObjCDriver: Bool = false
 
-    /// Whether a user is currently signed in. When `true` the sign-in UI is hidden and only the
-    /// sign-out affordance is shown.
+    /// Whether a user is currently signed in. When `true` the sign-in UI is hidden and the
+    /// signed-in UI (protected-API access + sign-out) is shown.
     @Published var isSignedIn: Bool = false
 
     /// Whether the view model is attempting to restore a previous session (silent token acquisition)
-    /// on launch. Starts `true` so the sign-in form is not shown until the silent attempt resolves;
-    /// the form appears only if there is no cached account or the token can't be refreshed silently.
+    /// on launch. Starts `true` so the sign-in form is not shown until the silent attempt resolves.
     @Published var isRestoringSession: Bool = true
 
-    /// Presenting controller used to show / dismiss the shared UIKit modals. Set by the hosting
-    /// view controller. Weak so the view model never retains the controller.
-    weak var presenter: UIViewController?
+    /// The sheet currently presented over the unified screen, or `nil` when none is shown.
+    @Published var activeSheet: AuthSheet?
+
+    /// Inline error shown inside the verify-code sheet, or `nil` when there is none.
+    @Published var verifyCodeError: String?
+
+    /// Inline error shown inside the new-password sheet, or `nil` when there is none.
+    @Published var newPasswordError: String?
+
+    /// The attributes the server requires during sign-up, surfaced by the collect-attributes sheet.
+    @Published var requiredAttributes: [MSALNativeAuthRequiredAttribute] = []
+
+    /// The authentication methods offered during MFA / strong-auth, surfaced by the
+    /// select-auth-method sheet.
+    @Published var authMethods: [MSALAuthMethod] = []
+
+    /// The most recent protected-API response text, shown on the signed-in screen.
+    @Published var protectedAPIResult: String?
 
     private let nativeAuth: MSALNativeAuthPublicClientApplication?
 
-    /// Continuation callbacks wired by whichever flow (V1 per-step delegates or the V2 action
-    /// router) is currently active, so the shared modals stay flow-agnostic.
+    /// Continuation callbacks wired by whichever flow (V1 per-step delegates, the V2 action router,
+    /// or an Obj-C driver) is currently active, so the shared sheets stay flow-agnostic.
     var onSubmitCode: ((String) -> Void)?
     var onResendCode: (() -> Void)?
     var onSubmitNewPassword: ((String) -> Void)?
+    var onSubmitAttributes: (([String: Any]) -> Void)?
+    var onSelectAuthMethod: ((MSALAuthMethod) -> Void)?
 
-    private var verifyCodeViewController: VerifyCodeViewController?
-    private var newPasswordViewController: NewPasswordViewController?
-
-    /// The account result produced by a successful flow, used to sign the user out.
+    /// The account result produced by a successful flow, used to acquire tokens and sign out.
     var accountResult: MSALNativeAuthUserAccountResult?
 
     /// The Objective-C V2 sign-in driver, retained for the duration of a flow when
-    /// ``useObjCV2Driver`` is enabled.
+    /// ``useObjCDriver`` is enabled with V2.
     var objCDriver: SignInViewModelV2ObjC?
+
+    /// The Objective-C V1 sign-in driver, retained for the duration of a flow when
+    /// ``useObjCDriver`` is enabled with V1.
+    var objCDriverV1: SignInViewModelV1ObjC?
+
+    /// A standard (non-native) MSAL application used for the browser-based / social "web fallback"
+    /// flow. Created lazily by the web-fallback code path.
+    var webBrowserApp: MSALPublicClientApplication?
+
+    /// Supplies the platform presentation anchor (a `UIWindow` on iOS, an `NSWindow` on macOS) for
+    /// the browser-based flow. Set by the hosting SwiftUI view.
+    var presentationAnchorProvider: (() -> Any?)?
 
     /// Ensures the silent session restore is attempted only once per view-model lifetime.
     private var didAttemptSessionRestore = false
@@ -116,9 +172,15 @@ class SignInViewModel: NSObject, ObservableObject
         }
     }
 
+    /// The native-auth application, exposed to the flow extensions.
+    var application: MSALNativeAuthPublicClientApplication?
+    {
+        nativeAuth
+    }
+
     var isSignInDisabled: Bool
     {
-        email.isEmpty || password.isEmpty || isSigningIn
+        email.isEmpty || isSigningIn
     }
 
     var isResetPasswordDisabled: Bool
@@ -126,10 +188,15 @@ class SignInViewModel: NSObject, ObservableObject
         email.isEmpty || isSigningIn
     }
 
+    var isSignUpDisabled: Bool
+    {
+        email.isEmpty || isSigningIn
+    }
+
     // MARK: - Start flows
 
-    /// Called when the sign-in screen appears. Tries to acquire an access token silently from the
-    /// cache. If there is no signed-in account (the user was signed out) the sign-in UI is shown.
+    /// Called when the screen appears. Tries to acquire an access token silently from the cache. If
+    /// there is no signed-in account (the user was signed out) the sign-in UI is shown.
     func loadCachedSession()
     {
         guard !didAttemptSessionRestore else
@@ -156,9 +223,11 @@ class SignInViewModel: NSObject, ObservableObject
         account.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: self)
     }
 
+    /// Starts a sign-in. With a password the password flow is used; with an **empty** password the
+    /// email one-time-code (OTP) flow is used.
     func signIn()
     {
-        guard !email.isEmpty, !password.isEmpty, !isSigningIn else
+        guard !email.isEmpty, !isSigningIn else
         {
             return
         }
@@ -171,14 +240,18 @@ class SignInViewModel: NSObject, ObservableObject
 
         resetFlowState()
         isSigningIn = true
-        statusMessage = "Signing in… (\(useV2Api ? "V2" : "V1"))"
+        let usingPassword = !password.isEmpty
+        statusMessage = "Signing in… (\(useV2Api ? "V2" : "V1")\(usingPassword ? "" : ", email OTP"))"
 
         let parameters = MSALNativeAuthSignInParameters(username: email)
-        parameters.password = password
-
-        if useV2Api
+        if usingPassword
         {
-            if useObjCV2Driver
+            parameters.password = password
+        }
+
+        if useObjCDriver
+        {
+            if useV2Api
             {
                 let driver = SignInViewModelV2ObjC(application: application, delegate: self)
                 objCDriver = driver
@@ -186,8 +259,12 @@ class SignInViewModel: NSObject, ObservableObject
             }
             else
             {
-                application.signInV2(parameters: parameters, delegate: self)
+                startV1ObjCSignIn(application: application)
             }
+        }
+        else if useV2Api
+        {
+            application.signInV2(parameters: parameters, delegate: self)
         }
         else
         {
@@ -228,7 +305,14 @@ class SignInViewModel: NSObject, ObservableObject
         onSubmitCode = nil
         onResendCode = nil
         onSubmitNewPassword = nil
+        onSubmitAttributes = nil
+        onSelectAuthMethod = nil
         objCDriver = nil
+        objCDriverV1 = nil
+        requiredAttributes = []
+        authMethods = []
+        verifyCodeError = nil
+        newPasswordError = nil
     }
 
     // MARK: - Sign out
@@ -240,6 +324,7 @@ class SignInViewModel: NSObject, ObservableObject
         accountResult = nil
         resetFlowState()
         password = ""
+        protectedAPIResult = nil
         isSignedIn = false
         isSigningIn = false
         isRestoringSession = false
@@ -248,10 +333,11 @@ class SignInViewModel: NSObject, ObservableObject
 
     // MARK: - Cancel the current flow
 
-    private func cancelFlow()
+    /// Dismisses any presented sheet and abandons the in-progress flow. Called by the sheets' cancel
+    /// affordances.
+    func cancelFlow()
     {
-        verifyCodeViewController = nil
-        newPasswordViewController = nil
+        activeSheet = nil
         isSigningIn = false
         statusMessage = "Action cancelled."
     }
@@ -282,176 +368,78 @@ extension SignInViewModel: CredentialsDelegate
     }
 }
 
-// MARK: - Verify Code modal
+// MARK: - Flow-agnostic sheet presentation
+//
+// These helpers keep the names used by the V1 / V2 / Obj-C-bridge flow extensions, but now drive
+// cross-platform SwiftUI sheets via `activeSheet` instead of presenting UIKit modals.
 
 extension SignInViewModel
 {
-    /// Whether the verify-code modal is currently presented.
+    /// Whether the verify-code sheet is currently presented.
     var isVerifyCodeModalPresented: Bool
     {
-        verifyCodeViewController != nil
+        activeSheet == .verifyCode
     }
 
-    /// Whether the new-password modal is currently presented.
+    /// Whether the new-password sheet is currently presented.
     var isNewPasswordModalPresented: Bool
     {
-        newPasswordViewController != nil
+        activeSheet == .newPassword
     }
 
+    /// Presents (or refreshes) the verify-code sheet. The active flow must have wired
+    /// ``onSubmitCode`` / ``onResendCode`` beforehand.
     func presentVerifyCodeModal()
     {
-        if verifyCodeViewController != nil
-        {
-            updateVerifyCodeModal(errorMessage: nil)
-        }
-        else
-        {
-            showVerifyCodeModal()
-        }
+        verifyCodeError = nil
+        activeSheet = .verifyCode
     }
 
-    private func showVerifyCodeModal()
-    {
-        verifyCodeViewController = presenter?.storyboard?.instantiateViewController(
-            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
-
-        guard let verifyCodeViewController = verifyCodeViewController else
-        {
-            print("Error creating Verify Code view controller")
-            return
-        }
-
-        updateVerifyCodeModal(errorMessage: nil)
-        presenter?.present(verifyCodeViewController, animated: true)
-    }
-
-    func updateVerifyCodeModal(errorMessage: String?)
-    {
-        guard let verifyCodeViewController = verifyCodeViewController else
-        {
-            return
-        }
-
-        if let errorMessage = errorMessage
-        {
-            verifyCodeViewController.errorLabel.text = errorMessage
-        }
-
-        verifyCodeViewController.onSubmit = { [weak self] code in
-            DispatchQueue.main.async
-            {
-                self?.onSubmitCode?(code)
-            }
-        }
-
-        verifyCodeViewController.onResend = { [weak self] in
-            DispatchQueue.main.async
-            {
-                self?.onResendCode?()
-            }
-        }
-
-        verifyCodeViewController.onCancel = { [weak self] in
-            DispatchQueue.main.async
-            {
-                self?.cancelFlow()
-            }
-        }
-    }
-
-    private func dismissVerifyCodeModal(completion: (() -> Void)? = nil)
-    {
-        guard verifyCodeViewController != nil else
-        {
-            completion?()
-            return
-        }
-
-        presenter?.dismiss(animated: true, completion: completion)
-        verifyCodeViewController = nil
-    }
-}
-
-// MARK: - New Password modal
-
-extension SignInViewModel
-{
+    /// Presents the new-password sheet. The active flow must have wired ``onSubmitNewPassword``
+    /// beforehand.
     func presentNewPasswordModal()
     {
-        if verifyCodeViewController != nil
-        {
-            dismissVerifyCodeModal { [weak self] in
-                self?.showNewPasswordModal()
-            }
-        }
-        else
-        {
-            showNewPasswordModal()
-        }
+        newPasswordError = nil
+        activeSheet = .newPassword
     }
 
-    private func showNewPasswordModal()
+    /// Presents the collect-attributes sheet. The active flow must have set ``requiredAttributes``
+    /// and wired ``onSubmitAttributes`` beforehand.
+    func presentCollectAttributesModal()
     {
-        newPasswordViewController = presenter?.storyboard?.instantiateViewController(
-            withIdentifier: "NewPasswordViewController") as? NewPasswordViewController
-
-        guard let newPasswordViewController = newPasswordViewController else
-        {
-            print("Error creating password view controller")
-            return
-        }
-
-        updateNewPasswordModal(errorMessage: nil)
-        presenter?.present(newPasswordViewController, animated: true)
+        activeSheet = .collectAttributes
     }
 
+    /// Presents the select-auth-method sheet. The active flow must have set ``authMethods`` and
+    /// wired ``onSelectAuthMethod`` beforehand.
+    func presentSelectAuthMethodModal()
+    {
+        activeSheet = .selectAuthMethod
+    }
+
+    /// Updates the inline error on the verify-code sheet (keeping it presented).
+    func updateVerifyCodeModal(errorMessage: String?)
+    {
+        verifyCodeError = errorMessage
+        if activeSheet != .verifyCode
+        {
+            activeSheet = .verifyCode
+        }
+    }
+
+    /// Updates the inline error on the new-password sheet (keeping it presented).
     func updateNewPasswordModal(errorMessage: String?)
     {
-        guard let newPasswordViewController = newPasswordViewController else
+        newPasswordError = errorMessage
+        if activeSheet != .newPassword
         {
-            return
-        }
-
-        if let errorMessage = errorMessage
-        {
-            newPasswordViewController.errorLabel.text = errorMessage
-        }
-
-        newPasswordViewController.onSubmit = { [weak self] password in
-            DispatchQueue.main.async
-            {
-                self?.onSubmitNewPassword?(password)
-            }
-        }
-
-        newPasswordViewController.onCancel = { [weak self] in
-            DispatchQueue.main.async
-            {
-                self?.cancelFlow()
-            }
+            activeSheet = .newPassword
         }
     }
 
-    private func dismissNewPasswordModal()
-    {
-        guard newPasswordViewController != nil else
-        {
-            return
-        }
-
-        presenter?.dismiss(animated: true)
-        newPasswordViewController = nil
-    }
-
+    /// Dismisses whichever sheet is presented.
     func dismissAnyModal()
     {
-        if verifyCodeViewController != nil
-        {
-            dismissVerifyCodeModal()
-        }
-        if newPasswordViewController != nil
-        {
-            dismissNewPasswordModal()
-        }
+        activeSheet = nil
     }
 }

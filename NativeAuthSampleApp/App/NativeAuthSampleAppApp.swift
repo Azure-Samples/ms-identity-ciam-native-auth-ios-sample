@@ -23,23 +23,34 @@
 // THE SOFTWARE.
 
 import SwiftUI
-import UIKit
+import MSAL
 
-/// Thin bridge that hosts the SwiftUI ``SignInView`` inside UIKit. It owns no flow logic itself:
-/// all V2 flow wiring, action routing, and modal presentation live in ``SignInViewModel``. The
-/// controller only hands the view model a presenting controller so it can show the shared modals.
-class SignInViewController: UIHostingController<SignInView>
+@main
+struct NativeAuthSampleAppApp: App
 {
-    private let viewModel = SignInViewModel()
-
-    required init?(coder aDecoder: NSCoder)
+    init()
     {
-        super.init(coder: aDecoder, rootView: SignInView(viewModel: viewModel))
+        MSALGlobalConfig.loggerConfig.logLevel = .verbose
+        MSALGlobalConfig.loggerConfig.setLogCallback
+        { _, message, containsPII in
+            if !containsPII
+            {
+                print("MSAL: \(message ?? "")")
+            }
+        }
     }
 
-    override func viewDidLoad()
+    var body: some Scene
     {
-        super.viewDidLoad()
-        viewModel.presenter = self
+        WindowGroup
+        {
+            SignInView()
+                .onOpenURL
+                { url in
+                    #if os(iOS)
+                    MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: nil)
+                    #endif
+                }
+        }
     }
 }
