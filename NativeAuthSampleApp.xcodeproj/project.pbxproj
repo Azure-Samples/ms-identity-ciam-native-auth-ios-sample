@@ -251,6 +251,8 @@
 			isa = PBXGroup;
 			children = (
 				2387CCE42FFC659000E30923 /* SignInView.swift */,
+				AA10SHEETVIEWS0001GROUP0 /* SheetViews */,
+				E8F1422AA694CF5B65FD1336 /* SignedInView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -264,6 +266,12 @@
 				FE331E10CE11A4B00C4042F0 /* SignInViewModelV2ObjC.h */,
 				FE331E12CE11A4B00C4042F2 /* SignInViewModelV2ObjC.m */,
 				FE331E14CE11A4B00C4042F4 /* SignInViewModel+V2ObjCBridge.swift */,
+				5BE34D6EAE7D82693A264775 /* SignInViewModel+SignUp.swift */,
+				B67F492BB21A35BD2BC73152 /* SignInViewModel+ProtectedAPI.swift */,
+				C0E4452E9673429297190A90 /* SignInViewModel+WebSocial.swift */,
+				CE194F13921977D88346BA4A /* SignInViewModel+V1ObjCBridge.swift */,
+				D95542588097B4BC9EA53CD2 /* SignInViewModelV1ObjC.m */,
+				9C5B4F6D9560AF9ED168B07B /* SignInViewModelV1ObjC.h */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -286,17 +294,6 @@
 				9BB32E4A29A6750800BD7D89 /* Frameworks */,
 				232A81FB2FF49A9200100CFB /* MSAL.xcodeproj */,
 				2BA1498CA6178151ABE704E3 /* NativeAuthSampleAppApp.swift */,
-				E8F1422AA694CF5B65FD1336 /* SignedInView.swift */,
-				64624F33962651BEA10814E8 /* VerifyCodeSheet.swift */,
-				ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */,
-				3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */,
-				747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */,
-				5BE34D6EAE7D82693A264775 /* SignInViewModel+SignUp.swift */,
-				B67F492BB21A35BD2BC73152 /* SignInViewModel+ProtectedAPI.swift */,
-				C0E4452E9673429297190A90 /* SignInViewModel+WebSocial.swift */,
-				CE194F13921977D88346BA4A /* SignInViewModel+V1ObjCBridge.swift */,
-				D95542588097B4BC9EA53CD2 /* SignInViewModelV1ObjC.m */,
-				9C5B4F6D9560AF9ED168B07B /* SignInViewModelV1ObjC.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -358,6 +355,17 @@
 			children = (
 			);
 			path = "Table View Cells";
+			sourceTree = "<group>";
+		};
+		AA10SHEETVIEWS0001GROUP0 /* SheetViews */ = {
+			isa = PBXGroup;
+			children = (
+				64624F33962651BEA10814E8 /* VerifyCodeSheet.swift */,
+				ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */,
+				3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */,
+				747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */,
+			);
+			name = SheetViews;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
