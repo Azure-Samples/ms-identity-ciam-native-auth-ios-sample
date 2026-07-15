@@ -61,9 +61,10 @@ class ProtectedAPIViewController: UIViewController {
         do {
             let config = try MSALNativeAuthPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
-                tenantSubdomain: Configuration.tenantSubdomain,
+                authority: Configuration.ciamAuthority(),
                 challengeTypes: [.OOB, .password]
             )
+            config.capabilities = [.mfaRequired, .registrationRequired]
             config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         } catch {

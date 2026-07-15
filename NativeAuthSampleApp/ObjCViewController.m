@@ -48,11 +48,17 @@
     [super viewDidLoad];
 
     NSError *error = nil;
-    MSALNativeAuthPublicClientApplicationConfig *config = [[MSALNativeAuthPublicClientApplicationConfig alloc]
-                                                           initWithClientId:Configuration.clientId
-                                                           tenantSubdomain:Configuration.tenantSubdomain
-                                                           challengeTypes:MSALNativeAuthChallengeTypeOOB | MSALNativeAuthChallengeTypePassword
-                                                           error:&error];
+    MSALCIAMAuthority *authority = [Configuration ciamAuthorityAndReturnError:&error];
+    MSALNativeAuthPublicClientApplicationConfig *config = nil;
+
+    if (authority && !error)
+    {
+        config = [[MSALNativeAuthPublicClientApplicationConfig alloc]
+                  initWithClientId:Configuration.clientId
+                  authority:authority
+                  challengeTypes:MSALNativeAuthChallengeTypeOOB | MSALNativeAuthChallengeTypePassword];
+        config.capabilities = MSALNativeAuthCapabilityMFARequired | MSALNativeAuthCapabilityRegistrationRequired;
+    }
 
     if (config && !error) {
         self.nativeAuth = [[MSALNativeAuthPublicClientApplication alloc]

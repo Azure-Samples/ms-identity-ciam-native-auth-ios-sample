@@ -48,9 +48,10 @@ class EmailAndCodeViewController: UIViewController {
         do {
             let config = try MSALNativeAuthPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
-                tenantSubdomain: Configuration.tenantSubdomain,
-                challengeTypes: [.OOB]
+                authority: Configuration.ciamAuthority(),
+                challengeTypes: [.OOB, .password]
             )
+            config.capabilities = [.mfaRequired, .registrationRequired]
             config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
             configureAuthManager()

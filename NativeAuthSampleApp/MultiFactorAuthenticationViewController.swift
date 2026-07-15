@@ -58,7 +58,7 @@ class MultiFactorAuthenticationViewController: UIViewController {
         do {
             let config = try MSALNativeAuthPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
-                tenantSubdomain: Configuration.tenantSubdomain,
+                authority: Configuration.ciamAuthority(),
                 challengeTypes: [.OOB, .password]
             )
             config.capabilities = [.mfaRequired, .registrationRequired]

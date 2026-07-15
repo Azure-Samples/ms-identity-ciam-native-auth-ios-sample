@@ -71,12 +71,13 @@ class EmailAndPasswordViewController: UIViewController {
         do {
             let config = try MSALNativeAuthPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
-                tenantSubdomain: Configuration.tenantSubdomain,
+                authority: Configuration.ciamAuthority(),
                 challengeTypes: [.OOB, .password]
             )
             
             config.requestInterceptor = self
             
+            config.capabilities = [.mfaRequired, .registrationRequired]
             config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
             configureAuthManager()
@@ -493,7 +494,7 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
 
     func onSignInStartError(error: MSAL.SignInStartError) {
         print("SignInStartDelegate: onSignInStartError: \(error)")
-        
+
         if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername {
             showResultText("Invalid username or password")
         } else {

@@ -28,8 +28,25 @@ import MSAL
 class Configuration: NSObject {
     // Update the below to your client ID and tenantSubdomain you received in the portal.
 
-    static let clientId = "595671e3-5863-4589-89c6-140cc451e969"
-    static let tenantSubdomain = "nativeauthasampleapp"
+    static let clientId = "8aa54aa1-6446-44a8-99a6-0b93b8d3d79f"
+    static let tenantSubdomain = "spasamples"
+
+    /// The tenant ID (directory GUID) used to build the CIAM authority in the
+    /// `tenantSubdomain.ciamlogin.com/tenantId` format.
+    static let tenantId = "1eb974cd-0dc5-40a6-9f68-94b19f5535c5"
+
+    /// The CIAM authority URL in the `https://<tenantSubdomain>.ciamlogin.com/<tenantId>` format.
+    static var authorityURL: URL {
+        URL(string: "https://\(tenantSubdomain).ciamlogin.com/\(tenantId)")!
+    }
+
+    /// Builds the CIAM authority used to configure the Native Auth application.
+    ///
+    /// Uses the `tenantSubdomain.ciamlogin.com/tenantId` format rather than the bare
+    /// tenant subdomain, so requests target the specific tenant by its directory GUID.
+    static func ciamAuthority() throws -> MSALCIAMAuthority {
+        return try MSALCIAMAuthority(url: authorityURL)
+    }
 
     /// Global switch between the Native Auth V1 (per-step delegates) and V2
     /// (server-driven, unified delegate) SDK surfaces. Flip to `false` to use the
@@ -40,7 +57,7 @@ class Configuration: NSObject {
     /// Set to `nil` to route to production. The Native Auth request path sends this as the
     /// `dc` query parameter.
     ///
-    static let testSliceDataCenter: String? = "nil"
+    static let testSliceDataCenter: String? = nil
 
     /// Slice configuration applied to every `MSALNativeAuthPublicClientApplicationConfig`.
     /// Returns `nil` when no test slice is configured.
