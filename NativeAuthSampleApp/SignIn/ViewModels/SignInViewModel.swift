@@ -25,6 +25,14 @@
 import Foundation
 import MSAL
 
+#if os(iOS) && canImport(UIKit)
+import UIKit
+#endif
+
+#if os(macOS) && canImport(AppKit)
+import AppKit
+#endif
+
 /// Identifies which cross-platform SwiftUI sheet the auth flow is currently presenting. The flows
 /// populate the flow-agnostic continuation closures (``onSubmitCode`` / ``onResendCode`` /
 /// ``onSubmitNewPassword`` / ``onSubmitAttributes`` / ``onSelectAuthMethod``) before setting the
@@ -441,5 +449,354 @@ extension SignInViewModel
     func dismissAnyModal()
     {
         activeSheet = nil
+    }
+}
+
+
+@MainActor private var protectedAPITokenDelegates: [ObjectIdentifier: ProtectedAPITokenDelegate] = [:]
+
+private final class ProtectedAPITokenDelegate: NSObject, CredentialsDelegate
+{
+    private let onCompleted: @MainActor (MSALNativeAuthTokenResult) -> Void
+    private let onError: @MainActor (RetrieveAccessTokenError) -> Void
+
+    init(
+        onCompleted: @escaping @MainActor (MSALNativeAuthTokenResult) -> Void,
+        onError: @escaping @MainActor (RetrieveAccessTokenError) -> Void
+    )
+    {
+        self.onCompleted = onCompleted
+        self.onError = onError
+    }
+
+    @MainActor
+    func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult)
+    {
+        onCompleted(result)
+    }
+
+    @MainActor
+    func onAccessTokenRetrieveError(error: RetrieveAccessTokenError)
+    {
+        onError(error)
+    }
+}
+
+// MARK: - Protected API
+
+extension SignInViewModel
+{
+    private var protectedAPIUrl: String?
+    {
+        nil
+    }
+
+    private var protectedAPIScopes: [String]
+    {
+        []
+    }
+
+    @MainActor
+    func callProtectedAPI()
+    {
+        guard let accountResult = accountResult else
+        {
+            protectedAPIResult = "No signed-in account is available."
+            return
+        }
+
+        guard let apiUrl = protectedAPIUrl, !protectedAPIScopes.isEmpty else
+        {
+            protectedAPIResult = "Protected API not configured. Set the API URL and scopes in SignInViewModel+ProtectedAPI.swift."
+            return
+        }
+
+        statusMessage = "Retrieving access token to call the protected API…"
+        protectedAPIResult = nil
+
+        let parameters = MSALNativeAuthGetAccessTokenParameters()
+        parameters.scopes = protectedAPIScopes
+
+        let key = ObjectIdentifier(self)
+        let delegate = ProtectedAPITokenDelegate(
+            onCompleted: { [weak self] tokenResult in
+                guard let self = self else { return }
+                protectedAPITokenDelegates[key] = nil
+                self.accessProtectedAPI(apiUrl: apiUrl, accessToken: tokenResult.accessToken)
+            },
+            onError: { [weak self] error in
+                protectedAPITokenDelegates[key] = nil
+                self?.statusMessage = "Unable to retrieve an access token."
+                self?.protectedAPIResult = "Error retrieving access token: \(error.errorDescription ?? "unknown error")"
+            }
+        )
+        protectedAPITokenDelegates[key] = delegate
+        accountResult.getAccessToken(parameters: parameters, delegate: delegate)
+    }
+
+    @MainActor
+    private func accessProtectedAPI(apiUrl: String, accessToken: String)
+    {
+        guard let url = URL(string: apiUrl) else
+        {
+            protectedAPIResult = "Invalid API URL."
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            if let error = error
+            {
+                Task { @MainActor in
+                    self?.statusMessage = "Protected API call failed."
+                    self?.protectedAPIResult = error.localizedDescription
+                }
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else
+            {
+                Task { @MainActor in
+                    self?.statusMessage = "Protected API call failed."
+                    self?.protectedAPIResult = "No HTTP response was returned."
+                }
+                return
+            }
+
+            guard (200...299).contains(httpResponse.statusCode) else
+            {
+                Task { @MainActor in
+                    self?.statusMessage = "Protected API call failed."
+                    self?.protectedAPIResult = "HTTP response code: \(httpResponse.statusCode)"
+                }
+                return
+            }
+
+            let body: String
+            if let data = data, let text = String(data: data, encoding: .utf8)
+            {
+                body = text
+            }
+            else
+            {
+                body = "<empty response>"
+            }
+
+            Task { @MainActor in
+                self?.statusMessage = "Accessed the protected API successfully."
+                self?.protectedAPIResult = """
+                Accessed API successfully using an access token.
+                HTTP response code: \(httpResponse.statusCode)
+                HTTP response body:
+                \(body)
+                """
+            }
+        }.resume()
+    }
+}
+
+
+
+// MARK: - Browser and social sign-in
+
+extension SignInViewModel
+{
+    func signInWithBrowser()
+    {
+        startBrowserSignIn(domainHint: nil, displayName: "browser")
+    }
+
+    func signInWithSocial(provider: SocialProvider)
+    {
+        startBrowserSignIn(domainHint: provider.domainHint, displayName: provider.displayName)
+    }
+
+    private func startBrowserSignIn(domainHint: String?, displayName: String)
+    {
+        guard !isSigningIn else
+        {
+            return
+        }
+
+        resetFlowState()
+        isSigningIn = true
+        statusMessage = "Signing in with \(displayName)…"
+
+        guard let webviewParameters = makeWebviewParameters() else
+        {
+            isSigningIn = false
+            statusMessage = "Unable to start browser sign-in: no presentation anchor is available."
+            return
+        }
+
+        let application: MSALPublicClientApplication
+        do
+        {
+            application = try webBrowserApplication()
+        }
+        catch
+        {
+            isSigningIn = false
+            statusMessage = "Unable to initialize browser sign-in: \(error.localizedDescription)"
+            return
+        }
+
+        let parameters = MSALInteractiveTokenParameters(scopes: ["User.Read"], webviewParameters: webviewParameters)
+        parameters.promptType = .login
+        parameters.domainHint = domainHint
+
+        application.acquireToken(with: parameters) { [weak self] result, error in
+            DispatchQueue.main.async
+            {
+                guard let self = self else { return }
+
+                if let error = error
+                {
+                    self.isSigningIn = false
+                    self.statusMessage = "Error acquiring token: \(error.localizedDescription)"
+                    return
+                }
+
+                guard result?.account != nil else
+                {
+                    self.isSigningIn = false
+                    self.statusMessage = "Could not acquire token: no account returned."
+                    return
+                }
+
+                if let account = self.application?.getNativeAuthUserAccount()
+                {
+                    self.accountResult = account
+                }
+
+                self.isSigningIn = false
+                self.isSignedIn = true
+                self.statusMessage = "Signed in successfully with \(displayName)."
+            }
+        }
+    }
+
+    private func webBrowserApplication() throws -> MSALPublicClientApplication
+    {
+        if let webBrowserApp = webBrowserApp
+        {
+            return webBrowserApp
+        }
+
+        guard let authorityUrl = URL(string: "https://\(Configuration.tenantSubdomain).ciamlogin.com") else
+        {
+            throw WebSignInError.invalidAuthority
+        }
+
+        let authority = try MSALCIAMAuthority(url: authorityUrl)
+        let config = MSALPublicClientApplicationConfig(
+            clientId: Configuration.clientId,
+            redirectUri: nil,
+            authority: authority
+        )
+        config.sliceConfig = Configuration.sliceConfig
+
+        let application = try MSALPublicClientApplication(configuration: config)
+        webBrowserApp = application
+        return application
+    }
+
+    private func makeWebviewParameters() -> MSALWebviewParameters?
+    {
+        guard let anchor = presentationAnchorProvider?() else
+        {
+            return nil
+        }
+
+        #if os(iOS) && canImport(UIKit)
+        guard let window = anchor as? UIWindow, let viewController = window.rootViewController else
+        {
+            return nil
+        }
+        return MSALWebviewParameters(authPresentationViewController: viewController)
+        #elseif os(macOS) && canImport(AppKit)
+        guard let window = anchor as? NSWindow, let viewController = window.contentViewController else
+        {
+            return nil
+        }
+        return MSALWebviewParameters(authPresentationViewController: viewController)
+        #else
+        return nil
+        #endif
+    }
+}
+
+private extension SocialProvider
+{
+    var domainHint: String
+    {
+        switch self
+        {
+        case .linkedin:
+            return "www.linkedin.com"
+        default:
+            return displayName
+        }
+    }
+}
+
+private enum WebSignInError: LocalizedError
+{
+    case invalidAuthority
+
+    var errorDescription: String?
+    {
+        switch self
+        {
+        case .invalidAuthority:
+            return "The CIAM authority URL is invalid."
+        }
+    }
+}
+
+
+
+// MARK: - Sign-up flow
+
+extension SignInViewModel
+{
+    func signUp()
+    {
+        guard !email.isEmpty, !isSigningIn else
+        {
+            return
+        }
+
+        guard let application = application else
+        {
+            statusMessage = "MSAL is not initialized."
+            return
+        }
+
+        resetFlowState()
+        isSigningIn = true
+        statusMessage = "Signing up… (\(useV2Api ? "V2" : "V1"))"
+
+        if useV2Api
+        {
+            let parameters = MSALNativeAuthSignUpParametersV2(username: email)
+            if !password.isEmpty
+            {
+                parameters.password = password
+            }
+            application.signUpV2(parameters: parameters, delegate: self)
+        }
+        else
+        {
+            let parameters = MSALNativeAuthSignUpParameters(username: email)
+            if !password.isEmpty
+            {
+                parameters.password = password
+            }
+            application.signUp(parameters: parameters, delegate: self)
+        }
     }
 }

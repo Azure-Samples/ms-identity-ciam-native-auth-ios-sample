@@ -223,3 +223,95 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         }
     }
 }
+
+
+// MARK: - Bridge from the Objective-C V2 driver back to the SwiftUI view model
+
+/// Maps events raised by the Objective-C ``SignInViewModelV2ObjC`` driver onto this view model's
+/// published UI state and the shared UIKit modals. The driver keeps all MSAL SDK usage in
+/// Objective-C (proving the V2 API is Obj-C-friendly); this view model only reacts to the callbacks
+/// and drives the SwiftUI presentation, reusing the same modals and continuation closures as the
+/// native Swift V2 path.
+extension SignInViewModel: SignInViewModelV2ObjCDelegate
+{
+    @MainActor
+    func signInDriver(_ driver: SignInViewModelV2ObjC, didUpdateStatus status: String, isBusy: Bool)
+    {
+        statusMessage = status
+        if !isBusy
+        {
+            isSigningIn = false
+        }
+    }
+
+    @MainActor
+    func signInDriver(
+        _ driver: SignInViewModelV2ObjC,
+        didRequireCodeSentTo sentTo: String,
+        codeLength: Int,
+        canResend: Bool
+    )
+    {
+        statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
+        onSubmitCode = { [weak driver] code in
+            driver?.submitCode(code)
+        }
+        onResendCode = canResend ? { [weak driver] in
+            driver?.resendCode()
+        } : nil
+        presentVerifyCodeModal()
+    }
+
+    @MainActor
+    func signInDriverDidRequireNewPassword(_ driver: SignInViewModelV2ObjC)
+    {
+        onSubmitNewPassword = { [weak driver] password in
+            driver?.submitNewPassword(password)
+        }
+        presentNewPasswordModal()
+    }
+
+    @MainActor
+    func signInDriver(_ driver: SignInViewModelV2ObjC, didCompleteWithResult result: MSALNativeAuthUserAccountResult)
+    {
+        accountResult = result
+        dismissAnyModal()
+        isSigningIn = false
+        isSignedIn = true
+        statusMessage = "Signed in as \(result.account.username ?? "unknown user")."
+    }
+
+    @MainActor
+    func signInDriver(
+        _ driver: SignInViewModelV2ObjC,
+        didFailWithMessage message: String,
+        isInvalidCode: Bool,
+        isInvalidPassword: Bool,
+        isBrowserRequired: Bool
+    )
+    {
+        // The driver reports the error's recoverability flags; the app decides how to surface it.
+        // On a recoverable error the modal's submit/resend callbacks still capture the state, so
+        // re-submitting advances the flow.
+        if isInvalidCode, isVerifyCodeModalPresented
+        {
+            updateVerifyCodeModal(errorMessage: "Check the code and try again")
+        }
+        else if isInvalidPassword, isNewPasswordModalPresented
+        {
+            updateNewPasswordModal(errorMessage: "Invalid password")
+        }
+        else if isBrowserRequired
+        {
+            dismissAnyModal()
+            isSigningIn = false
+            statusMessage = "This flow must continue in a browser. Please sign in using the browser-based flow."
+        }
+        else
+        {
+            dismissAnyModal()
+            isSigningIn = false
+            statusMessage = message
+        }
+    }
+}
