@@ -98,7 +98,7 @@ class ResetPasswordViewController: UIViewController {
                                            submitCallback: { [weak self] code in self?.authManager.submitCode(code) },
                                            resendCallback: { [weak self] in self?.authManager.resendCode() },
                                            cancelCallback: { [weak self] in self?.showResultText("Action cancelled") })
-            } else if error.kind == .invalidPassword {
+            } else if error.isInvalidPassword {
                 self.updateNewPasswordModal(errorMessage: "Invalid password",
                                             submitCallback: { [weak self] password in self?.authManager.submitNewPassword(password) },
                                             cancelCallback: { [weak self] in self?.showResultText("Action cancelled") })

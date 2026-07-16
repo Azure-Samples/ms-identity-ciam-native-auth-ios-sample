@@ -43,8 +43,8 @@ final class AuthManager: NSObject {
     /// The underlying Native Auth application used to start the V2 flows.
     let application: MSALNativeAuthPublicClientApplication
 
-    /// The most recent flow state, used to continue a multi-step flow.
-    private var flowState: MSALNativeAuthFlowState?
+    /// The most recent concrete state handed back by the SDK, used to continue a multi-step flow.
+    private var currentState: MSALNativeAuthState?
 
     /// The most recent action the server required, so callers can route a generic input (e.g. a
     /// verification code) to the correct continuation method.
@@ -57,9 +57,14 @@ final class AuthManager: NSObject {
     var onCompleted: ((MSALNativeAuthUserAccountResult) -> Void)?
 
     /// Invoked when the flow fails.
+    ///
+    /// Note: with the server-driven (V2) delegate model, "browser required" outcomes are also
+    /// reported here (the flow must fall back to the web). Inspect the error to decide how to react.
     var onError: ((MSALNativeAuthFlowError) -> Void)?
 
-    /// Invoked when the flow must continue in a web browser.
+    /// Retained for source compatibility. The V2 delegate model no longer surfaces a dedicated
+    /// browser-required callback with a URL — such outcomes now arrive through `onError`. This
+    /// closure is therefore never invoked; prefer handling the web fallback inside `onError`.
     var onBrowserRequired: ((URL) -> Void)?
 
     init(application: MSALNativeAuthPublicClientApplication) {
@@ -71,25 +76,22 @@ final class AuthManager: NSObject {
 
     /// Start the server-driven reset password (SSPR) flow.
     func resetPassword(email: String) {
-        flowState = nil
-        latestAction = nil
-        let parameters = MSALNativeAuthResetPasswordParameters(username: email)
+        reset()
+        let parameters = MSALNativeAuthResetPasswordParametersV2(username: email)
         application.resetPasswordV2(parameters: parameters, delegate: self)
     }
 
     /// Start the server-driven sign up flow.
     func signUp(email: String, password: String? = nil) {
-        flowState = nil
-        latestAction = nil
-        let parameters = MSALNativeAuthSignUpParameters(username: email)
+        reset()
+        let parameters = MSALNativeAuthSignUpParametersV2(username: email)
         parameters.password = password
         application.signUpV2(parameters: parameters, delegate: self)
     }
 
     /// Start the server-driven sign in flow.
     func signIn(email: String, password: String? = nil) {
-        flowState = nil
-        latestAction = nil
+        reset()
         let parameters = MSALNativeAuthSignInParameters(username: email)
         parameters.password = password
         application.signInV2(parameters: parameters, delegate: self)
@@ -98,66 +100,136 @@ final class AuthManager: NSObject {
     // MARK: - Continue the current flow (V2)
 
     func submitCode(_ code: String) {
-        flowState?.submitCode(code, delegate: self)
+        (currentState as? MSALNativeAuthCodeRequiredState)?.submitCode(code, delegate: self)
     }
 
     func submitPassword(_ password: String) {
-        flowState?.submitPassword(password, delegate: self)
+        (currentState as? MSALNativeAuthPasswordRequiredState)?.submitPassword(password, delegate: self)
     }
 
     func submitNewPassword(_ password: String) {
-        flowState?.submitNewPassword(password, delegate: self)
+        (currentState as? MSALNativeAuthNewPasswordRequiredState)?.submitNewPassword(password, delegate: self)
     }
 
     func submitAttributes(_ attributes: [String: Any]) {
-        flowState?.submitAttributes(attributes, delegate: self)
+        if let state = currentState as? MSALNativeAuthAttributesRequiredState {
+            state.submitAttributes(attributes, delegate: self)
+        } else if let state = currentState as? MSALNativeAuthAttributesInvalidState {
+            state.submitAttributes(attributes, delegate: self)
+        }
     }
 
     func selectAuthMethod(_ method: MSALAuthMethod, verificationContact: String? = nil) {
-        flowState?.selectAuthMethod(method, verificationContact: verificationContact, delegate: self)
+        if let state = currentState as? MSALNativeAuthMFARequiredState {
+            state.selectAuthMethod(method, verificationContact: verificationContact, delegate: self)
+        } else if let state = currentState as? MSALNativeAuthStrongAuthRegistrationRequiredState {
+            state.selectAuthMethod(method, verificationContact: verificationContact, delegate: self)
+        }
     }
 
     func submitChallenge(_ challenge: String) {
-        flowState?.submitChallenge(challenge, delegate: self)
+        if let state = currentState as? MSALNativeAuthMFAVerificationRequiredState {
+            state.submitChallenge(challenge, delegate: self)
+        } else if let state = currentState as? MSALNativeAuthStrongAuthVerificationRequiredState {
+            state.submitChallenge(challenge, delegate: self)
+        }
     }
 
     func resendCode() {
-        flowState?.resendCode(delegate: self)
+        (currentState as? MSALNativeAuthCodeRequiredState)?.resendCode(delegate: self)
     }
-}
 
-// MARK: - MSALNativeAuthFlowDelegate (unified V2 delegate)
+    // MARK: - Private
 
-extension AuthManager: MSALNativeAuthFlowDelegate {
+    private func reset() {
+        currentState = nil
+        latestAction = nil
+    }
 
+    /// Stores the latest state, records the reconstructed action and forwards it to the facade closure.
     @MainActor
-    func onActionRequired(action: MSALNativeAuthAction, flowState: MSALNativeAuthFlowState) {
-        self.flowState = flowState
-        self.latestAction = action
+    private func handle(_ state: MSALNativeAuthState, action: MSALNativeAuthAction) {
+        currentState = state
+        latestAction = action
         print("AuthManager: action required — \(AuthManager.describe(action))")
         onActionRequired?(action)
     }
+}
+
+// MARK: - MSALNativeAuthFlowDelegate (terminal callbacks) + per-state delegates
+
+extension AuthManager: MSALNativeAuthCodeRequiredDelegate,
+                       MSALNativeAuthPasswordRequiredDelegate,
+                       MSALNativeAuthNewPasswordRequiredDelegate,
+                       MSALNativeAuthAttributesRequiredDelegate,
+                       MSALNativeAuthAttributesInvalidDelegate,
+                       MSALNativeAuthMFARequiredDelegate,
+                       MSALNativeAuthMFAVerificationRequiredDelegate,
+                       MSALNativeAuthStrongAuthRegistrationRequiredDelegate,
+                       MSALNativeAuthStrongAuthVerificationRequiredDelegate {
+
+    // MARK: Terminal callbacks
 
     @MainActor
-    func onFlowCompleted(result: MSALNativeAuthUserAccountResult) {
-        flowState = nil
-        latestAction = nil
+    func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {
+        reset()
         print("AuthManager: flow completed for \(result.account.username ?? "unknown user")")
         onCompleted?(result)
     }
 
     @MainActor
-    func onFlowError(error: MSALNativeAuthFlowError, flowState: MSALNativeAuthFlowState?) {
-        self.flowState = flowState
-        print("AuthManager: flow error — \(error.errorDescription ?? "no description") (kind: \(error.kind))")
+    func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario) {
+        print("AuthManager: flow error — \(error.errorDescription ?? "no description")")
         onError?(error)
     }
 
+    // MARK: Per-state callbacks
+
     @MainActor
-    func onBrowserRequired(url: URL, flowState: MSALNativeAuthFlowState) {
-        self.flowState = flowState
-        print("AuthManager: browser required — \(url.absoluteString)")
-        onBrowserRequired?(url)
+    func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .codeRequired(sentTo: state.sentTo, channel: state.channel, codeLength: state.codeLength))
+    }
+
+    @MainActor
+    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .passwordRequired)
+    }
+
+    @MainActor
+    func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .newPasswordRequired)
+    }
+
+    @MainActor
+    func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .attributesRequired(attributes: state.attributes))
+    }
+
+    @MainActor
+    func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .attributesInvalid(attributeNames: state.attributeNames))
+    }
+
+    @MainActor
+    func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .mfaRequired(authMethods: state.authMethods))
+    }
+
+    @MainActor
+    func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .mfaVerificationRequired(sentTo: state.sentTo, channel: state.channel, codeLength: state.codeLength))
+    }
+
+    @MainActor
+    func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState,
+                                          scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .strongAuthRegistrationRequired(authMethods: state.authMethods))
+    }
+
+    @MainActor
+    func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState,
+                                          scenario: MSALNativeAuthFlowScenario) {
+        handle(state, action: .strongAuthVerificationRequired(sentTo: state.sentTo, channel: state.channel, codeLength: state.codeLength))
     }
 }
 
