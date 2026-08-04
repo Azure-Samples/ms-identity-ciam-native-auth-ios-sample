@@ -155,21 +155,22 @@ extension MultiFactorAuthenticationViewController {
     func configureAuthManager() {
         authManager = AuthManager(application: nativeAuth)
 
-        authManager.onActionRequired = { [weak self] action in
+        authManager.onStateRequired = { [weak self] state in
             guard let self = self else { return }
 
-            switch action {
-            case .mfaRequired(let authMethods):
-                self.promptMFAV2(authMethods: authMethods)
-            case .codeRequired(_, let channel, _),
-                 .mfaVerificationRequired(_, let channel, _):
-                self.presentMFAVerifyCodeModalV2(channelTargetType: channel)
-            case .strongAuthRegistrationRequired(let authMethods):
-                self.promptStrongAuthRegistrationV2(authMethods: authMethods)
-            case .strongAuthVerificationRequired:
+            switch state {
+            case let state as MSALNativeAuthMFARequiredState:
+                self.promptMFAV2(authMethods: state.authMethods)
+            case let state as MSALNativeAuthCodeRequiredState:
+                self.presentMFAVerifyCodeModalV2(channelTargetType: state.channel)
+            case let state as MSALNativeAuthMFAVerificationRequiredState:
+                self.presentMFAVerifyCodeModalV2(channelTargetType: state.channel)
+            case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
+                self.promptStrongAuthRegistrationV2(authMethods: state.authMethods)
+            case is MSALNativeAuthStrongAuthVerificationRequiredState:
                 self.presentVerifyChallengeModalV2()
             default:
-                self.showResultText("Action required: \(AuthManager.describe(action))")
+                self.showResultText("Action required: \(AuthManager.describe(state))")
             }
         }
 

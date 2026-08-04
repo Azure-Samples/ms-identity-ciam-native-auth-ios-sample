@@ -94,28 +94,32 @@ class EmailAndPasswordViewController: UIViewController {
     func configureAuthManager() {
         authManager = AuthManager(application: nativeAuth)
 
-        authManager.onActionRequired = { [weak self] action in
+        authManager.onStateRequired = { [weak self] state in
             guard let self = self else { return }
 
-            switch action {
-            case .codeRequired(let sentTo, _, let codeLength),
-                 .mfaVerificationRequired(let sentTo, _, let codeLength),
-                 .strongAuthVerificationRequired(let sentTo, _, let codeLength):
+            let presentCode: (String, Int) -> Void = { sentTo, codeLength in
                 self.showResultText("Code sent to \(sentTo) (\(codeLength) digits)")
                 self.presentVerifyCodeModalV2()
-            case .attributesRequired(let attributes):
-                self.presentAttributeCollectionModalV2(attributes: attributes)
-            case .attributesInvalid(let attributeNames):
-                self.showResultText("Invalid attributes: \(attributeNames.joined(separator: ", "))")
+            }
+
+            switch state {
+            case let state as MSALNativeAuthCodeRequiredState:
+                presentCode(state.sentTo, state.codeLength)
+            case let state as MSALNativeAuthMFAVerificationRequiredState:
+                presentCode(state.sentTo, state.codeLength)
+            case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
+                presentCode(state.sentTo, state.codeLength)
+            case let state as MSALNativeAuthAttributesRequiredState:
+                self.presentAttributeCollectionModalV2(attributes: state.attributes)
+            case let state as MSALNativeAuthAttributesInvalidState:
+                self.showResultText("Invalid attributes: \(state.attributeNames.joined(separator: ", "))")
                 self.presentAttributeCollectionModalV2(attributes: self.lastRequiredAttributesV2)
-            case .mfaRequired(let authMethods), .strongAuthRegistrationRequired(let authMethods):
-                guard let method = authMethods.first else {
-                    self.showResultText("No auth methods available")
-                    return
-                }
-                self.authManager.selectAuthMethod(method, verificationContact: nil)
+            case let state as MSALNativeAuthMFARequiredState:
+                self.selectFirstAuthMethodV2(state.authMethods)
+            case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
+                self.selectFirstAuthMethodV2(state.authMethods)
             default:
-                self.showResultText("Action required: \(AuthManager.describe(action))")
+                self.showResultText("Action required: \(AuthManager.describe(state))")
             }
         }
 
@@ -154,12 +158,21 @@ class EmailAndPasswordViewController: UIViewController {
     /// Routes a verify-code submission to the correct V2 continuation: primary OOB codes use
     /// `submitCode`, whereas MFA / strong-auth verification codes use `submitChallenge`.
     private func submitCodeOrChallengeV2(_ code: String) {
-        switch authManager.latestAction {
-        case .mfaVerificationRequired, .strongAuthVerificationRequired:
+        switch authManager.currentState {
+        case is MSALNativeAuthMFAVerificationRequiredState, is MSALNativeAuthStrongAuthVerificationRequiredState:
             authManager.submitChallenge(code)
         default:
             authManager.submitCode(code)
         }
+    }
+
+    /// Selects the first available auth method to continue an MFA / strong-auth flow.
+    private func selectFirstAuthMethodV2(_ authMethods: [MSALAuthMethod]) {
+        guard let method = authMethods.first else {
+            showResultText("No auth methods available")
+            return
+        }
+        authManager.selectAuthMethod(method, verificationContact: nil)
     }
 
     private func presentVerifyCodeModalV2() {

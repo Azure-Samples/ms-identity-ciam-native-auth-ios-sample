@@ -68,17 +68,17 @@ class ResetPasswordViewController: UIViewController {
     func configureAuthManager() {
         authManager = AuthManager(application: nativeAuth)
 
-        authManager.onActionRequired = { [weak self] action in
+        authManager.onStateRequired = { [weak self] state in
             guard let self = self else { return }
 
-            switch action {
-            case .codeRequired(let sentTo, _, let codeLength):
-                self.showResultText("Code sent to \(sentTo) (\(codeLength) digits)")
+            switch state {
+            case let state as MSALNativeAuthCodeRequiredState:
+                self.showResultText("Code sent to \(state.sentTo) (\(state.codeLength) digits)")
                 self.presentVerifyCodeModalV2()
-            case .newPasswordRequired, .passwordRequired:
+            case is MSALNativeAuthNewPasswordRequiredState, is MSALNativeAuthPasswordRequiredState:
                 self.presentNewPasswordModalV2()
             default:
-                self.showResultText("Reset password — action required: \(AuthManager.describe(action))")
+                self.showResultText("Reset password — action required: \(AuthManager.describe(state))")
             }
         }
 

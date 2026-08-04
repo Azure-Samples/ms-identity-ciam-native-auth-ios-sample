@@ -44,14 +44,11 @@ final class AuthManager: NSObject {
     let application: MSALNativeAuthPublicClientApplication
 
     /// The most recent concrete state handed back by the SDK, used to continue a multi-step flow.
-    private var currentState: MSALNativeAuthState?
+    private(set) var currentState: MSALNativeAuthState?
 
-    /// The most recent action the server required, so callers can route a generic input (e.g. a
-    /// verification code) to the correct continuation method.
-    private(set) var latestAction: MSALNativeAuthAction?
-
-    /// Invoked when the server requires the app to perform an action to continue the flow.
-    var onActionRequired: ((MSALNativeAuthAction) -> Void)?
+    /// Invoked when the server hands back a state that requires the app to continue the flow.
+    /// The concrete state type (and its properties) describe what input is needed next.
+    var onStateRequired: ((MSALNativeAuthState) -> Void)?
 
     /// Invoked when the flow completes successfully and tokens are available.
     var onCompleted: ((MSALNativeAuthUserAccountResult) -> Void)?
@@ -77,7 +74,7 @@ final class AuthManager: NSObject {
     /// Start the server-driven reset password (SSPR) flow.
     func resetPassword(email: String) {
         reset()
-        let parameters = MSALNativeAuthResetPasswordParametersV2(username: email)
+        let parameters = MSALNativeAuthResetPasswordParameters(username: email)
         application.resetPasswordV2(parameters: parameters, delegate: self)
     }
 
@@ -143,16 +140,14 @@ final class AuthManager: NSObject {
 
     private func reset() {
         currentState = nil
-        latestAction = nil
     }
 
-    /// Stores the latest state, records the reconstructed action and forwards it to the facade closure.
+    /// Stores the latest state and forwards it to the facade closure.
     @MainActor
-    private func handle(_ state: MSALNativeAuthState, action: MSALNativeAuthAction) {
+    private func handle(_ state: MSALNativeAuthState) {
         currentState = state
-        latestAction = action
-        print("AuthManager: action required — \(AuthManager.describe(action))")
-        onActionRequired?(action)
+        print("AuthManager: state required — \(AuthManager.describe(state))")
+        onStateRequired?(state)
     }
 }
 
@@ -161,6 +156,7 @@ final class AuthManager: NSObject {
 extension AuthManager: MSALNativeAuthCodeRequiredDelegate,
                        MSALNativeAuthPasswordRequiredDelegate,
                        MSALNativeAuthNewPasswordRequiredDelegate,
+                       MSALNativeAuthSignInAfterResetPasswordRequiredDelegate,
                        MSALNativeAuthAttributesRequiredDelegate,
                        MSALNativeAuthAttributesInvalidDelegate,
                        MSALNativeAuthMFARequiredDelegate,
@@ -187,49 +183,59 @@ extension AuthManager: MSALNativeAuthCodeRequiredDelegate,
 
     @MainActor
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .codeRequired(sentTo: state.sentTo, channel: state.channel, codeLength: state.codeLength))
+        handle(state)
     }
 
     @MainActor
     func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .passwordRequired)
+        handle(state)
     }
 
     @MainActor
     func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .newPasswordRequired)
+        handle(state)
+    }
+
+    @MainActor
+    func onSignInAfterResetPasswordRequired(
+        state: MSALNativeAuthSignInAfterResetPasswordState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
+        parameters.scopes = []
+        state.signIn(parameters: parameters, delegate: self)
     }
 
     @MainActor
     func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .attributesRequired(attributes: state.attributes))
+        handle(state)
     }
 
     @MainActor
     func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .attributesInvalid(attributeNames: state.attributeNames))
+        handle(state)
     }
 
     @MainActor
     func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .mfaRequired(authMethods: state.authMethods))
+        handle(state)
     }
 
     @MainActor
     func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .mfaVerificationRequired(sentTo: state.sentTo, channel: state.channel, codeLength: state.codeLength))
+        handle(state)
     }
 
     @MainActor
     func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState,
                                           scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .strongAuthRegistrationRequired(authMethods: state.authMethods))
+        handle(state)
     }
 
     @MainActor
     func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState,
                                           scenario: MSALNativeAuthFlowScenario) {
-        handle(state, action: .strongAuthVerificationRequired(sentTo: state.sentTo, channel: state.channel, codeLength: state.codeLength))
+        handle(state)
     }
 }
 
@@ -237,27 +243,29 @@ extension AuthManager: MSALNativeAuthCodeRequiredDelegate,
 
 extension AuthManager {
 
-    /// Human-readable description of an action, used for logging.
-    static func describe(_ action: MSALNativeAuthAction) -> String {
-        switch action {
-        case .codeRequired(let sentTo, _, let codeLength):
-            return "codeRequired (sentTo: \(sentTo), length: \(codeLength))"
-        case .passwordRequired:
+    /// Human-readable description of a state, used for logging.
+    static func describe(_ state: MSALNativeAuthState) -> String {
+        switch state {
+        case let state as MSALNativeAuthCodeRequiredState:
+            return "codeRequired (sentTo: \(state.sentTo), length: \(state.codeLength))"
+        case is MSALNativeAuthPasswordRequiredState:
             return "passwordRequired"
-        case .newPasswordRequired:
+        case is MSALNativeAuthNewPasswordRequiredState:
             return "newPasswordRequired"
-        case .attributesRequired(let attributes):
-            return "attributesRequired (\(attributes.map { $0.name }.joined(separator: ", ")))"
-        case .attributesInvalid(let attributeNames):
-            return "attributesInvalid (\(attributeNames.joined(separator: ", ")))"
-        case .mfaRequired:
+        case let state as MSALNativeAuthAttributesRequiredState:
+            return "attributesRequired (\(state.attributes.map { $0.name }.joined(separator: ", ")))"
+        case let state as MSALNativeAuthAttributesInvalidState:
+            return "attributesInvalid (\(state.attributeNames.joined(separator: ", ")))"
+        case is MSALNativeAuthMFARequiredState:
             return "mfaRequired"
-        case .mfaVerificationRequired(let sentTo, _, let codeLength):
-            return "mfaVerificationRequired (sentTo: \(sentTo), length: \(codeLength))"
-        case .strongAuthRegistrationRequired:
+        case let state as MSALNativeAuthMFAVerificationRequiredState:
+            return "mfaVerificationRequired (sentTo: \(state.sentTo), length: \(state.codeLength))"
+        case is MSALNativeAuthStrongAuthRegistrationRequiredState:
             return "strongAuthRegistrationRequired"
-        case .strongAuthVerificationRequired(let sentTo, _, let codeLength):
-            return "strongAuthVerificationRequired (sentTo: \(sentTo), length: \(codeLength))"
+        case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
+            return "strongAuthVerificationRequired (sentTo: \(state.sentTo), length: \(state.codeLength))"
+        default:
+            return "\(type(of: state))"
         }
     }
 }
