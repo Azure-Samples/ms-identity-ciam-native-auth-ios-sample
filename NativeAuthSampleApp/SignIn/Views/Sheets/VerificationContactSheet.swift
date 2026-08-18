@@ -22,51 +22,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
 import MSAL
 import SwiftUI
 
-struct SelectAuthMethodSheet: View
+struct VerificationContactSheet: View
 {
     @ObservedObject var viewModel: SignInViewModel
+    @State private var verificationContact = ""
+
+    private var isSMSMethod: Bool
+    {
+        viewModel.registrationAuthMethod?.channelTargetType.isSMSType == true
+    }
+
+    private var contactLabel: String
+    {
+        isSMSMethod ? "Phone number" : "Email address"
+    }
 
     var body: some View
     {
         VStack(alignment: .leading, spacing: 16)
         {
-            Text("Choose a verification method")
+            Text("Enter \(contactLabel.lowercased())")
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            if let statusMessage = viewModel.statusMessage
-            {
-                Text(statusMessage)
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-            }
+            Text("Enter the \(contactLabel.lowercased()) to register for this authentication method.")
+                .font(.footnote)
+                .foregroundColor(.secondary)
 
-            List(viewModel.authMethods, id: \.id)
-            { method in
-                Button
-                {
-                    viewModel.onSelectAuthMethod?(method)
-                }
-                label:
-                {
-                    VStack(alignment: .leading, spacing: 4)
-                    {
-                        Text(title(for: method))
-                            .font(.body)
-
-                        Text(detail(for: method))
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 4)
-                }
-                .buttonStyle(.plain)
-            }
-            .frame(minHeight: 160)
+            contactField
 
             HStack
             {
@@ -76,24 +63,39 @@ struct SelectAuthMethodSheet: View
                 }
 
                 Spacer()
+
+                Button("Continue")
+                {
+                    viewModel.onSubmitVerificationContact?(verificationContact.trimmingCharacters(in: .whitespacesAndNewlines))
+                }
+                .disabled(verificationContact.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .padding()
-        .frame(maxWidth: 480)
+        .frame(maxWidth: 420)
     }
 
-    private func title(for method: MSALAuthMethod) -> String
+    @ViewBuilder
+    private var contactField: some View
     {
-        method.channelTargetType.value.capitalized
-    }
-
-    private func detail(for method: MSALAuthMethod) -> String
-    {
-        if let loginHint = method.loginHint, !loginHint.isEmpty
+#if os(iOS)
+        if isSMSMethod
         {
-            return loginHint
+            TextField(contactLabel, text: $verificationContact)
+                .keyboardType(.phonePad)
+                .textFieldStyle(.roundedBorder)
         }
-
-        return "\(method.challengeType) via \(method.channelTargetType.value)"
+        else
+        {
+            TextField(contactLabel, text: $verificationContact)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .textFieldStyle(.roundedBorder)
+        }
+#else
+        TextField(contactLabel, text: $verificationContact)
+            .textFieldStyle(.roundedBorder)
+#endif
     }
 }

@@ -35,14 +35,16 @@ import AppKit
 
 /// Identifies which cross-platform SwiftUI sheet the auth flow is currently presenting. The flows
 /// populate the flow-agnostic continuation closures (``onSubmitCode`` / ``onResendCode`` /
-/// ``onSubmitNewPassword`` / ``onSubmitAttributes`` / ``onSelectAuthMethod``) before setting the
-/// matching sheet, so the sheets stay flow-agnostic.
+/// ``onSubmitNewPassword`` / ``onSubmitAttributes`` / ``onSelectAuthMethod`` /
+/// ``onSubmitVerificationContact``) before setting the matching sheet, so the sheets stay
+/// flow-agnostic.
 enum AuthSheet: String, Identifiable
 {
     case verifyCode
     case newPassword
     case collectAttributes
     case selectAuthMethod
+    case verificationContact
 
     var id: String { rawValue }
 }
@@ -72,8 +74,7 @@ enum SocialProvider: String, CaseIterable, Identifiable
 /// Drives every Native Auth flow behind the single unified SwiftUI authentication screen — sign-in
 /// (password **or** email one-time-code), sign-up, self-service password reset, the browser / social
 /// "web fallback", and post-sign-in protected-API access. It supports both the granular **V1** API
-/// and the server-driven **V2** per-state-delegate API, chosen by ``useV2Api``; either API can also
-/// be driven from Objective-C (``useObjCDriver``) to prove the public API is Obj-C-consumable.
+/// and the server-driven **V2** per-state-delegate API, chosen by ``useV2Api``.
 ///
 /// The view model is fully SwiftUI/AppKit-agnostic (no UIKit): every interactive step is surfaced as
 /// a cross-platform SwiftUI sheet selected by ``activeSheet``. The sheets are flow-agnostic — they
@@ -88,11 +89,6 @@ class SignInViewModel: NSObject, ObservableObject
     /// Selects which Native Auth API surface the flows use. `true` uses the server-driven **V2**
     /// unified-delegate API; `false` uses the granular **V1** API.
     @Published var useV2Api: Bool = true
-
-    /// Routes the flow through an Objective-C driver (``SignInViewModelV2ObjC`` for V2,
-    /// ``SignInViewModelV1ObjC`` for V1) instead of this Swift view model. This exists to verify the
-    /// V1 **and** V2 public APIs are fully consumable from Objective-C; the UI stays in SwiftUI.
-    @Published var useObjCDriver: Bool = false
 
     /// Whether a user is currently signed in. When `true` the sign-in UI is hidden and the
     /// signed-in UI (protected-API access + sign-out) is shown.
@@ -118,29 +114,25 @@ class SignInViewModel: NSObject, ObservableObject
     /// select-auth-method sheet.
     @Published var authMethods: [MSALAuthMethod] = []
 
+    /// The strong-auth registration method selected before entering its verification contact.
+    @Published var registrationAuthMethod: MSALAuthMethod?
+
     /// The most recent protected-API response text, shown on the signed-in screen.
     @Published var protectedAPIResult: String?
 
     private let nativeAuth: MSALNativeAuthPublicClientApplication?
 
-    /// Continuation callbacks wired by whichever flow (V1 per-step delegates, the V2 action router,
-    /// or an Obj-C driver) is currently active, so the shared sheets stay flow-agnostic.
+    /// Continuation callbacks wired by whichever flow (V1 per-step delegates or the V2 action
+    /// router) is currently active, so the shared sheets stay flow-agnostic.
     var onSubmitCode: ((String) -> Void)?
     var onResendCode: (() -> Void)?
     var onSubmitNewPassword: ((String) -> Void)?
     var onSubmitAttributes: (([String: Any]) -> Void)?
     var onSelectAuthMethod: ((MSALAuthMethod) -> Void)?
+    var onSubmitVerificationContact: ((String) -> Void)?
 
     /// The account result produced by a successful flow, used to acquire tokens and sign out.
     var accountResult: MSALNativeAuthUserAccountResult?
-
-    /// The Objective-C V2 sign-in driver, retained for the duration of a flow when
-    /// ``useObjCDriver`` is enabled with V2.
-    var objCDriver: SignInViewModelV2ObjC?
-
-    /// The Objective-C V1 sign-in driver, retained for the duration of a flow when
-    /// ``useObjCDriver`` is enabled with V1.
-    var objCDriverV1: SignInViewModelV1ObjC?
 
     /// A standard (non-native) MSAL application used for the browser-based / social "web fallback"
     /// flow. Created lazily by the web-fallback code path.
@@ -157,11 +149,16 @@ class SignInViewModel: NSObject, ObservableObject
     {
         do
         {
-            let config = try MSALNativeAuthPublicClientApplicationConfig(
-                clientId: Configuration.clientId,
-                tenantSubdomain: Configuration.tenantSubdomain,
-                challengeTypes: [.OOB, .password]
-            )
+//            let config = try MSALNativeAuthPublicClientApplicationConfig(
+//                clientId: Configuration.clientId,
+//                tenantSubdomain: Configuration.tenantSubdomain,
+//                challengeTypes: [.OOB, .password]
+//            )
+            
+            let config = try MSALNativeAuthPublicClientApplicationConfig(clientId: Configuration.clientId,
+                                                                         authority: Configuration.ciamAuthority(),
+                                                                         challengeTypes: [.OOB, .password])
+            config.capabilities = [.mfaRequired, .registrationRequired]
 
             config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
@@ -256,21 +253,14 @@ class SignInViewModel: NSObject, ObservableObject
         {
             parameters.password = password
         }
+        
+        let authenticationContextId = "c4"
+        let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
 
-        if useObjCDriver
-        {
-            if useV2Api
-            {
-                let driver = SignInViewModelV2ObjC(application: application, delegate: self)
-                objCDriver = driver
-                driver.signIn(withUsername: email, password: password)
-            }
-            else
-            {
-                startV1ObjCSignIn(application: application)
-            }
-        }
-        else if useV2Api
+        parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
+                                                     error: nil)
+
+        if useV2Api
         {
             application.signInV2(parameters: parameters, delegate: self)
         }
@@ -298,7 +288,7 @@ class SignInViewModel: NSObject, ObservableObject
 
         if useV2Api
         {
-            let parameters = MSALNativeAuthResetPasswordParametersV2(username: email)
+            let parameters = MSALNativeAuthResetPasswordParameters(username: email)
             application.resetPasswordV2(parameters: parameters, delegate: self)
         }
         else
@@ -315,10 +305,10 @@ class SignInViewModel: NSObject, ObservableObject
         onSubmitNewPassword = nil
         onSubmitAttributes = nil
         onSelectAuthMethod = nil
-        objCDriver = nil
-        objCDriverV1 = nil
+        onSubmitVerificationContact = nil
         requiredAttributes = []
         authMethods = []
+        registrationAuthMethod = nil
         verifyCodeError = nil
         newPasswordError = nil
     }
@@ -378,8 +368,8 @@ extension SignInViewModel: CredentialsDelegate
 
 // MARK: - Flow-agnostic sheet presentation
 //
-// These helpers keep the names used by the V1 / V2 / Obj-C-bridge flow extensions, but now drive
-// cross-platform SwiftUI sheets via `activeSheet` instead of presenting UIKit modals.
+// These helpers keep the names used by the V1 / V2 flow extensions, but now drive cross-platform
+// SwiftUI sheets via `activeSheet` instead of presenting UIKit modals.
 
 extension SignInViewModel
 {
@@ -423,6 +413,12 @@ extension SignInViewModel
     func presentSelectAuthMethodModal()
     {
         activeSheet = .selectAuthMethod
+    }
+
+    /// Presents the verification-contact sheet after the user selects a strong-auth method.
+    func presentVerificationContactModal()
+    {
+        activeSheet = .verificationContact
     }
 
     /// Updates the inline error on the verify-code sheet (keeping it presented).
@@ -756,8 +752,6 @@ private enum WebSignInError: LocalizedError
         }
     }
 }
-
-
 
 // MARK: - Sign-up flow
 

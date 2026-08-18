@@ -152,6 +152,194 @@ extension SignInViewModel: SignInResendCodeDelegate
     }
 }
 
+// MARK: - V1 MFA flow
+
+// These optional callbacks are declared on `SignInStartDelegate`, `SignInVerifyCodeDelegate` and
+// `SignInPasswordRequiredDelegate`. They fire only when the app opts in with
+// `config.capabilities = [.mfaRequired, .registrationRequired]`. A single implementation on the
+// class satisfies every protocol that declares the same Obj-C selector.
+
+extension SignInViewModel
+{
+    /// The server requires MFA. Pick an authentication method (auto-proceed when there is only one,
+    /// otherwise let the user choose) and request the challenge for it.
+    @MainActor @objc
+    func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState)
+    {
+        guard let firstMethod = authMethods.first else
+        {
+            handleV1Error("MFA is required but no authentication methods are available.")
+            return
+        }
+
+        if authMethods.count > 1
+        {
+            statusMessage = "Select an authentication method."
+            self.authMethods = authMethods
+            onSelectAuthMethod = { [weak self] method in
+                guard let self = self else { return }
+                self.dismissAnyModal()
+                newState.requestChallenge(authMethod: method, delegate: self)
+            }
+            presentSelectAuthMethodModal()
+            return
+        }
+
+        statusMessage = "Sending authentication challenge…"
+        newState.requestChallenge(authMethod: firstMethod, delegate: self)
+    }
+}
+
+extension SignInViewModel: MFARequestChallengeDelegate
+{
+    func onMFARequestChallengeError(error: MFARequestChallengeError, newState: MFARequiredState?)
+    {
+        handleV1Error("MFA challenge failed: \(error.errorDescription ?? "unknown error").")
+    }
+
+    func onMFARequestChallengeSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
+    {
+        statusMessage = "Select an authentication method."
+        self.authMethods = authMethods
+        onSelectAuthMethod = { [weak self] method in
+            guard let self = self else { return }
+            self.dismissAnyModal()
+            newState.requestChallenge(authMethod: method, delegate: self)
+        }
+        presentSelectAuthMethodModal()
+    }
+
+    func onMFARequestChallengeVerificationRequired(
+        newState: MFARequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
+    {
+        statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
+        onSubmitCode = { [weak self] code in
+            guard let self = self else { return }
+            newState.submitChallenge(challenge: code, delegate: self)
+        }
+        onResendCode = nil
+        presentVerifyCodeModal()
+    }
+}
+
+extension SignInViewModel: MFASubmitChallengeDelegate
+{
+    func onMFASubmitChallengeError(error: MFASubmitChallengeError, newState: MFARequiredState?)
+    {
+        if error.isInvalidChallenge, let newState = newState
+        {
+            onSubmitCode = { [weak self] code in
+                guard let self = self else { return }
+                newState.submitChallenge(challenge: code, delegate: self)
+            }
+            updateVerifyCodeModal(errorMessage: "Check the code and try again")
+        }
+        else
+        {
+            handleV1Error("MFA verification failed: \(error.errorDescription ?? "unknown error").")
+        }
+    }
+
+    // onSignInCompleted(result:) is implemented once in the SignInStartDelegate extension and
+    // satisfies this protocol's optional completion callback as well.
+}
+
+// MARK: - V1 strong-auth registration (JIT) flow
+
+extension SignInViewModel
+{
+    /// The server requires the user to register a strong authentication method. Ask the user to
+    /// select a supported method and enter the email address or phone number to register.
+    @MainActor @objc
+    func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
+    {
+        let supportedMethods = authMethods.filter
+        {
+            $0.channelTargetType.isEmailType || $0.channelTargetType.isSMSType
+        }
+
+        guard !supportedMethods.isEmpty else
+        {
+            handleV1Error("Strong authentication registration is required but no supported methods are available.")
+            return
+        }
+
+        statusMessage = "Select an authentication method to register."
+        self.authMethods = supportedMethods
+        onSelectAuthMethod = { [weak self] method in
+            guard let self = self else { return }
+            self.registrationAuthMethod = method
+            self.statusMessage = method.channelTargetType.isSMSType
+                ? "Enter the phone number to register."
+                : "Enter the email address to register."
+            self.onSubmitVerificationContact = { [weak self] verificationContact in
+                guard let self = self else { return }
+                self.dismissAnyModal()
+                self.statusMessage = "Registering authentication method…"
+                let parameters = MSALNativeAuthChallengeAuthMethodParameters(
+                    authMethod: method,
+                    verificationContact: verificationContact
+                )
+                newState.challengeAuthMethod(parameters: parameters, delegate: self)
+            }
+            self.presentVerificationContactModal()
+        }
+        presentSelectAuthMethodModal()
+    }
+}
+
+extension SignInViewModel: RegisterStrongAuthChallengeDelegate
+{
+    func onRegisterStrongAuthChallengeError(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthState?)
+    {
+        handleV1Error("Strong authentication registration failed: \(error.errorDescription ?? "unknown error").")
+    }
+
+    func onRegisterStrongAuthVerificationRequired(result: MSALNativeAuthRegisterStrongAuthVerificationRequiredResult)
+    {
+        statusMessage = "Code sent to \(result.sentTo) (\(result.codeLength) digits)."
+        let verificationState = result.newState
+        onSubmitCode = { [weak self] code in
+            guard let self = self else { return }
+            verificationState.submitChallenge(challenge: code, delegate: self)
+        }
+        onResendCode = nil
+        presentVerifyCodeModal()
+    }
+
+    // onSignInCompleted(result:) is implemented once in the SignInStartDelegate extension and
+    // satisfies this protocol's optional completion callback as well.
+}
+
+extension SignInViewModel: RegisterStrongAuthSubmitChallengeDelegate
+{
+    func onRegisterStrongAuthSubmitChallengeError(
+        error: RegisterStrongAuthSubmitChallengeError,
+        newState: RegisterStrongAuthVerificationRequiredState?
+    )
+    {
+        if error.isInvalidChallenge, let newState = newState
+        {
+            onSubmitCode = { [weak self] code in
+                guard let self = self else { return }
+                newState.submitChallenge(challenge: code, delegate: self)
+            }
+            updateVerifyCodeModal(errorMessage: "Check the code and try again")
+        }
+        else
+        {
+            handleV1Error("Strong authentication verification failed: \(error.errorDescription ?? "unknown error").")
+        }
+    }
+
+    // onSignInCompleted(result:) is implemented once in the SignInStartDelegate extension and
+    // satisfies this protocol's optional completion callback as well.
+}
+
 // MARK: - V1 Reset Password delegates
 
 extension SignInViewModel: ResetPasswordStartDelegate
@@ -447,105 +635,5 @@ extension SignInViewModel: SignInAfterSignUpDelegate
     func onSignInAfterSignUpError(error: SignInAfterSignUpError)
     {
         handleV1SignUpError("Error signing in after sign-up: \(error.errorDescription ?? "unknown error").")
-    }
-}
-
-
-
-// MARK: - Bridge from the Objective-C V1 driver back to the SwiftUI view model
-
-/// Maps events raised by the Objective-C ``SignInViewModelV1ObjC`` driver onto this view model's
-/// published UI state and the shared SwiftUI modals. The driver keeps all MSAL SDK usage in
-/// Objective-C (proving the V1 API is Obj-C-friendly); this view model only reacts to the callbacks
-/// and drives the SwiftUI presentation, reusing the same modals and continuation closures as the
-/// native Swift V1 path.
-extension SignInViewModel: SignInViewModelV1ObjCDelegate
-{
-    func startV1ObjCSignIn(application: MSALNativeAuthPublicClientApplication)
-    {
-        let driver = SignInViewModelV1ObjC(application: application, delegate: self)
-        objCDriverV1 = driver
-        driver.signIn(withUsername: email, password: password)
-    }
-
-    @MainActor
-    func signInV1Driver(_ driver: SignInViewModelV1ObjC, didUpdateStatus status: String, isBusy: Bool)
-    {
-        statusMessage = status
-        if !isBusy
-        {
-            isSigningIn = false
-        }
-    }
-
-    @MainActor
-    func signInV1Driver(
-        _ driver: SignInViewModelV1ObjC,
-        didRequireCodeSentTo sentTo: String,
-        codeLength: Int,
-        canResend: Bool
-    )
-    {
-        statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
-        onSubmitCode = { [weak driver] code in
-            driver?.submitCode(code)
-        }
-        onResendCode = canResend ? { [weak driver] in
-            driver?.resendCode()
-        } : nil
-        presentVerifyCodeModal()
-    }
-
-    @MainActor
-    func signInV1DriverDidRequireNewPassword(_ driver: SignInViewModelV1ObjC)
-    {
-        onSubmitNewPassword = { [weak driver] password in
-            driver?.submitNewPassword(password)
-        }
-        presentNewPasswordModal()
-    }
-
-    @MainActor
-    func signInV1Driver(_ driver: SignInViewModelV1ObjC, didCompleteWithResult result: MSALNativeAuthUserAccountResult)
-    {
-        accountResult = result
-        dismissAnyModal()
-        isSigningIn = false
-        isSignedIn = true
-        statusMessage = "Signed in as \(result.account.username ?? "unknown user")."
-    }
-
-    @MainActor
-    func signInV1Driver(
-        _ driver: SignInViewModelV1ObjC,
-        didFailWithMessage message: String,
-        isInvalidCode: Bool,
-        isInvalidPassword: Bool,
-        isBrowserRequired: Bool
-    )
-    {
-        // The driver reports the error's recoverability flags; the app decides how to surface it.
-        // On a recoverable error the modal's submit/resend callbacks still capture the state, so
-        // re-submitting advances the flow.
-        if isInvalidCode, isVerifyCodeModalPresented
-        {
-            updateVerifyCodeModal(errorMessage: "Check the code and try again")
-        }
-        else if isInvalidPassword, isNewPasswordModalPresented
-        {
-            updateNewPasswordModal(errorMessage: "Invalid password")
-        }
-        else if isBrowserRequired
-        {
-            dismissAnyModal()
-            isSigningIn = false
-            statusMessage = "This flow must continue in a browser. Please sign in using the browser-based flow."
-        }
-        else
-        {
-            dismissAnyModal()
-            isSigningIn = false
-            statusMessage = message
-        }
     }
 }

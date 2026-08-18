@@ -78,6 +78,8 @@ struct SignInView: View
                 CollectAttributesSheet(viewModel: viewModel)
             case .selectAuthMethod:
                 SelectAuthMethodSheet(viewModel: viewModel)
+            case .verificationContact:
+                VerificationContactSheet(viewModel: viewModel)
             }
         }
         .onAppear
@@ -112,9 +114,6 @@ struct SignInView: View
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Toggle("Use V2 API (preview)", isOn: $viewModel.useV2Api)
-                .disabled(viewModel.isSigningIn)
-
-            Toggle("Drive from Objective-C", isOn: $viewModel.useObjCDriver)
                 .disabled(viewModel.isSigningIn)
 
             TextField("Email", text: $viewModel.email)
