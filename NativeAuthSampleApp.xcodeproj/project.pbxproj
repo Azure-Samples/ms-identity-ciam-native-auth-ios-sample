@@ -15,9 +15,9 @@
 		2D1249EA8F479B4559696DDA /* SignedInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1422AA694CF5B65FD1336 /* SignedInView.swift */; };
 		9B08477D29969265003BA4B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477C29969265003BA4B4 /* Assets.xcassets */; };
 		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
+		B7D2F4A6C8E1093B5D7F2468 /* VerificationContactSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */; };
 		CB4044A9BEACF3494BB12E65 /* CollectAttributesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */; };
 		CE6441C6B6DF4566A12AA6F7 /* SelectAuthMethodSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */; };
-		B7D2F4A6C8E1093B5D7F2468 /* VerificationContactSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */; };
 		F2134E5C9F3FD49314DE35CB /* NativeAuthSampleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA1498CA6178151ABE704E3 /* NativeAuthSampleAppApp.swift */; };
 		F5974EC3BFBC0077F850909C /* NewPasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */; };
 		FE331E01CE11A4B00C4042E1 /* SignInViewModel+V1.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */; };
@@ -174,12 +174,12 @@
 		3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CollectAttributesSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/CollectAttributesSheet.swift; sourceTree = SOURCE_ROOT; };
 		64624F33962651BEA10814E8 /* VerifyCodeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyCodeSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/VerifyCodeSheet.swift; sourceTree = SOURCE_ROOT; };
 		747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectAuthMethodSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/SelectAuthMethodSheet.swift; sourceTree = SOURCE_ROOT; };
-		A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerificationContactSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/VerificationContactSheet.swift; sourceTree = SOURCE_ROOT; };
 		9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeAuthSampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B08477C29969265003BA4B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B08478129969265003BA4B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
+		A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerificationContactSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/VerificationContactSheet.swift; sourceTree = SOURCE_ROOT; };
 		E8F1422AA694CF5B65FD1336 /* SignedInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SignedInView.swift; path = NativeAuthSampleApp/SignIn/Views/SignedInView.swift; sourceTree = SOURCE_ROOT; };
 		ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NewPasswordSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/NewPasswordSheet.swift; sourceTree = SOURCE_ROOT; };
 		FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewModel.swift; sourceTree = "<group>"; };
@@ -670,7 +670,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -706,7 +706,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

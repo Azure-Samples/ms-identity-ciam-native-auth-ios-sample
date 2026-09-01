@@ -36,7 +36,10 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthMFAVerificationRequiredDelegate,
     MSALNativeAuthStrongAuthRegistrationRequiredDelegate,
     MSALNativeAuthStrongAuthVerificationRequiredDelegate,
-    MSALNativeAuthSignInAfterResetPasswordRequiredDelegate
+    MSALNativeAuthSignInAfterResetPasswordRequiredDelegate,
+    MSALNativeAuthSignInAfterSignUpRequiredDelegate
+//,
+//    MSALNativeAuthAuthMethodSelectionRequiredDelegate
 {
     private func label(_ scenario: MSALNativeAuthFlowScenario) -> String
     {
@@ -90,8 +93,8 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Additional information is required."
         requiredAttributes = state.attributes
-        onSubmitAttributes = { [weak self, weak state] attributes in
-            guard let self = self, let state = state else { return }
+        onSubmitAttributes = { [weak self] attributes in
+            guard let self = self else { return }
             state.submitAttributes(attributes, delegate: self)
         }
         presentCollectAttributesModal()
@@ -102,8 +105,8 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     {
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Invalid attribute value(s): \(state.attributeNames.joined(separator: ", ")). Please correct them and try again."
-        onSubmitAttributes = { [weak self, weak state] attributes in
-            guard let self = self, let state = state else { return }
+        onSubmitAttributes = { [weak self] attributes in
+            guard let self = self else { return }
             state.submitAttributes(attributes, delegate: self)
         }
         presentCollectAttributesModal()
@@ -123,8 +126,8 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         {
             statusMessage = "Select an authentication method."
             authMethods = state.authMethods
-            onSelectAuthMethod = { [weak self, weak state] method in
-                guard let self = self, let state = state else { return }
+            onSelectAuthMethod = { [weak self] method in
+                guard let self = self else { return }
                 state.selectAuthMethod(method, delegate: self)
             }
             presentSelectAuthMethodModal()
@@ -161,8 +164,8 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         {
             statusMessage = "Select an authentication method."
             authMethods = state.authMethods
-            onSelectAuthMethod = { [weak self, weak state] method in
-                guard let self = self, let state = state else { return }
+            onSelectAuthMethod = { [weak self] method in
+                guard let self = self else { return }
                 state.selectAuthMethod(method, delegate: self)
             }
             presentSelectAuthMethodModal()
@@ -171,6 +174,35 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         statusMessage = "Selecting authentication method…"
         state.selectAuthMethod(method, verificationContact: nil, delegate: self)
     }
+
+    // Experimental API — may change without notice.
+//    @MainActor
+//    func onAuthMethodSelectionRequired(
+//        state: MSALNativeAuthAuthMethodSelectionRequiredState,
+//        scenario: MSALNativeAuthFlowScenario
+//    )
+//    {
+//        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+//        guard let method = state.authMethods.first else
+//        {
+//            isSigningIn = false
+//            statusMessage = "No auth methods available."
+//            return
+//        }
+//        if state.authMethods.count > 1
+//        {
+//            statusMessage = "Select an authentication method."
+//            authMethods = state.authMethods
+//            onSelectAuthMethod = { [weak self] method in
+//                guard let self = self else { return }
+//                state.selectAuthMethod(method, verificationContact: nil, delegate: self)
+//            }
+//            presentSelectAuthMethodModal()
+//            return
+//        }
+//        statusMessage = "Selecting authentication method…"
+//        state.selectAuthMethod(method, verificationContact: nil, delegate: self)
+//    }
 
     @MainActor
     func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
@@ -183,6 +215,16 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         }
         onResendCode = nil
         presentVerifyCodeModal()
+    }
+
+    @MainActor
+    func onSignInAfterSignUpRequired(state: MSALNativeAuthSignInAfterSignUpState, scenario: MSALNativeAuthFlowScenario)
+    {
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+        dismissAnyModal()
+        statusMessage = "Signed up successfully. Signing in…"
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        state.signIn(parameters: parameters, delegate: self)
     }
 
     @MainActor

@@ -254,11 +254,11 @@ class SignInViewModel: NSObject, ObservableObject
             parameters.password = password
         }
         
-        let authenticationContextId = "c4"
-        let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
-
-        parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
-                                                     error: nil)
+//        let authenticationContextId = "c4"
+//        let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
+//
+//        parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
+//                                                     error: nil)
 
         if useV2Api
         {
