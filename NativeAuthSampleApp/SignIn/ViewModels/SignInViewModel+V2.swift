@@ -32,14 +32,12 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
     MSALNativeAuthAttributesRequiredDelegate,
     MSALNativeAuthAttributesInvalidDelegate,
-    MSALNativeAuthMFARequiredDelegate,
+    MSALNativeAuthAuthMethodSelectionRequiredDelegate,
     MSALNativeAuthMFAVerificationRequiredDelegate,
     MSALNativeAuthStrongAuthRegistrationRequiredDelegate,
     MSALNativeAuthStrongAuthVerificationRequiredDelegate,
     MSALNativeAuthSignInAfterResetPasswordRequiredDelegate,
     MSALNativeAuthSignInAfterSignUpRequiredDelegate
-//,
-//    MSALNativeAuthAuthMethodSelectionRequiredDelegate
 {
     private func label(_ scenario: MSALNativeAuthFlowScenario) -> String
     {
@@ -113,7 +111,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     }
 
     @MainActor
-    func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario)
+    func onAuthMethodSelectionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         guard let method = state.authMethods.first else
@@ -174,35 +172,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         statusMessage = "Selecting authentication method…"
         state.selectAuthMethod(method, verificationContact: nil, delegate: self)
     }
-
-    // Experimental API — may change without notice.
-//    @MainActor
-//    func onAuthMethodSelectionRequired(
-//        state: MSALNativeAuthAuthMethodSelectionRequiredState,
-//        scenario: MSALNativeAuthFlowScenario
-//    )
-//    {
-//        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-//        guard let method = state.authMethods.first else
-//        {
-//            isSigningIn = false
-//            statusMessage = "No auth methods available."
-//            return
-//        }
-//        if state.authMethods.count > 1
-//        {
-//            statusMessage = "Select an authentication method."
-//            authMethods = state.authMethods
-//            onSelectAuthMethod = { [weak self] method in
-//                guard let self = self else { return }
-//                state.selectAuthMethod(method, verificationContact: nil, delegate: self)
-//            }
-//            presentSelectAuthMethodModal()
-//            return
-//        }
-//        statusMessage = "Selecting authentication method…"
-//        state.selectAuthMethod(method, verificationContact: nil, delegate: self)
-//    }
 
     @MainActor
     func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
