@@ -30,7 +30,8 @@ struct NativeAuthSampleAppApp: App
 {
     init()
     {
-        MSALGlobalConfig.loggerConfig.logLevel = .verbose
+        MSALGlobalConfig.loggerConfig.logLevel = .warning
+        #if DEBUG
         MSALGlobalConfig.loggerConfig.setLogCallback
         { _, message, containsPII in
             if !containsPII
@@ -38,6 +39,7 @@ struct NativeAuthSampleAppApp: App
                 print("MSAL: \(message ?? "")")
             }
         }
+        #endif
     }
 
     var body: some Scene

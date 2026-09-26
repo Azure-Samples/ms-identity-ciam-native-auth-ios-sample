@@ -1,0 +1,33 @@
+name: Build and test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+      - main
+      - sedemche/native-auth-v2-test
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+      - name: Resolve pinned dependencies
+        run: xcodebuild -resolvePackageDependencies -project NativeAuthSampleApp.xcodeproj -scheme NativeAuthSampleApp
+      - name: Test protected API boundaries
+        run: swift test
+      - name: Build iOS simulator app
+        run: >-
+          xcodebuild build
+          -project NativeAuthSampleApp.xcodeproj
+          -scheme NativeAuthSampleApp
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO

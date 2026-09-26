@@ -53,6 +53,7 @@ struct SignedInView: View
                     .padding(.vertical, 8)
             }
             .buttonStyle(.bordered)
+            .disabled(viewModel.isCallingProtectedAPI)
 
             if let protectedAPIResult = viewModel.protectedAPIResult
             {

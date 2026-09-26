@@ -68,11 +68,12 @@ extension SignInViewModel
     private func handleV1SignInCompleted(result: MSALNativeAuthUserAccountResult)
     {
         resetFlowState()
+        password = ""
         accountResult = result
         dismissAnyModal()
         isSigningIn = false
         isSignedIn = true
-        statusMessage = "Signed in as \(result.account.username ?? "unknown user")."
+        statusMessage = "Signed in."
     }
 
     private func handleV1Error(_ message: String)

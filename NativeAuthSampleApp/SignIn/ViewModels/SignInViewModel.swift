@@ -88,7 +88,11 @@ class SignInViewModel: NSObject, ObservableObject
 
     /// Selects which Native Auth API surface the flows use. `true` uses the server-driven **V2**
     /// unified-delegate API; `false` uses the granular **V1** API.
+    #if DEBUG
     @Published var useV2Api: Bool = true
+    #else
+    @Published var useV2Api: Bool = false
+    #endif
 
     /// Whether a user is currently signed in. When `true` the sign-in UI is hidden and the
     /// signed-in UI (protected-API access + sign-out) is shown.
@@ -119,8 +123,13 @@ class SignInViewModel: NSObject, ObservableObject
 
     /// The most recent protected-API response text, shown on the signed-in screen.
     @Published var protectedAPIResult: String?
+    @Published var isCallingProtectedAPI: Bool = false
 
     private let nativeAuth: MSALNativeAuthPublicClientApplication?
+    private let protectedAPIClient = ProtectedAPIClient()
+    private var protectedAPITokenDelegate: ProtectedAPITokenDelegate?
+    private var protectedAPITask: Task<Void, Never>?
+    private var protectedAPIRequestID = UUID()
 
     /// Continuation callbacks wired by whichever flow (V1 per-step delegates or the V2 action
     /// router) is currently active, so the shared sheets stay flow-agnostic.
@@ -137,6 +146,7 @@ class SignInViewModel: NSObject, ObservableObject
     /// A standard (non-native) MSAL application used for the browser-based / social "web fallback"
     /// flow. Created lazily by the web-fallback code path.
     var webBrowserApp: MSALPublicClientApplication?
+    var webBrowserAccount: MSALAccount?
 
     /// Supplies the platform presentation anchor (a `UIWindow` on iOS, an `NSWindow` on macOS) for
     /// the browser-based flow. Set by the hosting SwiftUI view.
@@ -147,33 +157,35 @@ class SignInViewModel: NSObject, ObservableObject
 
     override init()
     {
+        if let configurationError = Configuration.identityConfigurationError
+        {
+            nativeAuth = nil
+            super.init()
+            statusMessage = configurationError
+            return
+        }
+
         do
         {
-//            let config = try MSALNativeAuthPublicClientApplicationConfig(
-//                clientId: Configuration.clientId,
-//                tenantSubdomain: Configuration.tenantSubdomain,
-//                challengeTypes: [.OOB, .password]
-//            )
-            
-            let config = try MSALNativeAuthPublicClientApplicationConfig(clientId: Configuration.clientId,
-                                                                         authority: Configuration.ciamAuthority(),
-                                                                         challengeTypes: [.OOB, .password])
+            let config = try MSALNativeAuthPublicClientApplicationConfig(
+                clientId: Configuration.clientId,
+                tenantSubdomain: Configuration.tenantSubdomain,
+                challengeTypes: [.OOB, .password]
+            )
             config.capabilities = [.mfaRequired, .registrationRequired]
-
             config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         }
         catch
         {
             nativeAuth = nil
-            print("Unable to initialize MSAL \(error)")
         }
 
         super.init()
 
         if nativeAuth == nil
         {
-            statusMessage = "Unable to initialize MSAL."
+            statusMessage = "Unable to initialize MSAL. Check the values in Configuration.swift."
         }
     }
 
@@ -218,14 +230,43 @@ class SignInViewModel: NSObject, ObservableObject
 
         guard let account = application.getNativeAuthUserAccount() else
         {
-            // No cached account — the user is signed out; show the sign-in UI.
-            isRestoringSession = false
+            restoreBrowserSession()
             return
         }
 
         accountResult = account
         statusMessage = "Restoring your session…"
         account.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: self)
+    }
+
+    private func restoreBrowserSession()
+    {
+        do
+        {
+            let application = try webBrowserApplication()
+            guard let account = try application.allAccounts().first else
+            {
+                isRestoringSession = false
+                return
+            }
+            let scopes = Configuration.protectedAPIConfiguration?.scopes ?? ["openid"]
+            let parameters = MSALSilentTokenParameters(scopes: scopes, account: account)
+            application.acquireTokenSilent(with: parameters) { [weak self] result, _ in
+                DispatchQueue.main.async
+                {
+                    guard let self = self else { return }
+                    self.isRestoringSession = false
+                    guard result != nil else { return }
+                    self.webBrowserAccount = account
+                    self.isSignedIn = true
+                    self.statusMessage = "Signed in."
+                }
+            }
+        }
+        catch
+        {
+            isRestoringSession = false
+        }
     }
 
     /// Starts a sign-in. With a password the password flow is used; with an **empty** password the
@@ -253,13 +294,6 @@ class SignInViewModel: NSObject, ObservableObject
         {
             parameters.password = password
         }
-        
-//        let authenticationContextId = "c4"
-//        let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
-//
-//        parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
-//                                                     error: nil)
-
         if useV2Api
         {
             application.signInV2(parameters: parameters, delegate: self)
@@ -318,8 +352,18 @@ class SignInViewModel: NSObject, ObservableObject
     /// Signs the current user out and restores the sign-in UI.
     func signOut()
     {
+        protectedAPIRequestID = UUID()
+        protectedAPITask?.cancel()
+        protectedAPITask = nil
+        protectedAPITokenDelegate = nil
+        isCallingProtectedAPI = false
         accountResult?.signOut()
         accountResult = nil
+        if let webBrowserAccount = webBrowserAccount
+        {
+            try? webBrowserApp?.remove(webBrowserAccount)
+        }
+        webBrowserAccount = nil
         resetFlowState()
         password = ""
         protectedAPIResult = nil
@@ -336,6 +380,8 @@ class SignInViewModel: NSObject, ObservableObject
     func cancelFlow()
     {
         activeSheet = nil
+        resetFlowState()
+        password = ""
         isSigningIn = false
         statusMessage = "Action cancelled."
     }
@@ -351,7 +397,7 @@ extension SignInViewModel: CredentialsDelegate
         // A token was acquired silently — the user is already signed in.
         isRestoringSession = false
         isSignedIn = true
-        statusMessage = "Signed in as \(accountResult?.account.username ?? "unknown user")."
+        statusMessage = "Signed in."
     }
 
     @MainActor
@@ -359,6 +405,7 @@ extension SignInViewModel: CredentialsDelegate
     {
         // Couldn't get a token silently (e.g. the user was signed out or interaction is required) —
         // show the sign-in UI.
+        accountResult?.signOut()
         accountResult = nil
         isRestoringSession = false
         isSignedIn = false
@@ -449,8 +496,6 @@ extension SignInViewModel
 }
 
 
-@MainActor private var protectedAPITokenDelegates: [ObjectIdentifier: ProtectedAPITokenDelegate] = [:]
-
 private final class ProtectedAPITokenDelegate: NSObject, CredentialsDelegate
 {
     private let onCompleted: @MainActor (MSALNativeAuthTokenResult) -> Void
@@ -482,116 +527,153 @@ private final class ProtectedAPITokenDelegate: NSObject, CredentialsDelegate
 
 extension SignInViewModel
 {
-    private var protectedAPIUrl: String?
-    {
-        nil
-    }
-
-    private var protectedAPIScopes: [String]
-    {
-        []
-    }
-
     @MainActor
     func callProtectedAPI()
     {
+        guard !isCallingProtectedAPI else
+        {
+            return
+        }
+
+        if accountResult == nil
+        {
+            callProtectedAPIWithBrowserAccount()
+            return
+        }
+
         guard let accountResult = accountResult else
         {
             protectedAPIResult = "No signed-in account is available."
             return
         }
 
-        guard let apiUrl = protectedAPIUrl, !protectedAPIScopes.isEmpty else
+        guard let configuration = Configuration.protectedAPIConfiguration else
         {
-            protectedAPIResult = "Protected API not configured. Set the API URL and scopes in SignInViewModel+ProtectedAPI.swift."
+            protectedAPIResult = Configuration.protectedAPIConfigurationError
+                ?? "Protected API is optional. Configure its HTTPS endpoint and scopes in Configuration.swift."
             return
         }
 
         statusMessage = "Retrieving access token to call the protected API…"
         protectedAPIResult = nil
+        isCallingProtectedAPI = true
+        let requestID = UUID()
+        protectedAPIRequestID = requestID
 
         let parameters = MSALNativeAuthGetAccessTokenParameters()
-        parameters.scopes = protectedAPIScopes
+        parameters.scopes = configuration.scopes
 
-        let key = ObjectIdentifier(self)
         let delegate = ProtectedAPITokenDelegate(
             onCompleted: { [weak self] tokenResult in
-                guard let self = self else { return }
-                protectedAPITokenDelegates[key] = nil
-                self.accessProtectedAPI(apiUrl: apiUrl, accessToken: tokenResult.accessToken)
+                guard let self = self, self.protectedAPIRequestID == requestID, self.isSignedIn else { return }
+                self.protectedAPITokenDelegate = nil
+                self.accessProtectedAPI(
+                    configuration: configuration,
+                    accessToken: tokenResult.accessToken,
+                    requestID: requestID
+                )
             },
             onError: { [weak self] error in
-                protectedAPITokenDelegates[key] = nil
-                self?.statusMessage = "Unable to retrieve an access token."
-                self?.protectedAPIResult = "Error retrieving access token: \(error.errorDescription ?? "unknown error")"
+                guard let self = self, self.protectedAPIRequestID == requestID else { return }
+                self.protectedAPITokenDelegate = nil
+                self.isCallingProtectedAPI = false
+                if error.isBrowserRequired
+                {
+                    self.statusMessage = "Additional interaction is required."
+                    self.protectedAPIResult = "Use browser sign-in to satisfy the API's interactive or claims requirement, then try again."
+                }
+                else
+                {
+                    self.statusMessage = "Unable to retrieve an access token."
+                    self.protectedAPIResult = error.errorDescription ?? "The token request failed."
+                }
             }
         )
-        protectedAPITokenDelegates[key] = delegate
+        protectedAPITokenDelegate = delegate
         accountResult.getAccessToken(parameters: parameters, delegate: delegate)
     }
 
     @MainActor
-    private func accessProtectedAPI(apiUrl: String, accessToken: String)
+    private func callProtectedAPIWithBrowserAccount()
     {
-        guard let url = URL(string: apiUrl) else
+        guard let configuration = Configuration.protectedAPIConfiguration else
         {
-            protectedAPIResult = "Invalid API URL."
+            protectedAPIResult = Configuration.protectedAPIConfigurationError
+                ?? "Protected API is optional. Configure its HTTPS endpoint and scopes in Configuration.swift."
+            return
+        }
+        guard let application = webBrowserApp, let account = webBrowserAccount else
+        {
+            protectedAPIResult = "No signed-in account is available."
             return
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error
+        statusMessage = "Retrieving access token to call the protected API…"
+        protectedAPIResult = nil
+        isCallingProtectedAPI = true
+        let requestID = UUID()
+        protectedAPIRequestID = requestID
+        let parameters = MSALSilentTokenParameters(scopes: configuration.scopes, account: account)
+        application.acquireTokenSilent(with: parameters) { [weak self] result, error in
+            DispatchQueue.main.async
             {
-                Task { @MainActor in
-                    self?.statusMessage = "Protected API call failed."
-                    self?.protectedAPIResult = error.localizedDescription
+                guard let self = self,
+                      self.protectedAPIRequestID == requestID,
+                      self.isSignedIn else { return }
+                guard let accessToken = result?.accessToken, error == nil else
+                {
+                    self.isCallingProtectedAPI = false
+                    self.statusMessage = "Additional interaction may be required."
+                    self.protectedAPIResult = "Sign in with Browser again to satisfy the API's interactive or claims requirement."
+                    return
                 }
-                return
+                self.accessProtectedAPI(
+                    configuration: configuration,
+                    accessToken: accessToken,
+                    requestID: requestID
+                )
             }
-
-            guard let httpResponse = response as? HTTPURLResponse else
-            {
-                Task { @MainActor in
-                    self?.statusMessage = "Protected API call failed."
-                    self?.protectedAPIResult = "No HTTP response was returned."
-                }
-                return
-            }
-
-            guard (200...299).contains(httpResponse.statusCode) else
-            {
-                Task { @MainActor in
-                    self?.statusMessage = "Protected API call failed."
-                    self?.protectedAPIResult = "HTTP response code: \(httpResponse.statusCode)"
-                }
-                return
-            }
-
-            let body: String
-            if let data = data, let text = String(data: data, encoding: .utf8)
-            {
-                body = text
-            }
-            else
-            {
-                body = "<empty response>"
-            }
-
-            Task { @MainActor in
-                self?.statusMessage = "Accessed the protected API successfully."
-                self?.protectedAPIResult = """
-                Accessed API successfully using an access token.
-                HTTP response code: \(httpResponse.statusCode)
-                HTTP response body:
-                \(body)
-                """
-            }
-        }.resume()
+        }
     }
+
+    @MainActor
+    private func accessProtectedAPI(
+        configuration: ProtectedAPIConfiguration,
+        accessToken: String,
+        requestID: UUID
+    )
+    {
+        protectedAPITask?.cancel()
+        protectedAPITask = Task { [weak self] in
+            guard let self = self else { return }
+            do
+            {
+                let body = try await protectedAPIClient.get(
+                    endpoint: configuration.endpoint,
+                    accessToken: accessToken
+                )
+                guard !Task.isCancelled, protectedAPIRequestID == requestID, isSignedIn else { return }
+                statusMessage = "Accessed the protected API successfully."
+                protectedAPIResult = body.isEmpty ? "<empty response>" : body
+            }
+            catch is CancellationError
+            {
+            }
+            catch
+            {
+                guard protectedAPIRequestID == requestID, isSignedIn else { return }
+                statusMessage = "Protected API call failed."
+                protectedAPIResult = error.localizedDescription
+            }
+            if protectedAPIRequestID == requestID
+            {
+                isCallingProtectedAPI = false
+                protectedAPITask = nil
+            }
+        }
+    }
+
+
 }
 
 
@@ -640,7 +722,8 @@ extension SignInViewModel
             return
         }
 
-        let parameters = MSALInteractiveTokenParameters(scopes: ["User.Read"], webviewParameters: webviewParameters)
+        let scopes = Configuration.protectedAPIConfiguration?.scopes ?? ["openid"]
+        let parameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
         parameters.promptType = .login
         parameters.domainHint = domainHint
 
@@ -652,17 +735,18 @@ extension SignInViewModel
                 if let error = error
                 {
                     self.isSigningIn = false
-                    self.statusMessage = "Error acquiring token: \(error.localizedDescription)"
+                    self.statusMessage = "Browser sign-in failed or was cancelled."
                     return
                 }
 
-                guard result?.account != nil else
+                guard let account = result?.account else
                 {
                     self.isSigningIn = false
                     self.statusMessage = "Could not acquire token: no account returned."
                     return
                 }
 
+                self.webBrowserAccount = account
                 if let account = self.application?.getNativeAuthUserAccount()
                 {
                     self.accountResult = account

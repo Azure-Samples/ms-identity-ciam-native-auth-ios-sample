@@ -39,21 +39,9 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthSignInAfterResetPasswordRequiredDelegate,
     MSALNativeAuthSignInAfterSignUpRequiredDelegate
 {
-    private func label(_ scenario: MSALNativeAuthFlowScenario) -> String
-    {
-        switch scenario
-        {
-        case .signIn: return "signIn"
-        case .signUp: return "signUp"
-        case .passwordReset: return "passwordReset"
-        @unknown default: return "unknown"
-        }
-    }
-
     @MainActor
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
@@ -69,7 +57,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Submitting password…"
         state.submitPassword(password, delegate: self)
     }
@@ -77,7 +64,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         onSubmitNewPassword = { [weak self] password in
             guard let self = self else { return }
             state.submitNewPassword(password, delegate: self)
@@ -88,7 +74,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Additional information is required."
         requiredAttributes = state.attributes
         onSubmitAttributes = { [weak self] attributes in
@@ -101,7 +86,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Invalid attribute value(s): \(state.attributeNames.joined(separator: ", ")). Please correct them and try again."
         onSubmitAttributes = { [weak self] attributes in
             guard let self = self else { return }
@@ -113,7 +97,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onAuthMethodSelectionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         guard let method = state.authMethods.first else
         {
             isSigningIn = false
@@ -138,7 +121,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Verification code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
@@ -151,32 +133,38 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        guard let method = state.authMethods.first else
+        let supportedMethods = state.authMethods.filter
+        {
+            $0.channelTargetType.isEmailType || $0.channelTargetType.isSMSType
+        }
+        guard !supportedMethods.isEmpty else
         {
             isSigningIn = false
-            statusMessage = "No auth methods available."
+            statusMessage = "Strong authentication registration is required but no supported methods are available."
             return
         }
-        if state.authMethods.count > 1
-        {
-            statusMessage = "Select an authentication method."
-            authMethods = state.authMethods
-            onSelectAuthMethod = { [weak self] method in
+        statusMessage = "Select an authentication method to register."
+        authMethods = supportedMethods
+        onSelectAuthMethod = { [weak self] method in
+            guard let self = self else { return }
+            self.registrationAuthMethod = method
+            self.statusMessage = method.channelTargetType.isSMSType
+                ? "Enter the phone number to register."
+                : "Enter the email address to register."
+            self.onSubmitVerificationContact = { [weak self] verificationContact in
                 guard let self = self else { return }
-                state.selectAuthMethod(method, delegate: self)
+                self.dismissAnyModal()
+                self.statusMessage = "Registering authentication method…"
+                state.selectAuthMethod(method, verificationContact: verificationContact, delegate: self)
             }
-            presentSelectAuthMethodModal()
-            return
+            self.presentVerificationContactModal()
         }
-        statusMessage = "Selecting authentication method…"
-        state.selectAuthMethod(method, verificationContact: nil, delegate: self)
+        presentSelectAuthMethodModal()
     }
 
     @MainActor
     func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Verification code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
@@ -189,7 +177,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onSignInAfterSignUpRequired(state: MSALNativeAuthSignInAfterSignUpState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         dismissAnyModal()
         statusMessage = "Signed up successfully. Signing in…"
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
@@ -199,7 +186,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onSignInAfterResetPasswordRequired(state: MSALNativeAuthSignInAfterResetPasswordState, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         dismissAnyModal()
         statusMessage = "Password reset. Signing in…"
         let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
@@ -209,18 +195,18 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: flow completed")
         accountResult = result
         dismissAnyModal()
+        resetFlowState()
+        password = ""
         isSigningIn = false
         isSignedIn = true
-        statusMessage = "Signed in as \(result.account.username ?? "unknown user")."
+        statusMessage = "Signed in."
     }
 
     @MainActor
     func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: flow error — \(error.errorDescription ?? "N/A")")
         // The app decides recoverability from the error. On a recoverable error the modal's
         // submit/resend callbacks still capture the state, so re-submitting advances the flow.
         if error.isInvalidCode, isVerifyCodeModalPresented

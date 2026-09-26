@@ -26,23 +26,56 @@ import MSAL
 
 @objcMembers
 class Configuration: NSObject {
-    // Update the below to your client ID and tenantSubdomain you received in the portal.
+    static let clientId = "Enter_the_Application_Id_Here"
+    static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
 
-    static let clientId = "595671e3-5863-4589-89c6-140cc451e969"
-    static let tenantSubdomain = "nativeauthasampleapp"
+    /// Optional protected API settings. Leave both values empty to use authentication without
+    /// calling an API.
+    static let protectedAPIEndpoint = ""
+    static let protectedAPIScopes: [String] = []
 
-    /// ESTS test slice / data-center used to pin requests to a specific scale unit.
-    /// Set to `nil` to route to production. The Native Auth request path sends this as the
-    /// `dc` query parameter.
-    ///
-//    static let testSliceDataCenter: String? = "ESTS-PUB-WEULR1-AZ2-FD130-001"
-    static let testSliceDataCenter: String? = "ESTS-PUB-SEASLR1-FD000-TEST1-100"
-    
+    /// Internal test-slice routing is opt-in. Keep this `nil` for production routing.
+    static let testSliceDataCenter: String? = nil
 
-    /// Slice configuration applied to every `MSALNativeAuthPublicClientApplicationConfig`.
-    /// Returns `nil` when no test slice is configured.
     static var sliceConfig: MSALSliceConfig? {
         guard let dc = testSliceDataCenter else { return nil }
         return MSALSliceConfig(slice: nil, dc: dc)
+    }
+
+    static var identityConfigurationError: String? {
+        if clientId == "Enter_the_Application_Id_Here" || tenantSubdomain == "Enter_the_Tenant_Subdomain_Here" {
+            return "Configure clientId and tenantSubdomain in Configuration.swift before signing in."
+        }
+        guard UUID(uuidString: clientId) != nil else {
+            return "Configuration.clientId must be an application (client) ID in UUID format."
+        }
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-"))
+        guard !tenantSubdomain.isEmpty,
+              tenantSubdomain.rangeOfCharacter(from: allowed.inverted) == nil else {
+            return "Configuration.tenantSubdomain must contain only letters, numbers, and hyphens."
+        }
+        return nil
+    }
+
+    static var protectedAPIConfiguration: ProtectedAPIConfiguration? {
+        guard !protectedAPIEndpoint.isEmpty || !protectedAPIScopes.isEmpty else {
+            return nil
+        }
+        return try? ProtectedAPIConfiguration(
+            endpoint: protectedAPIEndpoint,
+            scopes: protectedAPIScopes
+        )
+    }
+
+    static var protectedAPIConfigurationError: String? {
+        guard !protectedAPIEndpoint.isEmpty || !protectedAPIScopes.isEmpty else {
+            return nil
+        }
+        do {
+            _ = try ProtectedAPIConfiguration(endpoint: protectedAPIEndpoint, scopes: protectedAPIScopes)
+            return nil
+        } catch {
+            return error.localizedDescription
+        }
     }
 }

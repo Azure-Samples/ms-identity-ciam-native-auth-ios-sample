@@ -1,3 +1,4 @@
 xcuserdata
 .forge-DerivedData/
+.build/
 .DS_Store
