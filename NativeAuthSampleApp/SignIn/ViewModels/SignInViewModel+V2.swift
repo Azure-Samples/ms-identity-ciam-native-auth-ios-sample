@@ -132,7 +132,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
             return
         }
         statusMessage = "Selecting authentication method…"
-        state.selectAuthMethod(method, verificationContact: nil, delegate: self)
+        state.selectAuthMethod(method, delegate: self)
     }
 
     @MainActor
