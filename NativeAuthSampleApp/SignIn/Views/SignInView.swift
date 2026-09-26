@@ -31,11 +31,11 @@ import AppKit
 
 struct SignInView: View
 {
-    @ObservedObject var viewModel: SignInViewModel
+    @StateObject private var viewModel: SignInViewModel
 
     init(viewModel: SignInViewModel = SignInViewModel())
     {
-        self.viewModel = viewModel
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View
@@ -82,6 +82,7 @@ struct SignInView: View
                 VerificationContactSheet(viewModel: viewModel)
             }
         }
+        .interactiveDismissDisabled(viewModel.isSigningIn)
         .onAppear
         {
             viewModel.loadCachedSession()
