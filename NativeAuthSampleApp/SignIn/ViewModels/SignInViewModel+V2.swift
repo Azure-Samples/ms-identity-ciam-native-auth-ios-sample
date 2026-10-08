@@ -215,6 +215,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         isSigningIn = false
         isSignedIn = true
         statusMessage = "Signed in as \(result.account.username ?? "unknown user")."
+        accountResult?.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: self)
     }
 
     @MainActor
