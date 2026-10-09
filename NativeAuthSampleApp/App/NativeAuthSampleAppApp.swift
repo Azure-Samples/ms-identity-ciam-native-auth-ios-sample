@@ -45,6 +45,9 @@ struct NativeAuthSampleAppApp: App
         WindowGroup
         {
             SignInView()
+                #if os(macOS)
+                .frame(width: 480, height: 720)
+                #endif
                 .onOpenURL
                 { url in
                     #if os(iOS)
@@ -52,5 +55,8 @@ struct NativeAuthSampleAppApp: App
                     #endif
                 }
         }
+        #if os(macOS)
+        .windowResizability(.contentSize)
+        #endif
     }
 }

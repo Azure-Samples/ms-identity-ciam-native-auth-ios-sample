@@ -40,32 +40,34 @@ struct SignInView: View
 
     var body: some View
     {
-        VStack(spacing: 16)
+        ScrollView
         {
-            if viewModel.isSignedIn
+            VStack(spacing: 16)
             {
-                SignedInView(viewModel: viewModel)
-            }
-            else if viewModel.isRestoringSession
-            {
-                restoringSessionContent
-            }
-            else
-            {
-                signInContent
-            }
+                if viewModel.isSignedIn
+                {
+                    SignedInView(viewModel: viewModel)
+                }
+                else if viewModel.isRestoringSession
+                {
+                    restoringSessionContent
+                }
+                else
+                {
+                    signInContent
+                }
 
-            if !viewModel.isSignedIn, let statusMessage = viewModel.statusMessage
-            {
-                Text(statusMessage)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if !viewModel.isSignedIn, let statusMessage = viewModel.statusMessage
+                {
+                    Text(statusMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
-
-            Spacer()
+            .frame(maxWidth: .infinity)
+            .padding()
         }
-        .padding()
         .sheet(item: $viewModel.activeSheet)
         { sheet in
             switch sheet
