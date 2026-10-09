@@ -7,57 +7,39 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1220D5D52D90C52200B92305 /* SelectAuthMethodViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1220D5D42D90C52200B92305 /* SelectAuthMethodViewController.swift */; };
-		12266F092D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */; };
-		12800ED62D9AEDDF00D45FD8 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 12800ED52D9AEDDF00D45FD8 /* MSAL */; };
-		8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */; };
-		9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477329969264003BA4B4 /* AppDelegate.swift */; };
-		9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477529969264003BA4B4 /* SceneDelegate.swift */; };
-		9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */; };
-		9B08477B29969264003BA4B4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477929969264003BA4B4 /* Main.storyboard */; };
+		09F844D49F0383B4422ECB96 /* VerifyCodeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64624F33962651BEA10814E8 /* VerifyCodeSheet.swift */; };
+		194A56808D449E1A9F82E768 /* SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */; };
+		2387CCE52FFC659000E30923 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2387CCE42FFC659000E30923 /* SignInView.swift */; };
+		2D1249EA8F479B4559696DDA /* SignedInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1422AA694CF5B65FD1336 /* SignedInView.swift */; };
 		9B08477D29969265003BA4B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477C29969265003BA4B4 /* Assets.xcassets */; };
-		9B08478029969265003BA4B4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */; };
-		9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */; };
-		9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */; };
-		9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */; };
-		9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */; };
-		9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B9DD5192A053E8700042B43 /* ObjCViewController.m */; };
-		9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1949529F820980023905D /* EmailAndCodeViewController.swift */; };
 		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
-		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
-		DE2D14EC2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */; };
-		DE2D14EF2E858B24001FC199 /* AuthMethodCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */; };
-		DE894AAA2F9A00300034147E /* AttributeCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE894AA92F9A00300034147E /* AttributeCollectionViewController.swift */; };
-		E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */; };
+		A6E172B85E07057CD9960B35 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 107BEAE4732E65BAB2D69F05 /* MSAL */; };
+		B7D2F4A6C8E1093B5D7F2468 /* VerificationContactSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */; };
+		CB4044A9BEACF3494BB12E65 /* CollectAttributesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */; };
+		CE6441C6B6DF4566A12AA6F7 /* SelectAuthMethodSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */; };
+		F2134E5C9F3FD49314DE35CB /* NativeAuthSampleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA1498CA6178151ABE704E3 /* NativeAuthSampleAppApp.swift */; };
+		F5974EC3BFBC0077F850909C /* NewPasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */; };
+		FE331E01CE11A4B00C4042E1 /* SignInViewModel+V1.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */; };
+		FE331E03CE11A4B00C4042E3 /* SignInViewModel+V2.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1220D5D42D90C52200B92305 /* SelectAuthMethodViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAuthMethodViewController.swift; sourceTree = "<group>"; };
-		12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAuthMethodChallengeViewController.swift; sourceTree = "<group>"; };
-		8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtectedAPIViewController.swift; sourceTree = "<group>"; };
+		2387CCE42FFC659000E30923 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		2BA1498CA6178151ABE704E3 /* NativeAuthSampleAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NativeAuthSampleAppApp.swift; path = NativeAuthSampleApp/App/NativeAuthSampleAppApp.swift; sourceTree = SOURCE_ROOT; };
+		3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CollectAttributesSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/CollectAttributesSheet.swift; sourceTree = SOURCE_ROOT; };
+		64624F33962651BEA10814E8 /* VerifyCodeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyCodeSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/VerifyCodeSheet.swift; sourceTree = SOURCE_ROOT; };
+		747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectAuthMethodSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/SelectAuthMethodSheet.swift; sourceTree = SOURCE_ROOT; };
 		9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeAuthSampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		9B08477329969264003BA4B4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		9B08477529969264003BA4B4 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailAndPasswordViewController.swift; sourceTree = "<group>"; };
-		9B08477A29969264003BA4B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		9B08477C29969265003BA4B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		9B08477F29969265003BA4B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9B08478129969265003BA4B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeViewController.swift; sourceTree = "<group>"; };
-		9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordViewController.swift; sourceTree = "<group>"; };
-		9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPasswordViewController.swift; sourceTree = "<group>"; };
-		9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAttributesViewController.swift; sourceTree = "<group>"; };
-		9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NativeAuthSampleApp-Bridging-Header.h"; sourceTree = "<group>"; };
-		9B9DD5182A053E8700042B43 /* ObjCViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjCViewController.h; sourceTree = "<group>"; };
-		9B9DD5192A053E8700042B43 /* ObjCViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCViewController.m; sourceTree = "<group>"; };
-		9BA1949529F820980023905D /* EmailAndCodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAndCodeViewController.swift; sourceTree = "<group>"; };
 		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
-		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
 		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
-		DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAuthMethodDetailViewController.swift; sourceTree = "<group>"; };
-		DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMethodCell.swift; sourceTree = "<group>"; };
-		DE894AA92F9A00300034147E /* AttributeCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributeCollectionViewController.swift; sourceTree = "<group>"; };
-		E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiFactorAuthenticationViewController.swift; sourceTree = "<group>"; };
+		A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerificationContactSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/VerificationContactSheet.swift; sourceTree = SOURCE_ROOT; };
+		E8F1422AA694CF5B65FD1336 /* SignedInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SignedInView.swift; path = NativeAuthSampleApp/SignIn/Views/SignedInView.swift; sourceTree = SOURCE_ROOT; };
+		ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NewPasswordSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/NewPasswordSheet.swift; sourceTree = SOURCE_ROOT; };
+		FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewModel.swift; sourceTree = "<group>"; };
+		FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModel+V1.swift"; sourceTree = "<group>"; };
+		FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModel+V2.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,19 +47,49 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				12800ED62D9AEDDF00D45FD8 /* MSAL in Frameworks */,
+				A6E172B85E07057CD9960B35 /* MSAL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		34CDD7AE16B7ABAC6E3EC120 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2387CCE42FFC659000E30923 /* SignInView.swift */,
+				AA10SHEETVIEWS0001GROUP0 /* SheetViews */,
+				E8F1422AA694CF5B65FD1336 /* SignedInView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5B89B5D04B426A7B5D026AE8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */,
+				FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */,
+				FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		689C926C019C36260FDA441D /* SignIn */ = {
+			isa = PBXGroup;
+			children = (
+				34CDD7AE16B7ABAC6E3EC120 /* Views */,
+				5B89B5D04B426A7B5D026AE8 /* ViewModels */,
+			);
+			path = SignIn;
+			sourceTree = "<group>";
+		};
 		9B08476729969264003BA4B4 = {
 			isa = PBXGroup;
 			children = (
 				9B08477229969264003BA4B4 /* NativeAuthSampleApp */,
 				9B08477129969264003BA4B4 /* Products */,
 				9BB32E4A29A6750800BD7D89 /* Frameworks */,
+				2BA1498CA6178151ABE704E3 /* NativeAuthSampleAppApp.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,57 +104,13 @@
 		9B08477229969264003BA4B4 /* NativeAuthSampleApp */ = {
 			isa = PBXGroup;
 			children = (
-				9B08477329969264003BA4B4 /* AppDelegate.swift */,
-				9B08477529969264003BA4B4 /* SceneDelegate.swift */,
 				9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */,
-				9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */,
-				9B73CACB29F6DAA300FC7129 /* Modal View Controllers */,
-				DE2D14EE2E858B24001FC199 /* Table View Cells */,
+				689C926C019C36260FDA441D /* SignIn */,
 				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
-				9B08477929969264003BA4B4 /* Main.storyboard */,
 				9B08477C29969265003BA4B4 /* Assets.xcassets */,
-				9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */,
 				9B08478129969265003BA4B4 /* Info.plist */,
 			);
 			path = NativeAuthSampleApp;
-			sourceTree = "<group>";
-		};
-		9B73CACB29F6DAA300FC7129 /* Modal View Controllers */ = {
-			isa = PBXGroup;
-			children = (
-				DE894AA92F9A00300034147E /* AttributeCollectionViewController.swift */,
-				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
-				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
-				1220D5D42D90C52200B92305 /* SelectAuthMethodViewController.swift */,
-				DE2D14EB2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift */,
-				12266F082D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift */,
-			);
-			name = "Modal View Controllers";
-			sourceTree = "<group>";
-		};
-		9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */ = {
-			isa = PBXGroup;
-			children = (
-				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
-				9BA1949529F820980023905D /* EmailAndCodeViewController.swift */,
-				9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */,
-				E24A77922C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift */,
-				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
-				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
-				8D4CFFDD2B6820F500FC03F8 /* ProtectedAPIViewController.swift */,
-				9B9125012A0A90DB006F91E8 /* Objective-C Scenario */,
-			);
-			name = "Scenario View Controllers";
-			sourceTree = "<group>";
-		};
-		9B9125012A0A90DB006F91E8 /* Objective-C Scenario */ = {
-			isa = PBXGroup;
-			children = (
-				9B9DD5182A053E8700042B43 /* ObjCViewController.h */,
-				9B9DD5192A053E8700042B43 /* ObjCViewController.m */,
-				9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */,
-			);
-			name = "Objective-C Scenario";
 			sourceTree = "<group>";
 		};
 		9BB32E4A29A6750800BD7D89 /* Frameworks */ = {
@@ -152,15 +120,29 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		DE2D14EE2E858B24001FC199 /* Table View Cells */ = {
+		AA10SHEETVIEWS0001GROUP0 /* SheetViews */ = {
 			isa = PBXGroup;
 			children = (
-				DE2D14ED2E858B24001FC199 /* AuthMethodCell.swift */,
+				64624F33962651BEA10814E8 /* VerifyCodeSheet.swift */,
+				ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */,
+				3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */,
+				747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */,
+				A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */,
 			);
-			path = "Table View Cells";
+			name = SheetViews;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		598B40B4B52219E19C8D9DBB /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		9B08476F29969264003BA4B4 /* NativeAuthSampleApp */ = {
@@ -170,6 +152,7 @@
 				9B08476C29969264003BA4B4 /* Sources */,
 				9B08476D29969264003BA4B4 /* Frameworks */,
 				9B08476E29969264003BA4B4 /* Resources */,
+				598B40B4B52219E19C8D9DBB /* Headers */,
 			);
 			buildRules = (
 			);
@@ -177,7 +160,7 @@
 			);
 			name = NativeAuthSampleApp;
 			packageProductDependencies = (
-				12800ED52D9AEDDF00D45FD8 /* MSAL */,
+				107BEAE4732E65BAB2D69F05 /* MSAL */,
 			);
 			productName = NativeAuthSampleApp;
 			productReference = 9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */;
@@ -209,7 +192,7 @@
 			);
 			mainGroup = 9B08476729969264003BA4B4;
 			packageReferences = (
-				12800ED42D9AEDDF00D45FD8 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
+				1F30E8CF3CB045DE60F5A9E4 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
 			);
 			productRefGroup = 9B08477129969264003BA4B4 /* Products */;
 			projectDirPath = "";
@@ -225,9 +208,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B08478029969265003BA4B4 /* LaunchScreen.storyboard in Resources */,
 				9B08477D29969265003BA4B4 /* Assets.xcassets in Resources */,
-				9B08477B29969264003BA4B4 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,47 +219,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8D4CFFDE2B6820F500FC03F8 /* ProtectedAPIViewController.swift in Sources */,
-				DE894AAA2F9A00300034147E /* AttributeCollectionViewController.swift in Sources */,
-				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
-				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
-				1220D5D52D90C52200B92305 /* SelectAuthMethodViewController.swift in Sources */,
-				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
-				9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */,
-				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
-				9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */,
-				12266F092D9105EF0030DFA6 /* VerifyAuthMethodChallengeViewController.swift in Sources */,
-				9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */,
-				9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */,
-				DE2D14EF2E858B24001FC199 /* AuthMethodCell.swift in Sources */,
+				194A56808D449E1A9F82E768 /* SignInViewModel.swift in Sources */,
+				FE331E01CE11A4B00C4042E1 /* SignInViewModel+V1.swift in Sources */,
+				FE331E03CE11A4B00C4042E3 /* SignInViewModel+V2.swift in Sources */,
+				2387CCE52FFC659000E30923 /* SignInView.swift in Sources */,
 				9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */,
-				E24A77932C820A5F009970A4 /* MultiFactorAuthenticationViewController.swift in Sources */,
-				9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */,
-				9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */,
-				DE2D14EC2E858B1A001FC199 /* VerifyAuthMethodDetailViewController.swift in Sources */,
+				F2134E5C9F3FD49314DE35CB /* NativeAuthSampleAppApp.swift in Sources */,
+				2D1249EA8F479B4559696DDA /* SignedInView.swift in Sources */,
+				09F844D49F0383B4422ECB96 /* VerifyCodeSheet.swift in Sources */,
+				F5974EC3BFBC0077F850909C /* NewPasswordSheet.swift in Sources */,
+				CB4044A9BEACF3494BB12E65 /* CollectAttributesSheet.swift in Sources */,
+				CE6441C6B6DF4566A12AA6F7 /* SelectAuthMethodSheet.swift in Sources */,
+				B7D2F4A6C8E1093B5D7F2468 /* VerificationContactSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		9B08477929969264003BA4B4 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				9B08477A29969264003BA4B4 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				9B08477F29969265003BA4B4 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		9B08478229969265003BA4B4 /* Debug */ = {
@@ -403,26 +359,32 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "NativeAuthSampleApp/NativeAuthSampleApp-macOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NativeAuthSampleApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -437,26 +399,32 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "NativeAuthSampleApp/NativeAuthSampleApp-macOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NativeAuthSampleApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -486,20 +454,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		12800ED42D9AEDDF00D45FD8 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */ = {
+		1F30E8CF3CB045DE60F5A9E4 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AzureAD/microsoft-authentication-library-for-objc";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.11.0;
+				kind = exactVersion;
+				version = 2.16.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		12800ED52D9AEDDF00D45FD8 /* MSAL */ = {
+		107BEAE4732E65BAB2D69F05 /* MSAL */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 12800ED42D9AEDDF00D45FD8 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
+			package = 1F30E8CF3CB045DE60F5A9E4 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
 			productName = MSAL;
 		};
 /* End XCSwiftPackageProductDependency section */
