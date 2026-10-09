@@ -78,7 +78,7 @@ To update MSAL later, select a reviewed release in the project's **Package Depen
 
 ### Step 7: Configure the sample
 
-Replace `clientId` and `tenantSubdomain` in `NativeAuthSampleApp/Configuration.swift` with your app registration and tenant values, as described under [Key concepts](#key-concepts). Requests use normal tenant routing; no test data-center or slice is configured.
+Replace `clientId`, `tenantSubdomain`, and `tenantId` in `NativeAuthSampleApp/Configuration.swift` with your app registration and tenant values, as described under [Key concepts](#key-concepts). Both native and browser sign-in use `https://<tenant-subdomain>.ciamlogin.com/<tenant-id>`. No test data-center or slice is configured.
 
 In the `NativeAuthSampleApp` target's **Signing & Capabilities**, choose your development team and a bundle identifier for your app. Register `msauth.<bundle-identifier>://auth` as the redirect URI. `Info.plist` derives the URL scheme from the bundle identifier and includes the `msauthv2` and `msauthv3` query schemes.
 
@@ -109,17 +109,24 @@ import MSAL
 
 @objcMembers
 class Configuration: NSObject {
-    // Update the below to your client ID and tenantSubdomain you received in the portal.
+    // Update the client ID, tenant subdomain, and tenant ID from the portal.
 
     static let clientId = "Enter_the_Application_Id_Here"
     static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
+    static let tenantId = "Enter_the_Tenant_Id_Here"
+
+    static var authorityURL: URL {
+        URL(string: "https://\(tenantSubdomain).ciamlogin.com/\(tenantId)")!
+    }
 }
 ```
 
-The code creates two constant properties:
+The code defines three configuration values and a shared authority URL:
 
 * _clientId_ - the value _Enter_the_Application_Id_Here_ is replaced with **Application (client) ID** of the app you register during the project setup. The **Application (client) ID** is unique identifier of your registered application.
 * _tenantSubdomain_ - the value _Enter_the_Tenant_Subdomain_Here_ is replaced with the Directory (tenant) subdomain. The tenant subdomain URL is used to construct the authentication endpoint for your app.
+* _tenantId_ - replace _Enter_the_Tenant_Id_Here_ with the **Directory (tenant) ID** from your tenant's overview page.
+* _authorityURL_ - combines the tenant subdomain and tenant ID into the authority used by both authentication paths.
 
 You use `NativeAuthSampleApp/Configuration.swift` file to set configuration options when you initialize the client app in the Microsoft Authentication Library (MSAL).
 
@@ -129,9 +136,10 @@ To create SDK instance, use the following code:
 import MSAL
 
 func makeNativeAuth() throws -> MSALNativeAuthPublicClientApplication {
-    let config = try MSALNativeAuthPublicClientApplicationConfig(
+    let authority = try MSALCIAMAuthority(url: Configuration.authorityURL)
+    let config = MSALNativeAuthPublicClientApplicationConfig(
         clientId: Configuration.clientId,
-        tenantSubdomain: Configuration.tenantSubdomain,
+        authority: authority,
         challengeTypes: [.OOB, .password]
     )
     config.capabilities = [.mfaRequired, .registrationRequired]

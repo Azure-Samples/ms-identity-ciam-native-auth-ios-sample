@@ -149,9 +149,10 @@ class SignInViewModel: NSObject, ObservableObject
     {
         do
         {
-            let config = try MSALNativeAuthPublicClientApplicationConfig(
+            let authority = try MSALCIAMAuthority(url: Configuration.authorityURL)
+            let config = MSALNativeAuthPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
-                tenantSubdomain: Configuration.tenantSubdomain,
+                authority: authority,
                 challengeTypes: [.OOB, .password]
             )
             config.capabilities = [.mfaRequired, .registrationRequired]
@@ -677,12 +678,7 @@ extension SignInViewModel
             return webBrowserApp
         }
 
-        guard let authorityUrl = URL(string: "https://\(Configuration.tenantSubdomain).ciamlogin.com") else
-        {
-            throw WebSignInError.invalidAuthority
-        }
-
-        let authority = try MSALCIAMAuthority(url: authorityUrl)
+        let authority = try MSALCIAMAuthority(url: Configuration.authorityURL)
         let config = MSALPublicClientApplicationConfig(
             clientId: Configuration.clientId,
             redirectUri: nil,
@@ -729,20 +725,6 @@ private extension SocialProvider
             return "www.linkedin.com"
         default:
             return displayName
-        }
-    }
-}
-
-private enum WebSignInError: LocalizedError
-{
-    case invalidAuthority
-
-    var errorDescription: String?
-    {
-        switch self
-        {
-        case .invalidAuthority:
-            return "The CIAM authority URL is invalid."
         }
     }
 }
