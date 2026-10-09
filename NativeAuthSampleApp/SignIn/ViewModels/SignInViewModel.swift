@@ -149,18 +149,13 @@ class SignInViewModel: NSObject, ObservableObject
     {
         do
         {
-//            let config = try MSALNativeAuthPublicClientApplicationConfig(
-//                clientId: Configuration.clientId,
-//                tenantSubdomain: Configuration.tenantSubdomain,
-//                challengeTypes: [.OOB, .password]
-//            )
-            
-            let config = try MSALNativeAuthPublicClientApplicationConfig(clientId: Configuration.clientId,
-                                                                         authority: Configuration.ciamAuthority(),
-                                                                         challengeTypes: [.OOB, .password])
+            let config = try MSALNativeAuthPublicClientApplicationConfig(
+                clientId: Configuration.clientId,
+                tenantSubdomain: Configuration.tenantSubdomain,
+                challengeTypes: [.OOB, .password]
+            )
             config.capabilities = [.mfaRequired, .registrationRequired]
 
-            config.sliceConfig = Configuration.sliceConfig
             nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
         }
         catch
@@ -503,7 +498,7 @@ extension SignInViewModel
 
         guard let apiUrl = protectedAPIUrl, !protectedAPIScopes.isEmpty else
         {
-            protectedAPIResult = "Protected API not configured. Set the API URL and scopes in SignInViewModel+ProtectedAPI.swift."
+            protectedAPIResult = "Protected API not configured. Set protectedAPIUrl and protectedAPIScopes in SignInViewModel.swift."
             return
         }
 
@@ -693,7 +688,6 @@ extension SignInViewModel
             redirectUri: nil,
             authority: authority
         )
-        config.sliceConfig = Configuration.sliceConfig
 
         let application = try MSALPublicClientApplication(configuration: config)
         webBrowserApp = application

@@ -28,21 +28,6 @@ import MSAL
 class Configuration: NSObject {
     // Update the below to your client ID and tenantSubdomain you received in the portal.
 
-    static let clientId = "595671e3-5863-4589-89c6-140cc451e969"
-    static let tenantSubdomain = "nativeauthasampleapp"
-
-    /// ESTS test slice / data-center used to pin requests to a specific scale unit.
-    /// Set to `nil` to route to production. The Native Auth request path sends this as the
-    /// `dc` query parameter.
-    ///
-//    static let testSliceDataCenter: String? = "ESTS-PUB-WEULR1-AZ2-FD130-001"
-    static let testSliceDataCenter: String? = "ESTS-PUB-SEASLR1-FD000-TEST1-100"
-    
-
-    /// Slice configuration applied to every `MSALNativeAuthPublicClientApplicationConfig`.
-    /// Returns `nil` when no test slice is configured.
-    static var sliceConfig: MSALSliceConfig? {
-        guard let dc = testSliceDataCenter else { return nil }
-        return MSALSliceConfig(slice: nil, dc: dc)
-    }
+    static let clientId = "Enter_the_Application_Id_Here"
+    static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
 }

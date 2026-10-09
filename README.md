@@ -1,4 +1,4 @@
-# Sign in users and call a protected web API in iOS (Swift) mobile app by using native authentication
+# Sign in users and call a protected web API in an iOS/macOS SwiftUI app using native authentication
 
 * [Overview](#overview)
 * [Contents](#contents)
@@ -10,7 +10,13 @@
 
 ## Overview
 
-This sample iOS application demonstrates how to handle sign-up, sign-in, sign-out, and reset-password scenarios using Microsoft Entra External ID for customers. You can configure the sample to call a protected web API.
+This SwiftUI application demonstrates sign-up, sign-in, sign-out, and self-service password reset using Microsoft Entra External ID for customers on iOS and macOS. It uses Microsoft Authentication Library (MSAL) **2.16.0**, obtained through Swift Package Manager (SPM).
+
+The **Use V2 API (preview)** toggle is enabled by default. V2 uses server-driven authentication states; turning the toggle off selects the V1 per-step delegate APIs. Both share the same screens and configuration.
+
+> Native Auth V2 APIs in MSAL 2.16.0 are experimental, may change without notice, and must not be used in production applications. Availability of individual flows depends on your tenant configuration and service support.
+
+The sample includes password and email one-time-code sign-in, sign-up with attribute collection, password reset, MFA and strong-auth registration states, browser/social sign-in, cached-session restoration, and sign-out. An optional protected-API call is available after sign-in. Authentication method selection and verification prompts appear when requested by the service.
 
 ## Contents
 
@@ -18,13 +24,20 @@ This sample iOS application demonstrates how to handle sign-up, sign-in, sign-ou
 |-------------|-------------|
 | `NativeAuthSampleApp.xcodeproj`      | This sample application project file. |
 | `NativeAuthSampleApp/Configuration.swift`       | Configuration file. |
+| `NativeAuthSampleApp/App/NativeAuthSampleAppApp.swift` | Shared SwiftUI entry point and MSAL logging setup. |
+| `NativeAuthSampleApp/SignIn/ViewModels/SignInViewModel.swift` | Shared authentication state, initialization, browser sign-in, and protected-API setup. |
+| `NativeAuthSampleApp/SignIn/ViewModels/SignInViewModel+V1.swift` | V1 flow delegates. |
+| `NativeAuthSampleApp/SignIn/ViewModels/SignInViewModel+V2.swift` | V2 state delegates. |
+| `NativeAuthSampleApp/SignIn/Views/` | Shared sign-in/signed-in screens and authentication sheets. |
+| `NativeAuthSampleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved` | Resolved MSAL release and revision. |
 | `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
 | `README.md` | This README file. |
-| `LICENSE`   | The license for the sample. |
+| `LICENSE.md`   | The license for the sample. |
 
 ## Prerequisites
 
-* <a href="https://developer.apple.com/xcode/resources/" target="_blank">Xcode</a>
+* <a href="https://developer.apple.com/xcode/resources/" target="_blank">Xcode</a> with SDKs supporting the sample's deployment targets: **iOS 17.6 or later** and **macOS 14.6 or later**. Use a current stable Xcode compatible with the released MSAL binary.
+* Internet access to resolve the MSAL Swift package and download its binary framework. No separate MSAL source checkout, CocoaPods, or Carthage setup is needed.
 * Microsoft Entra External ID for customers tenant. If you don't already have one, <a href="https://aka.ms/ciam-free-trial?wt.mc_id=ciamcustomertenantfreetrial_linkclick_content_cnl" target="_blank">sign up for a free trial</a>
 
 ## Project setup
@@ -51,25 +64,41 @@ Create a user flow by following the steps in [Create a user flow](https://learn.
 
 Associate the application with the user flow by following the steps in [Associate the application with the user flow](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#associate-the-application-with-the-user-flow).
 
-### Step 6: Clone sample iOS mobile application
+### Step 6: Clone the sample and resolve MSAL
 
-Clone the sample iOS mobile application by following the steps outlined in [Clone sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#clone-sample-ios-mobile-application).
+```sh
+git clone https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample.git
+cd ms-identity-ciam-native-auth-ios-sample
+open NativeAuthSampleApp.xcodeproj
+```
 
-### Step 7: Configure the sample iOS mobile application
+Xcode resolves the existing package dependency from `https://github.com/AzureAD/microsoft-authentication-library-for-objc`. The project uses the **Exact Version: 2.16.0** rule and links the `MSAL` product to the shared application target. Do not add a second MSAL framework or local Xcode subproject.
 
-Configure the sample iOS mobile application by following the steps in [Configure the sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#configure-the-sample-ios-mobile-application).
+To update MSAL later, select a reviewed release in the project's **Package Dependencies**, change the exact version, resolve packages, and commit both the project file and `Package.resolved`. Validate both platforms and both API modes before updating the pin.
 
-### Step 8: Run and test sample iOS mobile application
+### Step 7: Configure the sample
 
-Run and test the iOS sample mobile application by following the steps in [Run and test sample iOS mobile application](https://learn.microsoft.com/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app#run-and-test-sample-ios-mobile-application).
+Replace `clientId` and `tenantSubdomain` in `NativeAuthSampleApp/Configuration.swift` with your app registration and tenant values, as described under [Key concepts](#key-concepts). Requests use normal tenant routing; no test data-center or slice is configured.
+
+In the `NativeAuthSampleApp` target's **Signing & Capabilities**, choose your development team and a bundle identifier for your app. Register `msauth.<bundle-identifier>://auth` as the redirect URI. `Info.plist` derives the URL scheme from the bundle identifier and includes the `msauthv2` and `msauthv3` query schemes.
+
+Keep the platform-specific keychain entitlements: `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS, each prefixed by your app identifier prefix. The macOS entitlements also enable the app sandbox and outgoing network connections. Follow the [MSAL configuration guidance](https://learn.microsoft.com/entra/msal/objc/install-and-configure-msal#configuring-your-project-to-use-msal) when adjusting signing or keychain settings.
+
+The browser sign-in path requests `User.Read`; ensure the delegated permission is granted to the registration. The social buttons offer Google, Facebook, Apple, and LinkedIn through browser-based sign-in. Configure the corresponding identity providers in your tenant/user flow before using them; the buttons alone do not enable providers.
+
+### Step 8: Run the sample
+
+Select the **NativeAuthSampleApp** scheme, then choose a compatible iOS simulator/device or **My Mac** and run from Xcode.
+
+Enter an email address and password for password sign-in, or leave the password empty to request an email one-time code. Use **Sign Up** or **Reset Password** for those flows and follow the service-requested sheets. The app attempts to restore a cached native-auth session on launch. After sign-in, the signed-in screen provides **Sign Out** and **Call Protected API**.
+
+Use the V2 toggle before starting a flow to compare V1 and V2 behavior. Test signup, sign-in, reset-password, invalid-code retry, cancellation, configured MFA/registration methods, browser sign-in, session restoration, and sign-out against your own tenant. This project does not currently include an automated test target.
 
 ### Step 9: Call a protected web API
 
-Follow the steps in Sign in users and call an API in a sample iOS mobile app by using native authentication to [sign in users and call a protected API in the iOS sample mobile app](https://learn.microsoft.com//entra/external-id/customers/sample-native-authentication-ios-sample-app-call-web-api).
+Register and expose your API, grant its delegated permissions, and obtain the API URL and scope using the [protected API setup guide](https://learn.microsoft.com/entra/external-id/customers/sample-native-authentication-ios-sample-app-call-web-api).
 
-### Additional step: Add email one-time passcode MFA to your iOS app (Private Preview)
-
-Add email one-time passcode MFA to the sign in flow by following the steps in [Add email one-time passcode MFA to your iOS/macOS app](https://github.com/microsoft/entra-previews/blob/PP5/docs/Native-Auth/Developer-guides/1-iOS-Swift/Add-email-otp-mfa-sign-in.md).
+In the **Protected API** extension of `NativeAuthSampleApp/SignIn/ViewModels/SignInViewModel.swift`, replace the `nil` returned by `protectedAPIUrl` with your HTTPS endpoint and the empty `protectedAPIScopes` array with your API's delegated scopes. The button acquires a token for those scopes and sends a bearer-authenticated GET request. Until configured, it displays a configuration message instead of calling an API.
 
 ## Key concepts
 
@@ -99,21 +128,18 @@ To create SDK instance, use the following code:
 ```swift
 import MSAL
 
-var nativeAuth: MSALNativeAuthPublicClientApplication!
-
-do {
-    nativeAuth = try MSALNativeAuthPublicClientApplication(
+func makeNativeAuth() throws -> MSALNativeAuthPublicClientApplication {
+    let config = try MSALNativeAuthPublicClientApplicationConfig(
         clientId: Configuration.clientId,
         tenantSubdomain: Configuration.tenantSubdomain,
         challengeTypes: [.OOB, .password]
     )
-} catch {
-    print("Unable to initialize MSAL \(error)")
-    showResultText("Unable to initialize MSAL")
+    config.capabilities = [.mfaRequired, .registrationRequired]
+    return try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
 }
 ```
 
-You create MSAL instance so that you can perform authentication logic and interact with your tenant through native authentication APIs. The `MSALNativeAuthPublicClientApplication` creates an instance called `nativeAuth`. The `clientId` and `tenantSubdomain`, defined in the configuration file `NativeAuthSampleApp/Configuration.swift` file, are passed as parameters. For more information about SDK instance, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/en-gb/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance)
+The view model uses this configuration pattern and catches initialization errors to display an error status. The capabilities advertise support for MFA and strong-auth registration; tenant policy determines when these states are required. For more information, see [Tutorial: Prepare your iOS app for native authentication](https://learn.microsoft.com/entra/external-id/customers/tutorial-native-authentication-prepare-ios-app#create-sdk-instance).
 
 ## Reporting problems
 
@@ -122,6 +148,6 @@ You create MSAL instance so that you can perform authentication logic and intera
 
 ## Contributing
 
-If you'd like to contribute to this sample, see [CONTRIBUTING.MD](/CONTRIBUTING.md).
+If you'd like to contribute to this sample, see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
