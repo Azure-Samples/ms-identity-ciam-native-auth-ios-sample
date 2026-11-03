@@ -28,21 +28,45 @@ import MSAL
 class Configuration: NSObject {
     // Update the below to your client ID and tenantSubdomain you received in the portal.
 
-    static let clientId = "595671e3-5863-4589-89c6-140cc451e969"
-    static let tenantSubdomain = "nativeauthasampleapp"
+    static let clientId = "c08b63a7-3415-431e-84ad-85a8a7d6cc0e"
+    static let tenantSubdomain = "spasamples"
+    static let tenantId = "1eb974cd-0dc5-40a6-9f68-94b19f5535c5"
+
+    //static let clientId = "f8e00965-c38b-4710-ba45-efae62eeb6f9"
+    //static let tenantSubdomain = "MSIDLABCIAM6"
+    //static let tenantId = "fe362aec-5d43-45d1-b730-9755e60dc3b9"
 
     /// ESTS test slice / data-center used to pin requests to a specific scale unit.
     /// Set to `nil` to route to production. The Native Auth request path sends this as the
     /// `dc` query parameter.
     ///
-//    static let testSliceDataCenter: String? = "ESTS-PUB-WEULR1-AZ2-FD130-001"
+     //  static let testSliceDataCenter: String? = "ESTS-PUB-WEULR1-AZ2-FD130-001"
+    // static let testSliceDataCenter: String? = "ESTS-PUB-SEASLR1-FD000-TEST1-100"
+
     static let testSliceDataCenter: String? = "ESTS-PUB-SEASLR1-FD000-TEST1-100"
-    
+    static let testSlice: String? = "test1"
+
+
+    /// Errors thrown while building values from the sample app configuration.
+    enum ConfigurationError: Error {
+        case invalidAuthorityUrl
+    }
+
+    /// Builds the CIAM (External ID) authority from `tenantSubdomain`, using the
+    /// `https://<tenantSubdomain>.ciamlogin.com` endpoint expected by Native Auth.
+    /// Throws `ConfigurationError.invalidAuthorityUrl` if the URL cannot be formed.
+    static func ciamAuthority() throws -> MSALCIAMAuthority {
+        guard let authorityUrl = URL(string: "https://\(tenantSubdomain).ciamlogin.com/\(tenantId)") else {
+            throw ConfigurationError.invalidAuthorityUrl
+        }
+        return try MSALCIAMAuthority(url: authorityUrl)
+    }
+
 
     /// Slice configuration applied to every `MSALNativeAuthPublicClientApplicationConfig`.
     /// Returns `nil` when no test slice is configured.
     static var sliceConfig: MSALSliceConfig? {
-        guard let dc = testSliceDataCenter else { return nil }
-        return MSALSliceConfig(slice: nil, dc: dc)
+        guard let dc = testSliceDataCenter, let slice = testSlice else { return nil }
+        return MSALSliceConfig(slice: slice, dc: dc)
     }
 }

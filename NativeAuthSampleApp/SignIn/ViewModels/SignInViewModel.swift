@@ -36,12 +36,13 @@ import AppKit
 /// Identifies which cross-platform SwiftUI sheet the auth flow is currently presenting. The flows
 /// populate the flow-agnostic continuation closures (``onSubmitCode`` / ``onResendCode`` /
 /// ``onSubmitNewPassword`` / ``onSubmitAttributes`` / ``onSelectAuthMethod`` /
-/// ``onSubmitVerificationContact``) before setting the matching sheet, so the sheets stay
+/// ``onSubmitVerificationContact`` / ``onSubmitExistingAccountPassword``) before setting the matching sheet, so the sheets stay
 /// flow-agnostic.
 enum AuthSheet: String, Identifiable
 {
     case verifyCode
     case newPassword
+    case existingAccountPassword
     case collectAttributes
     case selectAuthMethod
     case verificationContact
@@ -107,6 +108,9 @@ class SignInViewModel: NSObject, ObservableObject
     /// Inline error shown inside the new-password sheet, or `nil` when there is none.
     @Published var newPasswordError: String?
 
+    /// Inline error shown while collecting an existing account's current password.
+    @Published var existingAccountPasswordError: String?
+
     /// The attributes the server requires during sign-up, surfaced by the collect-attributes sheet.
     @Published var requiredAttributes: [MSALNativeAuthRequiredAttribute] = []
 
@@ -127,6 +131,7 @@ class SignInViewModel: NSObject, ObservableObject
     var onSubmitCode: ((String) -> Void)?
     var onResendCode: (() -> Void)?
     var onSubmitNewPassword: ((String) -> Void)?
+    var onSubmitExistingAccountPassword: ((String) -> Void)?
     var onSubmitAttributes: (([String: Any]) -> Void)?
     var onSelectAuthMethod: ((MSALAuthMethod) -> Void)?
     var onSubmitVerificationContact: ((String) -> Void)?
@@ -158,6 +163,7 @@ class SignInViewModel: NSObject, ObservableObject
             let config = try MSALNativeAuthPublicClientApplicationConfig(clientId: Configuration.clientId,
                                                                          authority: Configuration.ciamAuthority(),
                                                                          challengeTypes: [.OOB, .password])
+            // Required by the V1 flows; V2 follows server responses without capability opt-ins.
             config.capabilities = [.mfaRequired, .registrationRequired]
 
             config.sliceConfig = Configuration.sliceConfig
@@ -248,24 +254,56 @@ class SignInViewModel: NSObject, ObservableObject
         let usingPassword = !password.isEmpty
         statusMessage = "Signing in… (\(useV2Api ? "V2" : "V1")\(usingPassword ? "" : ", email OTP"))"
 
-        let parameters = MSALNativeAuthSignInParameters(username: email)
-        if usingPassword
-        {
-            parameters.password = password
-        }
-        
-//        let authenticationContextId = "c4"
-//        let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
-//
-//        parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
-//                                                     error: nil)
 
         if useV2Api
         {
+            let parameters = MSALNativeAuthSignInParametersV2(username: email)
+            if usingPassword
+            {
+                parameters.password = password
+            }
+
+    //        let authenticationContextId = "c4"
+    //        let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
+    //
+    //        parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
+    //                                                     error: nil)
+            let claimsJSON = """
+            {
+              "access_token": {
+                "acrs": {
+                  "essential": true,
+                  "values": ["urn:user:registersecurityinfo"]
+                }
+              }
+            }
+            """
+
+            var claimsError: NSError?
+            let claimsRequest = MSALClaimsRequest(
+                jsonString: claimsJSON,
+                error: &claimsError
+            )
+
+            //parameters.claimsRequest = claimsRequest
+
+            let authenticationContextId = "c4"
+            let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
+
+            parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson, error: nil)
+            //parameters.scopes = ["api://901ff99a-bb3a-4831-a419-cd5d8e9cad30/Custom.Scope"]
+            //parameters.scopes = ["api://96e12db6-dcb2-47f2-b6fc-2e3c8d27e903/Custom.Scope"]
+            //parameters.scopes = ["api://901ff99a-bb3a-4831-a419-cd5d8e9cad30/Custom.Scope"]
+            //parameters.scopes = ["User.Read"]
             application.signInV2(parameters: parameters, delegate: self)
         }
         else
         {
+            let parameters = MSALNativeAuthSignInParameters(username: email)
+            if usingPassword
+            {
+                parameters.password = password
+            }
             application.signIn(parameters: parameters, delegate: self)
         }
     }
@@ -288,7 +326,10 @@ class SignInViewModel: NSObject, ObservableObject
 
         if useV2Api
         {
-            let parameters = MSALNativeAuthResetPasswordParameters(username: email)
+            let parameters = MSALNativeAuthResetPasswordParametersV2(username: email)
+            let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}"
+
+            parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson, error: nil)
             application.resetPasswordV2(parameters: parameters, delegate: self)
         }
         else
@@ -303,6 +344,7 @@ class SignInViewModel: NSObject, ObservableObject
         onSubmitCode = nil
         onResendCode = nil
         onSubmitNewPassword = nil
+        onSubmitExistingAccountPassword = nil
         onSubmitAttributes = nil
         onSelectAuthMethod = nil
         onSubmitVerificationContact = nil
@@ -311,6 +353,7 @@ class SignInViewModel: NSObject, ObservableObject
         registrationAuthMethod = nil
         verifyCodeError = nil
         newPasswordError = nil
+        existingAccountPasswordError = nil
     }
 
     // MARK: - Sign out
@@ -712,6 +755,8 @@ extension SignInViewModel
         {
             return nil
         }
+        let parameters = MSALWebviewParameters(authPresentationViewController: viewController)
+        parameters.webviewType = .authenticationSession
         return MSALWebviewParameters(authPresentationViewController: viewController)
         #elseif os(macOS) && canImport(AppKit)
         guard let window = anchor as? NSWindow, let viewController = window.contentViewController else
@@ -777,10 +822,10 @@ extension SignInViewModel
         if useV2Api
         {
             let parameters = MSALNativeAuthSignUpParametersV2(username: email)
-            if !password.isEmpty
-            {
-                parameters.password = password
-            }
+            let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}"
+
+            parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson, error: nil)
+            //parameters.scopes = ["api://96e12db6-dcb2-47f2-b6fc-2e3c8d27e903/Custom.Scope"]
             application.signUpV2(parameters: parameters, delegate: self)
         }
         else

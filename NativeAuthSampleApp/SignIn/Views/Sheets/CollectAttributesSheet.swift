@@ -72,16 +72,21 @@ struct CollectAttributesSheet: View
 
                 Button("Submit")
                 {
-                    let attributes = values.reduce(into: [String: Any]())
-                    { result, entry in
-                        if !entry.value.isEmpty
+                    let attributes = viewModel.requiredAttributes.reduce(into: [String: Any]())
+                    { result, attribute in
+                        if let value = values[attribute.name], !value.isEmpty
                         {
-                            result[entry.key] = entry.value
+                            result[attribute.name] = value
                         }
                     }
 
+                    values.removeAll()
                     viewModel.onSubmitAttributes?(attributes)
                 }
+                .disabled(!viewModel.requiredAttributes.contains
+                { attribute in
+                    !(values[attribute.name] ?? "").isEmpty
+                })
             }
         }
         .padding()
