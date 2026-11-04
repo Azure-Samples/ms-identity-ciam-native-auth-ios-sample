@@ -33,7 +33,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     //MSALNativeAuthExistingAccountPasswordRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
     MSALNativeAuthAttributesRequiredDelegate,
-    MSALNativeAuthAttributesInvalidDelegate,
     MSALNativeAuthAuthMethodSelectionRequiredDelegate,
     MSALNativeAuthMFAVerificationRequiredDelegate,
     MSALNativeAuthStrongAuthRegistrationRequiredDelegate,
@@ -115,18 +114,6 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Additional information is required."
         requiredAttributes = state.attributes
-        onSubmitAttributes = { [weak self] attributes in
-            guard let self = self else { return }
-            state.submitAttributes(attributes, delegate: self)
-        }
-        presentCollectAttributesModal()
-    }
-
-    @MainActor
-    func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
-    {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        statusMessage = "Invalid attribute value(s): \(state.attributeNames.joined(separator: ", ")). Please correct them and try again."
         onSubmitAttributes = { [weak self] attributes in
             guard let self = self else { return }
             state.submitAttributes(attributes, delegate: self)
@@ -272,20 +259,10 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
             errorKind = "invalidCode — The one-time code is invalid or expired."
         case error.isInvalidPassword:
             errorKind = "invalidPassword — The password does not meet the server's requirements."
-        case error.isInvalidCredentials:
-            errorKind = "invalidCredentials — The username or password was not accepted."
         case error.isInvalidUsername:
             errorKind = "invalidUsername — The username failed local validation."
-        case error.isUserDoesNotHavePassword:
-            errorKind = "userDoesNotHavePassword — The account does not have a password."
-        case error.isUserAlreadyExists:
-            errorKind = "userAlreadyExists — An account already exists for this username."
         case error.isInvalidChallenge:
             errorKind = "invalidChallenge — The authentication challenge was rejected."
-        case error.isAuthMethodBlocked:
-            errorKind = "authMethodBlocked — The authentication method was blocked."
-        case error.isVerificationContactBlocked:
-            errorKind = "verificationContactBlocked — The verification contact was blocked."
         case error.isInvalidInput:
             errorKind = "invalidInput — The strong-auth registration input was invalid."
         case error.isBrowserRequired:

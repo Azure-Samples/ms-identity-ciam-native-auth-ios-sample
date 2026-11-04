@@ -260,7 +260,7 @@ class SignInViewModel: NSObject, ObservableObject
             let parameters = MSALNativeAuthSignInParametersV2(username: email)
             if usingPassword
             {
-                parameters.password = password
+                //parameters.password = password
             }
 
     //        let authenticationContextId = "c4"
@@ -823,7 +823,7 @@ extension SignInViewModel
         {
             let parameters = MSALNativeAuthSignUpParametersV2(username: email)
             let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}"
-
+            //parameters.attributes = ["givenName": "Test Given Name"]
             parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson, error: nil)
             //parameters.scopes = ["api://96e12db6-dcb2-47f2-b6fc-2e3c8d27e903/Custom.Scope"]
             application.signUpV2(parameters: parameters, delegate: self)
