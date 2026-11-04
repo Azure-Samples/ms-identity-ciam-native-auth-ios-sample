@@ -29,8 +29,8 @@ import MSAL
 
 extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthPasswordRequiredDelegate,
-    //MSALNativeAuthExistingAccountCodeRequiredDelegate,
-    //MSALNativeAuthExistingAccountPasswordRequiredDelegate,
+    MSALNativeAuthExistingAccountCodeRequiredDelegate,
+    MSALNativeAuthExistingAccountPasswordRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
     MSALNativeAuthAttributesRequiredDelegate,
     MSALNativeAuthAuthMethodSelectionRequiredDelegate,
@@ -75,7 +75,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         state.submitPassword(password, delegate: self)
     }
 
-    /*
+
     @MainActor
     func onExistingAccountCodeRequired(state: MSALNativeAuthExistingAccountCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
@@ -95,7 +95,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         }
         existingAccountPasswordError = nil
         activeSheet = .existingAccountPassword
-    }*/
+    }
 
     @MainActor
     func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
@@ -153,7 +153,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         }
         onResendCode = { [weak self] in
             guard let self = self else { return }
-           // state.resendChallenge(delegate: self)
+            state.resendChallenge(delegate: self)
         }
         presentVerifyCodeModal()
     }
