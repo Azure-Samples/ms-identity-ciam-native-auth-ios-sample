@@ -283,7 +283,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         {
             updateNewPasswordModal(errorMessage: "Invalid password")
         }
-        else if (error.isInvalidCredentials || error.isInvalidPassword), activeSheet == .existingAccountPassword
+        else if error.isInvalidPassword, activeSheet == .existingAccountPassword
         {
             existingAccountPasswordError = "Check your current password and try again."
         }
@@ -297,7 +297,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         {
             dismissAnyModal()
             isSigningIn = false
-            statusMessage = "Sign in failed: \(error.errorDescription ?? "N/A") Error Code: \(error.errorCodes)."
+            statusMessage = "Operation failed: \(error.errorDescription ?? "N/A") Error Code: \(error.errorCodes)."
         }
     }
 }
