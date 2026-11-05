@@ -36,12 +36,13 @@ import AppKit
 /// Identifies which cross-platform SwiftUI sheet the auth flow is currently presenting. The flows
 /// populate the flow-agnostic continuation closures (``onSubmitCode`` / ``onResendCode`` /
 /// ``onSubmitNewPassword`` / ``onSubmitAttributes`` / ``onSelectAuthMethod`` /
-/// ``onSubmitVerificationContact``) before setting the matching sheet, so the sheets stay
+/// ``onSubmitVerificationContact`` / ``onSubmitExistingAccountPassword``) before setting the matching sheet, so the sheets stay
 /// flow-agnostic.
 enum AuthSheet: String, Identifiable
 {
     case verifyCode
     case newPassword
+    case existingAccountPassword
     case collectAttributes
     case selectAuthMethod
     case verificationContact
@@ -107,6 +108,9 @@ class SignInViewModel: NSObject, ObservableObject
     /// Inline error shown inside the new-password sheet, or `nil` when there is none.
     @Published var newPasswordError: String?
 
+    /// Inline error shown while collecting an existing account's current password.
+    @Published var existingAccountPasswordError: String?
+
     /// The attributes the server requires during sign-up, surfaced by the collect-attributes sheet.
     @Published var requiredAttributes: [MSALNativeAuthRequiredAttribute] = []
 
@@ -127,6 +131,7 @@ class SignInViewModel: NSObject, ObservableObject
     var onSubmitCode: ((String) -> Void)?
     var onResendCode: (() -> Void)?
     var onSubmitNewPassword: ((String) -> Void)?
+    var onSubmitExistingAccountPassword: ((String) -> Void)?
     var onSubmitAttributes: (([String: Any]) -> Void)?
     var onSelectAuthMethod: ((MSALAuthMethod) -> Void)?
     var onSubmitVerificationContact: ((String) -> Void)?
@@ -181,17 +186,17 @@ class SignInViewModel: NSObject, ObservableObject
 
     var isSignInDisabled: Bool
     {
-        email.isEmpty || isSigningIn
+        isSigningIn
     }
 
     var isResetPasswordDisabled: Bool
     {
-        email.isEmpty || isSigningIn
+        isSigningIn
     }
 
     var isSignUpDisabled: Bool
     {
-        email.isEmpty || isSigningIn
+        isSigningIn
     }
 
     // MARK: - Start flows
@@ -228,7 +233,7 @@ class SignInViewModel: NSObject, ObservableObject
     /// email one-time-code (OTP) flow is used.
     func signIn()
     {
-        guard !email.isEmpty, !isSigningIn else
+        guard !isSigningIn else
         {
             return
         }
@@ -244,31 +249,25 @@ class SignInViewModel: NSObject, ObservableObject
         let usingPassword = !password.isEmpty
         statusMessage = "Signing in… (\(useV2Api ? "V2" : "V1")\(usingPassword ? "" : ", email OTP"))"
 
-        let parameters = MSALNativeAuthSignInParameters(username: email)
-        if usingPassword
-        {
-            parameters.password = password
-        }
-        
-//        let authenticationContextId = "c4"
-//        let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
-//
-//        parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
-//                                                     error: nil)
-
         if useV2Api
         {
+            let parameters = MSALNativeAuthSignInParametersV2(username: email)
             application.signInV2(parameters: parameters, delegate: self)
         }
         else
         {
+            let parameters = MSALNativeAuthSignInParameters(username: email)
+            if usingPassword
+            {
+                parameters.password = password
+            }
             application.signIn(parameters: parameters, delegate: self)
         }
     }
 
     func resetPassword()
     {
-        guard !email.isEmpty, !isSigningIn else
+        guard !isSigningIn else
         {
             return
         }
@@ -284,7 +283,7 @@ class SignInViewModel: NSObject, ObservableObject
 
         if useV2Api
         {
-            let parameters = MSALNativeAuthResetPasswordParameters(username: email)
+            let parameters = MSALNativeAuthResetPasswordParametersV2(username: email)
             application.resetPasswordV2(parameters: parameters, delegate: self)
         }
         else
@@ -299,6 +298,7 @@ class SignInViewModel: NSObject, ObservableObject
         onSubmitCode = nil
         onResendCode = nil
         onSubmitNewPassword = nil
+        onSubmitExistingAccountPassword = nil
         onSubmitAttributes = nil
         onSelectAuthMethod = nil
         onSubmitVerificationContact = nil
@@ -307,6 +307,7 @@ class SignInViewModel: NSObject, ObservableObject
         registrationAuthMethod = nil
         verifyCodeError = nil
         newPasswordError = nil
+        existingAccountPasswordError = nil
     }
 
     // MARK: - Sign out
@@ -735,7 +736,7 @@ extension SignInViewModel
 {
     func signUp()
     {
-        guard !email.isEmpty, !isSigningIn else
+        guard !isSigningIn else
         {
             return
         }
@@ -753,10 +754,6 @@ extension SignInViewModel
         if useV2Api
         {
             let parameters = MSALNativeAuthSignUpParametersV2(username: email)
-            if !password.isEmpty
-            {
-                parameters.password = password
-            }
             application.signUpV2(parameters: parameters, delegate: self)
         }
         else

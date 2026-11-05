@@ -29,9 +29,10 @@ import MSAL
 
 extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthPasswordRequiredDelegate,
+    MSALNativeAuthExistingAccountCodeRequiredDelegate,
+    MSALNativeAuthExistingAccountPasswordRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
     MSALNativeAuthAttributesRequiredDelegate,
-    MSALNativeAuthAttributesInvalidDelegate,
     MSALNativeAuthAuthMethodSelectionRequiredDelegate,
     MSALNativeAuthMFAVerificationRequiredDelegate,
     MSALNativeAuthStrongAuthRegistrationRequiredDelegate,
@@ -70,8 +71,43 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        statusMessage = "Submitting password…"
-        state.submitPassword(password, delegate: self)
+        if !password.isEmpty
+        {
+            statusMessage = "Submitting password…"
+            state.submitPassword(password, delegate: self)
+            return
+        }
+
+        statusMessage = "Enter your password to continue."
+        onSubmitExistingAccountPassword = { [weak self] password in
+            guard let self = self else { return }
+            self.existingAccountPasswordError = nil
+            state.submitPassword(password, delegate: self)
+        }
+        existingAccountPasswordError = nil
+        activeSheet = .existingAccountPassword
+    }
+
+
+    @MainActor
+    func onExistingAccountCodeRequired(state: MSALNativeAuthExistingAccountCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
+    {
+        onCodeRequired(state: state, scenario: scenario)
+        statusMessage = "An account already exists. Enter the code sent to \(state.sentTo) (\(state.codeLength) digits) to sign in."
+    }
+
+    @MainActor
+    func onExistingAccountPasswordRequired(state: MSALNativeAuthExistingAccountPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
+    {
+        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
+        statusMessage = "An account already exists. Enter its current password to sign in."
+        onSubmitExistingAccountPassword = { [weak self] password in
+            guard let self = self else { return }
+            self.existingAccountPasswordError = nil
+            state.submitPassword(password, delegate: self)
+        }
+        existingAccountPasswordError = nil
+        activeSheet = .existingAccountPassword
     }
 
     @MainActor
@@ -99,40 +135,24 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     }
 
     @MainActor
-    func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
-    {
-        print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        statusMessage = "Invalid attribute value(s): \(state.attributeNames.joined(separator: ", ")). Please correct them and try again."
-        onSubmitAttributes = { [weak self] attributes in
-            guard let self = self else { return }
-            state.submitAttributes(attributes, delegate: self)
-        }
-        presentCollectAttributesModal()
-    }
-
-    @MainActor
     func onAuthMethodSelectionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        guard let method = state.authMethods.first else
+        guard state.authMethods.count > 0 else
         {
             isSigningIn = false
             statusMessage = "No auth methods available."
             return
         }
-        if state.authMethods.count > 1
-        {
-            statusMessage = "Select an authentication method."
-            authMethods = state.authMethods
-            onSelectAuthMethod = { [weak self] method in
-                guard let self = self else { return }
-                state.selectAuthMethod(method, delegate: self)
-            }
-            presentSelectAuthMethodModal()
-            return
+
+        statusMessage = "Select an authentication method."
+        authMethods = state.authMethods
+        onSelectAuthMethod = { [weak self] method in
+            guard let self = self else { return }
+            state.selectAuthMethod(method, delegate: self)
         }
-        statusMessage = "Selecting authentication method…"
-        state.selectAuthMethod(method, delegate: self)
+        presentSelectAuthMethodModal()
+        return
     }
 
     @MainActor
@@ -144,6 +164,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
             guard let self = self else { return }
             state.submitChallenge(code, delegate: self)
         }
+        // The SDK does not expose a resend operation for MFA verification.
         onResendCode = nil
         presentVerifyCodeModal()
     }
@@ -152,25 +173,41 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
-        guard let method = state.authMethods.first else
+        guard state.authMethods.count > 0 else
         {
+            dismissAnyModal()
             isSigningIn = false
-            statusMessage = "No auth methods available."
+            statusMessage = "No supported authentication methods are available for registration."
             return
         }
-        if state.authMethods.count > 1
-        {
-            statusMessage = "Select an authentication method."
-            authMethods = state.authMethods
-            onSelectAuthMethod = { [weak self] method in
-                guard let self = self else { return }
-                state.selectAuthMethod(method, delegate: self)
-            }
-            presentSelectAuthMethodModal()
-            return
+        onSubmitCode = nil
+        onResendCode = nil
+        authMethods = state.authMethods
+        statusMessage = "Select an authentication method to register."
+        onSelectAuthMethod = { [weak self] method in
+            guard let self = self else { return }
+            self.collectV2VerificationContact(for: method, state: state)
         }
-        statusMessage = "Selecting authentication method…"
-        state.selectAuthMethod(method, verificationContact: nil, delegate: self)
+        presentSelectAuthMethodModal()
+    }
+
+    @MainActor
+    private func collectV2VerificationContact(
+        for method: MSALAuthMethod,
+        state: MSALNativeAuthStrongAuthRegistrationRequiredState
+    )
+    {
+        registrationAuthMethod = method
+        statusMessage = method.channelTargetType.isSMSType
+            ? "Enter the phone number to register, including the country calling code."
+            : "Enter the email address to register."
+        onSubmitVerificationContact = { [weak self] verificationContact in
+            guard let self = self else { return }
+            self.dismissAnyModal()
+            self.statusMessage = "Registering authentication method…"
+            state.selectAuthMethod(method, verificationContact: verificationContact, delegate: self)
+        }
+        presentVerificationContactModal()
     }
 
     @MainActor
@@ -182,6 +219,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
             guard let self = self else { return }
             state.submitChallenge(code, delegate: self)
         }
+        // The SDK does not expose a resend operation for strong-auth verification.
         onResendCode = nil
         presentVerifyCodeModal()
     }
@@ -192,8 +230,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         dismissAnyModal()
         statusMessage = "Signed up successfully. Signing in…"
-        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
-        state.signIn(parameters: parameters, delegate: self)
+        state.signIn(delegate: self)
     }
 
     @MainActor
@@ -202,8 +239,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         dismissAnyModal()
         statusMessage = "Password reset. Signing in…"
-        let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
-        state.signIn(parameters: parameters, delegate: self)
+        state.signIn(delegate: self)
     }
 
     @MainActor
@@ -221,16 +257,44 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario)
     {
-        print("SignInViewModel[\(label(scenario))]: flow error — \(error.errorDescription ?? "N/A")")
+        let errorKind: String
+        switch true
+        {
+        case error.isNotImplemented:
+            errorKind = "notImplemented — The required delegate is not implemented."
+        case error.isUserNotFound:
+            errorKind = "userNotFound — The username was not found."
+        case error.isInvalidCode:
+            errorKind = "invalidCode — The one-time code is invalid or expired."
+        case error.isInvalidPassword:
+            errorKind = "invalidPassword — The password does not meet the server's requirements."
+        case error.isInvalidUsername:
+            errorKind = "invalidUsername — The username failed local validation."
+        case error.isInvalidChallenge:
+            errorKind = "invalidChallenge — The authentication challenge was rejected."
+        case error.isInvalidInput:
+            errorKind = "invalidInput — The strong-auth registration input was invalid."
+        case error.isBrowserRequired:
+            errorKind = "browserRequired — The flow must continue in a browser."
+        case error.isGeneralError:
+            errorKind = "generalError — A general or unexpected error occurred."
+        default:
+            errorKind = "unknown — No known MSALNativeAuthFlowError classification matched."
+        }
+        print("SignInViewModel[\(label(scenario))]: flow error — \(errorKind) Description: \(error.errorDescription ?? "N/A") Error Codes: \(error.errorCodes).")
         // The app decides recoverability from the error. On a recoverable error the modal's
         // submit/resend callbacks still capture the state, so re-submitting advances the flow.
-        if error.isInvalidCode, isVerifyCodeModalPresented
+        if (error.isInvalidCode || error.isInvalidChallenge), isVerifyCodeModalPresented
         {
             updateVerifyCodeModal(errorMessage: "Check the code and try again")
         }
         else if error.isInvalidPassword, isNewPasswordModalPresented
         {
             updateNewPasswordModal(errorMessage: "Invalid password")
+        }
+        else if error.isInvalidPassword, activeSheet == .existingAccountPassword
+        {
+            existingAccountPasswordError = "Check your current password and try again."
         }
         else if error.isBrowserRequired
         {
@@ -242,7 +306,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         {
             dismissAnyModal()
             isSigningIn = false
-            statusMessage = "Sign in failed: \(error.errorDescription ?? "N/A") Error Code: \(error.errorCodes)."
+            statusMessage = "Operation failed: \(error.errorDescription ?? "N/A") Error Code: \(error.errorCodes)."
         }
     }
 }

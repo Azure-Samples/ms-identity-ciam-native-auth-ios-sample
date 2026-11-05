@@ -75,7 +75,6 @@ struct VerifyCodeSheet: View
                 {
                     viewModel.onSubmitCode?(code)
                 }
-                .disabled(code.isEmpty)
             }
         }
         .padding()

@@ -18,7 +18,7 @@
 		CB4044A9BEACF3494BB12E65 /* CollectAttributesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */; };
 		CE6441C6B6DF4566A12AA6F7 /* SelectAuthMethodSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */; };
 		F2134E5C9F3FD49314DE35CB /* NativeAuthSampleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA1498CA6178151ABE704E3 /* NativeAuthSampleAppApp.swift */; };
-		F5974EC3BFBC0077F850909C /* NewPasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */; };
+		F5974EC3BFBC0077F850909C /* PasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED154C1C8FE89752B0CC6DE3 /* PasswordSheet.swift */; };
 		FE331E01CE11A4B00C4042E1 /* SignInViewModel+V1.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */; };
 		FE331E03CE11A4B00C4042E3 /* SignInViewModel+V2.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */; };
 /* End PBXBuildFile section */
@@ -36,7 +36,7 @@
 		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
 		A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerificationContactSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/VerificationContactSheet.swift; sourceTree = SOURCE_ROOT; };
 		E8F1422AA694CF5B65FD1336 /* SignedInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SignedInView.swift; path = NativeAuthSampleApp/SignIn/Views/SignedInView.swift; sourceTree = SOURCE_ROOT; };
-		ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NewPasswordSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/NewPasswordSheet.swift; sourceTree = SOURCE_ROOT; };
+		ED154C1C8FE89752B0CC6DE3 /* PasswordSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PasswordSheet.swift; path = NativeAuthSampleApp/SignIn/Views/Sheets/PasswordSheet.swift; sourceTree = SOURCE_ROOT; };
 		FE331E00CE11A4B00C4042E0 /* SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewModel.swift; sourceTree = "<group>"; };
 		FE331E02CE11A4B00C4042E2 /* SignInViewModel+V1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModel+V1.swift"; sourceTree = "<group>"; };
 		FE331E04CE11A4B00C4042E4 /* SignInViewModel+V2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModel+V2.swift"; sourceTree = "<group>"; };
@@ -124,7 +124,7 @@
 			isa = PBXGroup;
 			children = (
 				64624F33962651BEA10814E8 /* VerifyCodeSheet.swift */,
-				ED154C1C8FE89752B0CC6DE3 /* NewPasswordSheet.swift */,
+				ED154C1C8FE89752B0CC6DE3 /* PasswordSheet.swift */,
 				3DA6427EAF35F7901EA7B481 /* CollectAttributesSheet.swift */,
 				747B41E7965CA916B9344C2A /* SelectAuthMethodSheet.swift */,
 				A4C9E1032D7F4B6A8E5C9012 /* VerificationContactSheet.swift */,
@@ -227,7 +227,7 @@
 				F2134E5C9F3FD49314DE35CB /* NativeAuthSampleAppApp.swift in Sources */,
 				2D1249EA8F479B4559696DDA /* SignedInView.swift in Sources */,
 				09F844D49F0383B4422ECB96 /* VerifyCodeSheet.swift in Sources */,
-				F5974EC3BFBC0077F850909C /* NewPasswordSheet.swift in Sources */,
+				F5974EC3BFBC0077F850909C /* PasswordSheet.swift in Sources */,
 				CB4044A9BEACF3494BB12E65 /* CollectAttributesSheet.swift in Sources */,
 				CE6441C6B6DF4566A12AA6F7 /* SelectAuthMethodSheet.swift in Sources */,
 				B7D2F4A6C8E1093B5D7F2468 /* VerificationContactSheet.swift in Sources */,

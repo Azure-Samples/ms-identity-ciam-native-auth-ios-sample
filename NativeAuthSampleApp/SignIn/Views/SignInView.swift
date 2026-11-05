@@ -75,7 +75,9 @@ struct SignInView: View
             case .verifyCode:
                 VerifyCodeSheet(viewModel: viewModel)
             case .newPassword:
-                NewPasswordSheet(viewModel: viewModel)
+                PasswordSheet(viewModel: viewModel, isExistingAccount: false)
+            case .existingAccountPassword:
+                PasswordSheet(viewModel: viewModel, isExistingAccount: true)
             case .collectAttributes:
                 CollectAttributesSheet(viewModel: viewModel)
             case .selectAuthMethod:

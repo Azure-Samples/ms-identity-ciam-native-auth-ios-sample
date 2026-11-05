@@ -53,6 +53,13 @@ struct VerificationContactSheet: View
                 .font(.footnote)
                 .foregroundColor(.secondary)
 
+            if isSMSMethod
+            {
+                Text("Include the country calling code, for example +15555550100.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+
             contactField
 
             HStack
@@ -66,9 +73,8 @@ struct VerificationContactSheet: View
 
                 Button("Continue")
                 {
-                    viewModel.onSubmitVerificationContact?(verificationContact.trimmingCharacters(in: .whitespacesAndNewlines))
+                    viewModel.onSubmitVerificationContact?(verificationContact)
                 }
-                .disabled(verificationContact.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .padding()

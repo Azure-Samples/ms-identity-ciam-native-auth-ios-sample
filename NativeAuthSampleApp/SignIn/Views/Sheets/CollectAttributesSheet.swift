@@ -72,14 +72,12 @@ struct CollectAttributesSheet: View
 
                 Button("Submit")
                 {
-                    let attributes = values.reduce(into: [String: Any]())
-                    { result, entry in
-                        if !entry.value.isEmpty
-                        {
-                            result[entry.key] = entry.value
-                        }
+                    let attributes = viewModel.requiredAttributes.reduce(into: [String: Any]())
+                    { result, attribute in
+                        result[attribute.name] = values[attribute.name] ?? ""
                     }
 
+                    values.removeAll()
                     viewModel.onSubmitAttributes?(attributes)
                 }
             }
