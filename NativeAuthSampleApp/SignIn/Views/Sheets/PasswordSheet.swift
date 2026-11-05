@@ -25,16 +25,22 @@
 import SwiftUI
 import MSAL
 
-struct NewPasswordSheet: View
+struct PasswordSheet: View
 {
     @ObservedObject var viewModel: SignInViewModel
-    @State private var newPassword = ""
+    let isExistingAccount: Bool
+    @State private var password = ""
+
+    private var errorMessage: String?
+    {
+        isExistingAccount ? viewModel.existingAccountPasswordError : viewModel.newPasswordError
+    }
 
     var body: some View
     {
         VStack(alignment: .leading, spacing: 16)
         {
-            Text("Set a new password")
+            Text(isExistingAccount ? "Sign in to your existing account" : "Set a new password")
                 .font(.title2)
                 .fontWeight(.semibold)
 
@@ -45,12 +51,13 @@ struct NewPasswordSheet: View
                     .foregroundColor(.secondary)
             }
 
-            SecureField("New password", text: $newPassword)
+            SecureField(isExistingAccount ? "Current password" : "New password", text: $password)
                 .textFieldStyle(.roundedBorder)
+                .textContentType(isExistingAccount ? .password : .newPassword)
 
-            if let newPasswordError = viewModel.newPasswordError
+            if let errorMessage = errorMessage
             {
-                Text(newPasswordError)
+                Text(errorMessage)
                     .font(.footnote)
                     .foregroundColor(.red)
             }
@@ -66,9 +73,16 @@ struct NewPasswordSheet: View
 
                 Button("Submit")
                 {
-                    viewModel.onSubmitNewPassword?(newPassword)
+                    if isExistingAccount
+                    {
+                        viewModel.onSubmitExistingAccountPassword?(password)
+                    }
+                    else
+                    {
+                        viewModel.onSubmitNewPassword?(password)
+                    }
                 }
-                .disabled(newPassword.isEmpty)
+                .disabled(password.isEmpty)
             }
         }
         .padding()
