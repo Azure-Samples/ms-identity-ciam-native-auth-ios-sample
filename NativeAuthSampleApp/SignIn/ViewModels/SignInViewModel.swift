@@ -86,6 +86,8 @@ class SignInViewModel: NSObject, ObservableObject
     @Published var password: String = ""
     @Published var statusMessage: String?
     @Published var isSigningIn: Bool = false
+    /// Tracks an in-flight request, not the time spent waiting for user input in a flow.
+    @Published private(set) var isRequestInProgress: Bool = false
 
     /// Selects which Native Auth API surface the flows use. `true` uses the server-driven **V2**
     /// unified-delegate API; `false` uses the granular **V1** API.
@@ -186,17 +188,29 @@ class SignInViewModel: NSObject, ObservableObject
 
     var isSignInDisabled: Bool
     {
-        isSigningIn
+        isSigningIn || isRequestInProgress
     }
 
     var isResetPasswordDisabled: Bool
     {
-        isSigningIn
+        isSigningIn || isRequestInProgress
     }
 
     var isSignUpDisabled: Bool
     {
-        isSigningIn
+        isSigningIn || isRequestInProgress
+    }
+
+    func performRequest(_ request: () -> Void)
+    {
+        guard !isRequestInProgress else { return }
+        isRequestInProgress = true
+        request()
+    }
+
+    func completeRequest()
+    {
+        isRequestInProgress = false
     }
 
     // MARK: - Start flows
@@ -226,14 +240,17 @@ class SignInViewModel: NSObject, ObservableObject
 
         accountResult = account
         statusMessage = "Restoring your session…"
-        account.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: self)
+        performRequest
+        {
+            account.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: self)
+        }
     }
 
     /// Starts a sign-in. With a password the password flow is used; with an **empty** password the
     /// email one-time-code (OTP) flow is used.
     func signIn()
     {
-        guard !isSigningIn else
+        guard !isSigningIn, !isRequestInProgress else
         {
             return
         }
@@ -252,7 +269,10 @@ class SignInViewModel: NSObject, ObservableObject
         if useV2Api
         {
             let parameters = MSALNativeAuthSignInParametersV2(username: email)
-            application.signInV2(parameters: parameters, delegate: self)
+            performRequest
+            {
+                application.signInV2(parameters: parameters, delegate: self)
+            }
         }
         else
         {
@@ -261,13 +281,16 @@ class SignInViewModel: NSObject, ObservableObject
             {
                 parameters.password = password
             }
-            application.signIn(parameters: parameters, delegate: self)
+            performRequest
+            {
+                application.signIn(parameters: parameters, delegate: self)
+            }
         }
     }
 
     func resetPassword()
     {
-        guard !isSigningIn else
+        guard !isSigningIn, !isRequestInProgress else
         {
             return
         }
@@ -284,12 +307,18 @@ class SignInViewModel: NSObject, ObservableObject
         if useV2Api
         {
             let parameters = MSALNativeAuthResetPasswordParametersV2(username: email)
-            application.resetPasswordV2(parameters: parameters, delegate: self)
+            performRequest
+            {
+                application.resetPasswordV2(parameters: parameters, delegate: self)
+            }
         }
         else
         {
             let parameters = MSALNativeAuthResetPasswordParameters(username: email)
-            application.resetPassword(parameters: parameters, delegate: self)
+            performRequest
+            {
+                application.resetPassword(parameters: parameters, delegate: self)
+            }
         }
     }
 
@@ -315,7 +344,12 @@ class SignInViewModel: NSObject, ObservableObject
     /// Signs the current user out and restores the sign-in UI.
     func signOut()
     {
-        accountResult?.signOut()
+        guard !isRequestInProgress else { return }
+        performRequest
+        {
+            accountResult?.signOut()
+            completeRequest()
+        }
         accountResult = nil
         resetFlowState()
         password = ""
@@ -328,11 +362,12 @@ class SignInViewModel: NSObject, ObservableObject
 
     // MARK: - Cancel the current flow
 
-    /// Dismisses any presented sheet and abandons the in-progress flow. Called by the sheets' cancel
-    /// affordances.
+    /// Dismisses any presented sheet and abandons the in-progress flow, including interactive dismissal.
     func cancelFlow()
     {
+        guard !isRequestInProgress else { return }
         activeSheet = nil
+        resetFlowState()
         isSigningIn = false
         statusMessage = "Action cancelled."
     }
@@ -345,6 +380,7 @@ extension SignInViewModel: CredentialsDelegate
     @MainActor
     func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult)
     {
+        completeRequest()
         // A token was acquired silently — the user is already signed in.
         isRestoringSession = false
         isSignedIn = true
@@ -354,6 +390,7 @@ extension SignInViewModel: CredentialsDelegate
     @MainActor
     func onAccessTokenRetrieveError(error: RetrieveAccessTokenError)
     {
+        completeRequest()
         // Couldn't get a token silently (e.g. the user was signed out or interaction is required) —
         // show the sign-in UI.
         accountResult = nil
@@ -394,6 +431,7 @@ extension SignInViewModel
     /// beforehand.
     func presentNewPasswordModal()
     {
+        statusMessage = nil
         newPasswordError = nil
         activeSheet = .newPassword
     }
@@ -492,6 +530,7 @@ extension SignInViewModel
     @MainActor
     func callProtectedAPI()
     {
+        guard !isRequestInProgress else { return }
         guard let accountResult = accountResult else
         {
             protectedAPIResult = "No signed-in account is available."
@@ -513,18 +552,23 @@ extension SignInViewModel
         let key = ObjectIdentifier(self)
         let delegate = ProtectedAPITokenDelegate(
             onCompleted: { [weak self] tokenResult in
-                guard let self = self else { return }
                 protectedAPITokenDelegates[key] = nil
+                guard let self = self else { return }
+                self.completeRequest()
                 self.accessProtectedAPI(apiUrl: apiUrl, accessToken: tokenResult.accessToken)
             },
             onError: { [weak self] error in
                 protectedAPITokenDelegates[key] = nil
+                self?.completeRequest()
                 self?.statusMessage = "Unable to retrieve an access token."
                 self?.protectedAPIResult = "Error retrieving access token: \(error.errorDescription ?? "unknown error")"
             }
         )
         protectedAPITokenDelegates[key] = delegate
-        accountResult.getAccessToken(parameters: parameters, delegate: delegate)
+        performRequest
+        {
+            accountResult.getAccessToken(parameters: parameters, delegate: delegate)
+        }
     }
 
     @MainActor
@@ -540,54 +584,54 @@ extension SignInViewModel
         request.httpMethod = "GET"
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error = error
-            {
+        performRequest
+        {
+            URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
                 Task { @MainActor in
-                    self?.statusMessage = "Protected API call failed."
-                    self?.protectedAPIResult = error.localizedDescription
+                    guard let self = self else { return }
+                    defer { self.completeRequest() }
+
+                    if let error = error
+                    {
+                        self.statusMessage = "Protected API call failed."
+                        self.protectedAPIResult = error.localizedDescription
+                        return
+                    }
+
+                    guard let httpResponse = response as? HTTPURLResponse else
+                    {
+                        self.statusMessage = "Protected API call failed."
+                        self.protectedAPIResult = "No HTTP response was returned."
+                        return
+                    }
+
+                    guard (200...299).contains(httpResponse.statusCode) else
+                    {
+                        self.statusMessage = "Protected API call failed."
+                        self.protectedAPIResult = "HTTP response code: \(httpResponse.statusCode)"
+                        return
+                    }
+
+                    let body: String
+                    if let data = data, let text = String(data: data, encoding: .utf8)
+                    {
+                        body = text
+                    }
+                    else
+                    {
+                        body = "<empty response>"
+                    }
+
+                    self.statusMessage = "Accessed the protected API successfully."
+                    self.protectedAPIResult = """
+                    Accessed API successfully using an access token.
+                    HTTP response code: \(httpResponse.statusCode)
+                    HTTP response body:
+                    \(body)
+                    """
                 }
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse else
-            {
-                Task { @MainActor in
-                    self?.statusMessage = "Protected API call failed."
-                    self?.protectedAPIResult = "No HTTP response was returned."
-                }
-                return
-            }
-
-            guard (200...299).contains(httpResponse.statusCode) else
-            {
-                Task { @MainActor in
-                    self?.statusMessage = "Protected API call failed."
-                    self?.protectedAPIResult = "HTTP response code: \(httpResponse.statusCode)"
-                }
-                return
-            }
-
-            let body: String
-            if let data = data, let text = String(data: data, encoding: .utf8)
-            {
-                body = text
-            }
-            else
-            {
-                body = "<empty response>"
-            }
-
-            Task { @MainActor in
-                self?.statusMessage = "Accessed the protected API successfully."
-                self?.protectedAPIResult = """
-                Accessed API successfully using an access token.
-                HTTP response code: \(httpResponse.statusCode)
-                HTTP response body:
-                \(body)
-                """
-            }
-        }.resume()
+            }.resume()
+        }
     }
 }
 
@@ -609,7 +653,7 @@ extension SignInViewModel
 
     private func startBrowserSignIn(domainHint: String?, displayName: String)
     {
-        guard !isSigningIn else
+        guard !isSigningIn, !isRequestInProgress else
         {
             return
         }
@@ -641,33 +685,37 @@ extension SignInViewModel
         parameters.promptType = .login
         parameters.domainHint = domainHint
 
-        application.acquireToken(with: parameters) { [weak self] result, error in
-            DispatchQueue.main.async
-            {
-                guard let self = self else { return }
-
-                if let error = error
+        performRequest
+        {
+            application.acquireToken(with: parameters) { [weak self] result, error in
+                DispatchQueue.main.async
                 {
+                    guard let self = self else { return }
+                    self.completeRequest()
+
+                    if let error = error
+                    {
+                        self.isSigningIn = false
+                        self.statusMessage = "Error acquiring token: \(error.localizedDescription)"
+                        return
+                    }
+
+                    guard result?.account != nil else
+                    {
+                        self.isSigningIn = false
+                        self.statusMessage = "Could not acquire token: no account returned."
+                        return
+                    }
+
+                    if let account = self.application?.getNativeAuthUserAccount()
+                    {
+                        self.accountResult = account
+                    }
+
                     self.isSigningIn = false
-                    self.statusMessage = "Error acquiring token: \(error.localizedDescription)"
-                    return
+                    self.isSignedIn = true
+                    self.statusMessage = "Signed in successfully with \(displayName)."
                 }
-
-                guard result?.account != nil else
-                {
-                    self.isSigningIn = false
-                    self.statusMessage = "Could not acquire token: no account returned."
-                    return
-                }
-
-                if let account = self.application?.getNativeAuthUserAccount()
-                {
-                    self.accountResult = account
-                }
-
-                self.isSigningIn = false
-                self.isSignedIn = true
-                self.statusMessage = "Signed in successfully with \(displayName)."
             }
         }
     }
@@ -736,7 +784,7 @@ extension SignInViewModel
 {
     func signUp()
     {
-        guard !isSigningIn else
+        guard !isSigningIn, !isRequestInProgress else
         {
             return
         }
@@ -754,7 +802,10 @@ extension SignInViewModel
         if useV2Api
         {
             let parameters = MSALNativeAuthSignUpParametersV2(username: email)
-            application.signUpV2(parameters: parameters, delegate: self)
+            performRequest
+            {
+                application.signUpV2(parameters: parameters, delegate: self)
+            }
         }
         else
         {
@@ -763,7 +814,10 @@ extension SignInViewModel
             {
                 parameters.password = password
             }
-            application.signUp(parameters: parameters, delegate: self)
+            performRequest
+            {
+                application.signUp(parameters: parameters, delegate: self)
+            }
         }
     }
 }

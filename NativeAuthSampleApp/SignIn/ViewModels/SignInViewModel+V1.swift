@@ -34,11 +34,17 @@ extension SignInViewModel
     {
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            state.submitCode(code: code, delegate: self)
+            self.performRequest
+            {
+                state.submitCode(code: code, delegate: self)
+            }
         }
         onResendCode = { [weak self] in
             guard let self = self else { return }
-            state.resendCode(delegate: self)
+            self.performRequest
+            {
+                state.resendCode(delegate: self)
+            }
         }
     }
 
@@ -47,11 +53,17 @@ extension SignInViewModel
     {
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            state.submitCode(code: code, delegate: self)
+            self.performRequest
+            {
+                state.submitCode(code: code, delegate: self)
+            }
         }
         onResendCode = { [weak self] in
             guard let self = self else { return }
-            state.resendCode(delegate: self)
+            self.performRequest
+            {
+                state.resendCode(delegate: self)
+            }
         }
     }
 
@@ -60,7 +72,10 @@ extension SignInViewModel
     {
         onSubmitNewPassword = { [weak self] password in
             guard let self = self else { return }
-            state.submitPassword(password: password, delegate: self)
+            self.performRequest
+            {
+                state.submitPassword(password: password, delegate: self)
+            }
         }
     }
 
@@ -89,6 +104,7 @@ extension SignInViewModel: SignInStartDelegate
 {
     func onSignInStartError(error: SignInStartError)
     {
+        completeRequest()
         if error.isUserNotFound || error.isInvalidCredentials || error.isInvalidUsername
         {
             handleV1Error("Invalid username or password.")
@@ -106,6 +122,7 @@ extension SignInViewModel: SignInStartDelegate
         codeLength: Int
     )
     {
+        completeRequest()
         statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
         wireV1SignInCodeCallbacks(newState)
         presentVerifyCodeModal()
@@ -113,6 +130,7 @@ extension SignInViewModel: SignInStartDelegate
 
     func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
     {
+        completeRequest()
         handleV1SignInCompleted(result: result)
     }
 }
@@ -121,6 +139,7 @@ extension SignInViewModel: SignInVerifyCodeDelegate
 {
     func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
     {
+        completeRequest()
         if error.isInvalidCode, let newState = newState
         {
             wireV1SignInCodeCallbacks(newState)
@@ -137,6 +156,7 @@ extension SignInViewModel: SignInResendCodeDelegate
 {
     func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?)
     {
+        completeRequest()
         handleV1Error("Unable to resend the code.")
     }
 
@@ -147,6 +167,7 @@ extension SignInViewModel: SignInResendCodeDelegate
         codeLength: Int
     )
     {
+        completeRequest()
         wireV1SignInCodeCallbacks(newState)
         updateVerifyCodeModal(errorMessage: nil)
     }
@@ -166,6 +187,7 @@ extension SignInViewModel
     @MainActor @objc
     func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState)
     {
+        completeRequest()
         guard let firstMethod = authMethods.first else
         {
             handleV1Error("MFA is required but no authentication methods are available.")
@@ -179,14 +201,20 @@ extension SignInViewModel
             onSelectAuthMethod = { [weak self] method in
                 guard let self = self else { return }
                 self.dismissAnyModal()
-                newState.requestChallenge(authMethod: method, delegate: self)
+                self.performRequest
+                {
+                    newState.requestChallenge(authMethod: method, delegate: self)
+                }
             }
             presentSelectAuthMethodModal()
             return
         }
 
         statusMessage = "Sending authentication challenge…"
-        newState.requestChallenge(authMethod: firstMethod, delegate: self)
+        performRequest
+        {
+            newState.requestChallenge(authMethod: firstMethod, delegate: self)
+        }
     }
 }
 
@@ -194,17 +222,22 @@ extension SignInViewModel: MFARequestChallengeDelegate
 {
     func onMFARequestChallengeError(error: MFARequestChallengeError, newState: MFARequiredState?)
     {
+        completeRequest()
         handleV1Error("MFA challenge failed: \(error.errorDescription ?? "unknown error").")
     }
 
     func onMFARequestChallengeSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
     {
+        completeRequest()
         statusMessage = "Select an authentication method."
         self.authMethods = authMethods
         onSelectAuthMethod = { [weak self] method in
             guard let self = self else { return }
             self.dismissAnyModal()
-            newState.requestChallenge(authMethod: method, delegate: self)
+            self.performRequest
+            {
+                newState.requestChallenge(authMethod: method, delegate: self)
+            }
         }
         presentSelectAuthMethodModal()
     }
@@ -216,10 +249,14 @@ extension SignInViewModel: MFARequestChallengeDelegate
         codeLength: Int
     )
     {
+        completeRequest()
         statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            newState.submitChallenge(challenge: code, delegate: self)
+            self.performRequest
+            {
+                newState.submitChallenge(challenge: code, delegate: self)
+            }
         }
         onResendCode = nil
         presentVerifyCodeModal()
@@ -230,11 +267,15 @@ extension SignInViewModel: MFASubmitChallengeDelegate
 {
     func onMFASubmitChallengeError(error: MFASubmitChallengeError, newState: MFARequiredState?)
     {
+        completeRequest()
         if error.isInvalidChallenge, let newState = newState
         {
             onSubmitCode = { [weak self] code in
                 guard let self = self else { return }
-                newState.submitChallenge(challenge: code, delegate: self)
+                self.performRequest
+                {
+                    newState.submitChallenge(challenge: code, delegate: self)
+                }
             }
             updateVerifyCodeModal(errorMessage: "Check the code and try again")
         }
@@ -257,6 +298,7 @@ extension SignInViewModel
     @MainActor @objc
     func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
     {
+        completeRequest()
         let supportedMethods = authMethods.filter
         {
             $0.channelTargetType.isEmailType || $0.channelTargetType.isSMSType
@@ -284,7 +326,10 @@ extension SignInViewModel
                     authMethod: method,
                     verificationContact: verificationContact
                 )
-                newState.challengeAuthMethod(parameters: parameters, delegate: self)
+                self.performRequest
+                {
+                    newState.challengeAuthMethod(parameters: parameters, delegate: self)
+                }
             }
             self.presentVerificationContactModal()
         }
@@ -296,16 +341,21 @@ extension SignInViewModel: RegisterStrongAuthChallengeDelegate
 {
     func onRegisterStrongAuthChallengeError(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthState?)
     {
+        completeRequest()
         handleV1Error("Strong authentication registration failed: \(error.errorDescription ?? "unknown error").")
     }
 
     func onRegisterStrongAuthVerificationRequired(result: MSALNativeAuthRegisterStrongAuthVerificationRequiredResult)
     {
+        completeRequest()
         statusMessage = "Code sent to \(result.sentTo) (\(result.codeLength) digits)."
         let verificationState = result.newState
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            verificationState.submitChallenge(challenge: code, delegate: self)
+            self.performRequest
+            {
+                verificationState.submitChallenge(challenge: code, delegate: self)
+            }
         }
         onResendCode = nil
         presentVerifyCodeModal()
@@ -322,11 +372,15 @@ extension SignInViewModel: RegisterStrongAuthSubmitChallengeDelegate
         newState: RegisterStrongAuthVerificationRequiredState?
     )
     {
+        completeRequest()
         if error.isInvalidChallenge, let newState = newState
         {
             onSubmitCode = { [weak self] code in
                 guard let self = self else { return }
-                newState.submitChallenge(challenge: code, delegate: self)
+                self.performRequest
+                {
+                    newState.submitChallenge(challenge: code, delegate: self)
+                }
             }
             updateVerifyCodeModal(errorMessage: "Check the code and try again")
         }
@@ -346,6 +400,7 @@ extension SignInViewModel: ResetPasswordStartDelegate
 {
     func onResetPasswordStartError(error: ResetPasswordStartError)
     {
+        completeRequest()
         if error.isInvalidUsername || error.isUserNotFound
         {
             handleV1Error("Unable to reset password: the email is invalid.")
@@ -367,6 +422,7 @@ extension SignInViewModel: ResetPasswordStartDelegate
         codeLength: Int
     )
     {
+        completeRequest()
         statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
         wireV1ResetPasswordCodeCallbacks(newState)
         presentVerifyCodeModal()
@@ -377,6 +433,7 @@ extension SignInViewModel: ResetPasswordVerifyCodeDelegate
 {
     func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
     {
+        completeRequest()
         if error.isInvalidCode, let newState = newState
         {
             wireV1ResetPasswordCodeCallbacks(newState)
@@ -390,6 +447,7 @@ extension SignInViewModel: ResetPasswordVerifyCodeDelegate
 
     func onPasswordRequired(newState: ResetPasswordRequiredState)
     {
+        completeRequest()
         wireV1ResetPasswordNewPasswordCallback(newState)
         presentNewPasswordModal()
     }
@@ -399,6 +457,7 @@ extension SignInViewModel: ResetPasswordResendCodeDelegate
 {
     func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
     {
+        completeRequest()
         handleV1Error("Unable to resend the code.")
     }
 
@@ -409,6 +468,7 @@ extension SignInViewModel: ResetPasswordResendCodeDelegate
         codeLength: Int
     )
     {
+        completeRequest()
         wireV1ResetPasswordCodeCallbacks(newState)
         updateVerifyCodeModal(errorMessage: nil)
     }
@@ -418,6 +478,7 @@ extension SignInViewModel: ResetPasswordRequiredDelegate
 {
     func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
     {
+        completeRequest()
         if error.isInvalidPassword, let newState = newState
         {
             wireV1ResetPasswordNewPasswordCallback(newState)
@@ -431,10 +492,14 @@ extension SignInViewModel: ResetPasswordRequiredDelegate
 
     func onResetPasswordCompleted(newState: SignInAfterResetPasswordState)
     {
+        completeRequest()
         dismissAnyModal()
         statusMessage = "Password reset. Signing in…"
         let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
-        newState.signIn(parameters: parameters, delegate: self)
+        performRequest
+        {
+            newState.signIn(parameters: parameters, delegate: self)
+        }
     }
 }
 
@@ -442,6 +507,7 @@ extension SignInViewModel: SignInAfterResetPasswordDelegate
 {
     func onSignInAfterResetPasswordError(error: SignInAfterResetPasswordError)
     {
+        completeRequest()
         handleV1Error("Error signing in after password reset: \(error.errorDescription ?? "unknown error").")
     }
 }
@@ -455,11 +521,17 @@ extension SignInViewModel
     {
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            state.submitCode(code: code, delegate: self)
+            self.performRequest
+            {
+                state.submitCode(code: code, delegate: self)
+            }
         }
         onResendCode = { [weak self] in
             guard let self = self else { return }
-            state.resendCode(delegate: self)
+            self.performRequest
+            {
+                state.resendCode(delegate: self)
+            }
         }
     }
 
@@ -467,7 +539,10 @@ extension SignInViewModel
     {
         onSubmitNewPassword = { [weak self] password in
             guard let self = self else { return }
-            state.submitPassword(password: password, delegate: self)
+            self.performRequest
+            {
+                state.submitPassword(password: password, delegate: self)
+            }
         }
     }
 
@@ -475,7 +550,10 @@ extension SignInViewModel
     {
         onSubmitAttributes = { [weak self] attributes in
             guard let self = self else { return }
-            state.submitAttributes(attributes: attributes, delegate: self)
+            self.performRequest
+            {
+                state.submitAttributes(attributes: attributes, delegate: self)
+            }
         }
     }
 
@@ -491,7 +569,10 @@ extension SignInViewModel
         dismissAnyModal()
         statusMessage = "Signed up successfully. Signing in…"
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
-        state.signIn(parameters: parameters, delegate: self)
+        performRequest
+        {
+            state.signIn(parameters: parameters, delegate: self)
+        }
     }
 }
 
@@ -506,6 +587,7 @@ extension SignInViewModel: SignUpStartDelegate,
 {
     func onSignUpStartError(error: SignUpStartError)
     {
+        completeRequest()
         if error.isUserAlreadyExists
         {
             handleV1SignUpError("Unable to sign up: user already exists.")
@@ -535,6 +617,7 @@ extension SignInViewModel: SignUpStartDelegate,
         codeLength: Int
     )
     {
+        completeRequest()
         statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
         wireV1SignUpCodeCallbacks(newState)
         presentVerifyCodeModal()
@@ -542,11 +625,13 @@ extension SignInViewModel: SignUpStartDelegate,
 
     func onSignUpAttributesInvalid(attributeNames: [String])
     {
+        completeRequest()
         handleV1SignUpError("Unable to sign up: invalid attribute(s): \(attributeNames.joined(separator: ", ")).")
     }
 
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
     {
+        completeRequest()
         if error.isInvalidCode, let newState = newState
         {
             wireV1SignUpCodeCallbacks(newState)
@@ -564,6 +649,7 @@ extension SignInViewModel: SignUpStartDelegate,
 
     func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState)
     {
+        completeRequest()
         requiredAttributes = attributes
         wireV1SignUpAttributesCallback(newState)
         dismissAnyModal()
@@ -572,17 +658,20 @@ extension SignInViewModel: SignUpStartDelegate,
 
     func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState)
     {
+        completeRequest()
         wireV1SignUpPasswordCallback(newState)
         presentNewPasswordModal()
     }
 
     func onSignUpCompleted(newState: SignInAfterSignUpState)
     {
+        completeRequest()
         continueAfterV1SignUp(newState)
     }
 
     func onSignUpResendCodeError(error: ResendCodeError, newState: SignUpCodeRequiredState?)
     {
+        completeRequest()
         if let newState = newState
         {
             wireV1SignUpCodeCallbacks(newState)
@@ -597,6 +686,7 @@ extension SignInViewModel: SignUpStartDelegate,
         codeLength: Int
     )
     {
+        completeRequest()
         statusMessage = "Code sent to \(sentTo) (\(codeLength) digits)."
         wireV1SignUpCodeCallbacks(newState)
         updateVerifyCodeModal(errorMessage: nil)
@@ -604,6 +694,7 @@ extension SignInViewModel: SignUpStartDelegate,
 
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
     {
+        completeRequest()
         if error.isInvalidPassword, let newState = newState
         {
             wireV1SignUpPasswordCallback(newState)
@@ -617,11 +708,13 @@ extension SignInViewModel: SignUpStartDelegate,
 
     func onSignUpAttributesRequiredError(error: AttributesRequiredError)
     {
+        completeRequest()
         handleV1SignUpError("Error submitting attributes: \(error.errorDescription ?? "unknown error").")
     }
 
     func onSignUpAttributesInvalid(attributeNames: [String], newState: SignUpAttributesRequiredState)
     {
+        completeRequest()
         wireV1SignUpAttributesCallback(newState)
         statusMessage = "Invalid attribute(s): \(attributeNames.joined(separator: ", ")). Please correct them and try again."
         presentCollectAttributesModal()
@@ -634,6 +727,7 @@ extension SignInViewModel: SignInAfterSignUpDelegate
 {
     func onSignInAfterSignUpError(error: SignInAfterSignUpError)
     {
+        completeRequest()
         handleV1SignUpError("Error signing in after sign-up: \(error.errorDescription ?? "unknown error").")
     }
 }

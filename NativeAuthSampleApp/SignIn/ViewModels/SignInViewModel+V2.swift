@@ -54,15 +54,22 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            state.submitCode(code, delegate: self)
+            self.performRequest
+            {
+                state.submitCode(code, delegate: self)
+            }
         }
         onResendCode = { [weak self] in
             guard let self = self else { return }
-            state.resendCode(delegate: self)
+            self.performRequest
+            {
+                state.resendCode(delegate: self)
+            }
         }
         presentVerifyCodeModal()
     }
@@ -70,11 +77,15 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         if !password.isEmpty
         {
             statusMessage = "Submitting password…"
-            state.submitPassword(password, delegate: self)
+            performRequest
+            {
+                state.submitPassword(password, delegate: self)
+            }
             return
         }
 
@@ -82,7 +93,10 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         onSubmitExistingAccountPassword = { [weak self] password in
             guard let self = self else { return }
             self.existingAccountPasswordError = nil
-            state.submitPassword(password, delegate: self)
+            self.performRequest
+            {
+                state.submitPassword(password, delegate: self)
+            }
         }
         existingAccountPasswordError = nil
         activeSheet = .existingAccountPassword
@@ -99,12 +113,16 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onExistingAccountPasswordRequired(state: MSALNativeAuthExistingAccountPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "An account already exists. Enter its current password to sign in."
         onSubmitExistingAccountPassword = { [weak self] password in
             guard let self = self else { return }
             self.existingAccountPasswordError = nil
-            state.submitPassword(password, delegate: self)
+            self.performRequest
+            {
+                state.submitPassword(password, delegate: self)
+            }
         }
         existingAccountPasswordError = nil
         activeSheet = .existingAccountPassword
@@ -113,10 +131,14 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         onSubmitNewPassword = { [weak self] password in
             guard let self = self else { return }
-            state.submitNewPassword(password, delegate: self)
+            self.performRequest
+            {
+                state.submitNewPassword(password, delegate: self)
+            }
         }
         presentNewPasswordModal()
     }
@@ -124,12 +146,16 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Additional information is required."
         requiredAttributes = state.attributes
         onSubmitAttributes = { [weak self] attributes in
             guard let self = self else { return }
-            state.submitAttributes(attributes, delegate: self)
+            self.performRequest
+            {
+                state.submitAttributes(attributes, delegate: self)
+            }
         }
         presentCollectAttributesModal()
     }
@@ -137,6 +163,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onAuthMethodSelectionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         guard state.authMethods.count > 0 else
         {
@@ -149,7 +176,10 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
         authMethods = state.authMethods
         onSelectAuthMethod = { [weak self] method in
             guard let self = self else { return }
-            state.selectAuthMethod(method, delegate: self)
+            self.performRequest
+            {
+                state.selectAuthMethod(method, delegate: self)
+            }
         }
         presentSelectAuthMethodModal()
         return
@@ -158,11 +188,15 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Verification code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            state.submitChallenge(code, delegate: self)
+            self.performRequest
+            {
+                state.submitChallenge(code, delegate: self)
+            }
         }
         // The SDK does not expose a resend operation for MFA verification.
         onResendCode = nil
@@ -172,6 +206,7 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         guard state.authMethods.count > 0 else
         {
@@ -205,7 +240,10 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
             guard let self = self else { return }
             self.dismissAnyModal()
             self.statusMessage = "Registering authentication method…"
-            state.selectAuthMethod(method, verificationContact: verificationContact, delegate: self)
+            self.performRequest
+            {
+                state.selectAuthMethod(method, verificationContact: verificationContact, delegate: self)
+            }
         }
         presentVerificationContactModal()
     }
@@ -213,11 +251,15 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         statusMessage = "Verification code sent to \(state.sentTo) (\(state.codeLength) digits)."
         onSubmitCode = { [weak self] code in
             guard let self = self else { return }
-            state.submitChallenge(code, delegate: self)
+            self.performRequest
+            {
+                state.submitChallenge(code, delegate: self)
+            }
         }
         // The SDK does not expose a resend operation for strong-auth verification.
         onResendCode = nil
@@ -227,36 +269,49 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
     @MainActor
     func onSignInAfterSignUpRequired(state: MSALNativeAuthSignInAfterSignUpState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         dismissAnyModal()
         statusMessage = "Signed up successfully. Signing in…"
-        state.signIn(delegate: self)
+        performRequest
+        {
+            state.signIn(delegate: self)
+        }
     }
 
     @MainActor
     func onSignInAfterResetPasswordRequired(state: MSALNativeAuthSignInAfterResetPasswordState, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: state required — \(state.description)")
         dismissAnyModal()
         statusMessage = "Password reset. Signing in…"
-        state.signIn(delegate: self)
+        performRequest
+        {
+            state.signIn(delegate: self)
+        }
     }
 
     @MainActor
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         print("SignInViewModel[\(label(scenario))]: flow completed")
         accountResult = result
         dismissAnyModal()
         isSigningIn = false
         isSignedIn = true
         statusMessage = "Signed in as \(result.account.username ?? "unknown user")."
-        accountResult?.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: self)
+        performRequest
+        {
+            result.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: self)
+        }
     }
 
     @MainActor
     func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario)
     {
+        completeRequest()
         let errorKind: String
         switch true
         {

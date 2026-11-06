@@ -68,23 +68,42 @@ struct SignInView: View
             .frame(maxWidth: .infinity)
             .padding()
         }
-        .sheet(item: $viewModel.activeSheet)
-        { sheet in
-            switch sheet
-            {
-            case .verifyCode:
-                VerifyCodeSheet(viewModel: viewModel)
-            case .newPassword:
-                PasswordSheet(viewModel: viewModel, isExistingAccount: false)
-            case .existingAccountPassword:
-                PasswordSheet(viewModel: viewModel, isExistingAccount: true)
-            case .collectAttributes:
-                CollectAttributesSheet(viewModel: viewModel)
-            case .selectAuthMethod:
-                SelectAuthMethodSheet(viewModel: viewModel)
-            case .verificationContact:
-                VerificationContactSheet(viewModel: viewModel)
+        .requestProgress(isActive: viewModel.isRequestInProgress)
+        .sheet(item: Binding(
+            get: { viewModel.activeSheet },
+            set: { sheet in
+                // Only presentation-driven dismissal cancels; SDK transitions update the model directly.
+                if sheet == nil, viewModel.activeSheet != nil
+                {
+                    viewModel.cancelFlow()
+                }
+                else
+                {
+                    viewModel.activeSheet = sheet
+                }
             }
+        ))
+        { sheet in
+            Group
+            {
+                switch sheet
+                {
+                case .verifyCode:
+                    VerifyCodeSheet(viewModel: viewModel)
+                case .newPassword:
+                    PasswordSheet(viewModel: viewModel, isExistingAccount: false)
+                case .existingAccountPassword:
+                    PasswordSheet(viewModel: viewModel, isExistingAccount: true)
+                case .collectAttributes:
+                    CollectAttributesSheet(viewModel: viewModel)
+                case .selectAuthMethod:
+                    SelectAuthMethodSheet(viewModel: viewModel)
+                case .verificationContact:
+                    VerificationContactSheet(viewModel: viewModel)
+                }
+            }
+            .requestProgress(isActive: viewModel.isRequestInProgress)
+            .interactiveDismissDisabled(viewModel.isRequestInProgress)
         }
         .onAppear
         {
@@ -225,6 +244,30 @@ struct SignInView: View
         #else
         return nil
         #endif
+    }
+}
+
+private extension View
+{
+    func requestProgress(isActive: Bool) -> some View
+    {
+        disabled(isActive)
+            .allowsHitTesting(!isActive)
+            .overlay
+            {
+                if isActive
+                {
+                    ZStack
+                    {
+                        Color.primary.opacity(0.08)
+                        ProgressView("Please wait…")
+                            .padding()
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                }
+            }
     }
 }
 
