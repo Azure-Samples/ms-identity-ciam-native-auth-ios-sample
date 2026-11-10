@@ -198,8 +198,13 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
                 state.submitChallenge(code, delegate: self)
             }
         }
-        // The SDK does not expose a resend operation for MFA verification.
-        onResendCode = nil
+        onResendCode = { [weak self] in
+            guard let self = self else { return }
+            self.performRequest
+            {
+                state.resendChallenge(delegate: self)
+            }
+        }
         presentVerifyCodeModal()
     }
 
@@ -261,8 +266,13 @@ extension SignInViewModel: MSALNativeAuthCodeRequiredDelegate,
                 state.submitChallenge(code, delegate: self)
             }
         }
-        // The SDK does not expose a resend operation for strong-auth verification.
-        onResendCode = nil
+        onResendCode = { [weak self] in
+            guard let self = self else { return }
+            self.performRequest
+            {
+                state.resendChallenge(delegate: self)
+            }
+        }
         presentVerifyCodeModal()
     }
 
