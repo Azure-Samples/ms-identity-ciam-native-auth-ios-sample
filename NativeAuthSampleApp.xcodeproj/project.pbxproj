@@ -458,8 +458,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AzureAD/microsoft-authentication-library-for-objc";
 			requirement = {
-				kind = exactVersion;
-				version = 2.16.0;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.18.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
