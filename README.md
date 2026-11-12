@@ -10,11 +10,11 @@
 
 ## Overview
 
-This SwiftUI application demonstrates sign-up, sign-in, sign-out, and self-service password reset using Microsoft Entra External ID for customers on iOS and macOS. It uses Microsoft Authentication Library (MSAL) **2.16.0**, obtained through Swift Package Manager (SPM).
+This SwiftUI application demonstrates sign-up, sign-in, sign-out, and self-service password reset using Microsoft Entra External ID for customers on iOS and macOS. It uses Microsoft Authentication Library (MSAL) [**2.18.1**](https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/tag/2.18.1), obtained through Swift Package Manager (SPM).
 
 The **Use V2 API (preview)** toggle is enabled by default. V2 uses server-driven authentication states; turning the toggle off selects the V1 per-step delegate APIs. Both share the same screens and configuration.
 
-> Native Auth V2 APIs in MSAL 2.16.0 are experimental, may change without notice, and must not be used in production applications. Availability of individual flows depends on your tenant configuration and service support.
+> Native Auth V2 APIs are available in the MSAL 2.18.1 release but remain experimental, may change without notice, and must not be used in production applications. Availability of individual flows depends on your tenant configuration and service support.
 
 The sample includes password and email one-time-code sign-in, sign-up with attribute collection, password reset, MFA and strong-auth registration states, browser/social sign-in, cached-session restoration, and sign-out. An optional protected-API call is available after sign-in. Authentication method selection and verification prompts appear when requested by the service.
 
@@ -72,9 +72,9 @@ cd ms-identity-ciam-native-auth-ios-sample
 open NativeAuthSampleApp.xcodeproj
 ```
 
-Xcode resolves the existing package dependency from `https://github.com/AzureAD/microsoft-authentication-library-for-objc`. The project uses the **Exact Version: 2.16.0** rule and links the `MSAL` product to the shared application target. Do not add a second MSAL framework or local Xcode subproject.
+Xcode resolves the existing package dependency from `https://github.com/AzureAD/microsoft-authentication-library-for-objc`. The project uses the **Up to Next Major Version** rule starting at **2.18.1** (versions below 3.0.0) and links the `MSAL` product to the shared application target. The checked-in `Package.resolved` pins **2.18.1** at revision `7eba2116b99ff3b3323574e00de92d60ba556be8`. SPM downloads the released binary framework; no development branch or local MSAL build is required. Do not add a second MSAL framework or local Xcode subproject.
 
-To update MSAL later, select a reviewed release in the project's **Package Dependencies**, change the exact version, resolve packages, and commit both the project file and `Package.resolved`. Validate both platforms and both API modes before updating the pin.
+To update MSAL later, select a reviewed release within the allowed range and update the package resolution in Xcode. Change the version requirement in the project's **Package Dependencies** only if needed. Commit the updated `Package.resolved` and any corresponding project-file changes. Validate both platforms and both API modes before updating the pin.
 
 ### Step 7: Configure the sample
 
