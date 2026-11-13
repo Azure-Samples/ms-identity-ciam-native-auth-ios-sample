@@ -1,5 +1,4 @@
 //
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -22,19 +21,42 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//  
 
-import UIKit
+import SwiftUI
 import MSAL
 
-class AuthMethodCell: UITableViewCell {
-    @IBOutlet weak var authMethodTitle: UILabel!
-    @IBOutlet weak var authMethodValue: UILabel!
-    var authMethod: MSALAuthMethod?
+@main
+struct NativeAuthSampleAppApp: App
+{
+    init()
+    {
+        MSALGlobalConfig.loggerConfig.logLevel = .verbose
+        MSALGlobalConfig.loggerConfig.setLogCallback
+        { _, message, containsPII in
+            if !containsPII
+            {
+                print("MSAL: \(message ?? "")")
+            }
+        }
+    }
 
-    func setup() {
-        authMethodTitle.text = authMethod?.channelTargetType.value.capitalized ?? "N/A"
-        authMethodValue.text = authMethod?.loginHint ?? "No default value"
-
+    var body: some Scene
+    {
+        WindowGroup
+        {
+            SignInView()
+                #if os(macOS)
+                .frame(width: 480, height: 720)
+                #endif
+                .onOpenURL
+                { url in
+                    #if os(iOS)
+                    MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: nil)
+                    #endif
+                }
+        }
+        #if os(macOS)
+        .windowResizability(.contentSize)
+        #endif
     }
 }
