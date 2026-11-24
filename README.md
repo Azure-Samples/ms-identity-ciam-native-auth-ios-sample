@@ -12,9 +12,9 @@
 
 This SwiftUI application demonstrates sign-up, sign-in, sign-out, and self-service password reset using Microsoft Entra External ID for customers on iOS and macOS. It uses Microsoft Authentication Library (MSAL) [**2.18.1**](https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/tag/2.18.1), obtained through Swift Package Manager (SPM).
 
-The **Use V2 API (preview)** toggle is enabled by default. V2 uses server-driven authentication states; turning the toggle off selects the V1 per-step delegate APIs. Both share the same screens and configuration.
+The **Use V2 API** toggle is enabled by default. V2 uses server-driven authentication states; turning the toggle off selects the V1 per-step delegate APIs. Both share the same screens and configuration.
 
-> Native Auth V2 APIs are available in the MSAL 2.18.1 release but remain experimental, may change without notice, and must not be used in production applications. Availability of individual flows depends on your tenant configuration and service support.
+Native Auth V2 APIs are available in the MSAL 2.18.1 release. Availability of individual flows depends on your tenant configuration and service support.
 
 The sample includes password and email one-time-code sign-in, sign-up with attribute collection, password reset, MFA and strong-auth registration states, browser/social sign-in, cached-session restoration, and sign-out. An optional protected-API call is available after sign-in. Authentication method selection and verification prompts appear when requested by the service.
 
