@@ -136,7 +136,7 @@ struct SignInView: View
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Toggle("Use V2 API (preview)", isOn: $viewModel.useV2Api)
+            Toggle("Use V2 API", isOn: $viewModel.useV2Api)
                 .disabled(viewModel.isSigningIn)
 
             TextField("Email", text: $viewModel.email)
